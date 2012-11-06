@@ -1,0 +1,33 @@
+﻿package-as: XLoot
+
+externals:
+	Libs/LibStub:
+		url: svn://svn.wowace.com/wow/libstub/mainline/trunk
+		tag: latest
+	Libs/CallbackHandler-1.0:
+		url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
+		tag: latest
+	Libs/AceDB-3.0:
+		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDB-3.0
+		tag: latest
+	Libs/AceAddon-3.0:
+		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
+		tag: latest
+	Libs/Modules/Config/Libs/AceGUI-3.0:
+		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceGUI-3.0
+		tag: latest
+	Libs/Modules/Config/Libs/AceConfig-3.0:
+		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceConfig-3.0
+		tag: latest
+	Libs/Modules/Config/Libs/AceDBOptions-3.0:
+		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDBOptions-3.0
+		tag: latest
+
+ignore:
+	- .pkgmeta
+
+move-folders:
+	XLoot/Modules/Frame: XLoot_Frame
+	XLoot/Modules/Group: XLoot_Group
+	XLoot/Modules/Master: XLoot_Master
+	XLoot/Modules/Options: XLoot_Options

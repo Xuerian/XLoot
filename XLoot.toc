@@ -1,0 +1,23 @@
+﻿## Interface: 50001
+## Title: XLoot
+## Notes: Core module for Loot and Looting-related UI improvements
+## Version: @project-version@
+## Author: Xuerian
+## X-Category: Inventory
+## X-eMail xuerian @ gmail DOT com
+## X-Name: XLoot
+
+## SavedVariables: XLootADB
+## OptionalDeps: Ace3, LibStub, ButtonFacade, Masque
+
+#@no-lib-strip@
+Libs\Embeds.xml
+#@end-no-lib-strip@
+
+localization.lua
+XLoot.lua
+skins.lua
+
+#@do-not-package@
+Modules\Modules.xml
+#@end-do-not-package@
