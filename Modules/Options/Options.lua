@@ -32,7 +32,7 @@ function addon:OnEnable()
 		local db, k, meta = path(info)
 		if info.option.type == "color" then
 			return unpack(db[k])
-		elseif info.option.type == "select" then
+		elseif info.option.type == "select" and meta.v_map then
 			return meta.v_map[db[k]]
 		else
 			return db[k]
@@ -47,7 +47,7 @@ function addon:OnEnable()
 			db[k][2] = v2
 			db[k][3] = v3
 			db[k][4] = v4
-		elseif info.option.type == "select" then
+		elseif info.option.type == "select" and meta.k_map then
 			db[k] = meta.k_map[v]
 		else
 			db[k] = v
