@@ -244,6 +244,10 @@ do
 		local out = data.compiled[name]
 		local skin = (data.SKIN and lib.skins[data.SKIN]) and lib.skins[data.SKIN] or lib.current
 		local set = data.sets[name]
+		-- Copy defaults
+		for k,v in pairs(lib.base) do
+			out[k] = v
+		end
 		-- Copy skin data
 		for k,v in pairs(skin) do
 			out[k] = v
@@ -265,6 +269,8 @@ do
 		for k,v in pairs(set) do
 			out[k] = v
 		end
+		-- Apply metatable
+		setmetatable(out, getmetatable(skin))
 		return out
 	end
 
@@ -310,13 +316,14 @@ do
 		target.Reskin = Reskin
 		target.Skin = Skin
 		target.Highlight = Highlight
+		return target
 	end
 end
 
 -------------------------------------------------------------------------------
 -- Default skins
 do
-	local base = {
+	lib.base = {
 		color_mod = .75,
 		row_spacing = 2,
 	}
@@ -348,12 +355,13 @@ do
 	}
 
 	-- Skin registration
-	local mt = { __index = base }
+	local mt = { __index = lib.base }
 	function XLoot:RegisterSkin(skin_name, skin_table)
 		setmetatable(skin_table, mt)
 		skin_table.key = skin_name
 		lib.skins[skin_name] = skin_table
 	end
+
 
 	-- Register default skins
 	XLoot:RegisterSkin('svelte', svelte)
