@@ -13,6 +13,9 @@ externals:
 	Libs/AceAddon-3.0:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
 		tag: latest
+	Modules/Monitor/Libs/LibLootEvents:
+		url: git://git.curseforge.net/wow/liblootevents/mainline.git
+		tag: latest
 	Modules/Options/Libs/AceGUI-3.0:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceGUI-3.0
 		tag: latest
@@ -29,5 +32,6 @@ ignore:
 move-folders:
 	XLoot/Modules/Frame: XLoot_Frame
 	XLoot/Modules/Group: XLoot_Group
+	XLoot/Modules/Monitor: XLoot_Monitor
 	XLoot/Modules/Master: XLoot_Master
 	XLoot/Modules/Options: XLoot_Options
