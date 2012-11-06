@@ -13,13 +13,13 @@ externals:
 	Libs/AceAddon-3.0:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
 		tag: latest
-	Libs/Modules/Config/Libs/AceGUI-3.0:
+	Modules/Options/Libs/AceGUI-3.0:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceGUI-3.0
 		tag: latest
-	Libs/Modules/Config/Libs/AceConfig-3.0:
+	Modules/Options/Libs/AceConfig-3.0:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceConfig-3.0
 		tag: latest
-	Libs/Modules/Config/Libs/AceDBOptions-3.0:
+	Modules/Options/Libs/AceDBOptions-3.0:
 		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDBOptions-3.0
 		tag: latest
 
