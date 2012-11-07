@@ -1,12 +1,7 @@
 ﻿-- See: http://wow.curseforge.com/addons/xloot/localization/ to create or fix translations
 local locales = {
 	enUS = {
-		linkall_threshold_missed = "No loot meets your quality threshold",
-		button_link = "Link",
-		button_close = "Close",
-		bind_on_use_short = "BoU",
-		bind_on_equip_short = "BoE",
-		bind_on_pickup_short = "BoP"
+
 	},
 	-- Possibly localized
 	ptBR = {
@@ -49,4 +44,4 @@ local locales = {
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore")@
 --@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-subnamespaces="subtable", handle-unlocalized="ignore")@
 
-XLoot:Localize("Frame", locales)
+XLoot:Localize("Monitor", locales)
