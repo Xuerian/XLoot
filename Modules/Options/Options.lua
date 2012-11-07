@@ -1,4 +1,15 @@
-﻿-- Create module
+﻿--[=[ This addon provides options for all modules.
+Options are preferrably defined as "BetterOptions" tables, which functionally resemble AceOptionsTables but are much more concise.
+
+Start by defining your module options here in addon:OnEnable below other module options with the call addon:RegisterModuleBetterOptions("ModuleName", table), inside a if XLoot:GetModule(ModuleName, true) block.
+
+The resulting BetterOptions -> AceOptionsTable is, just like passing a normal/partial AceOptionsTable, is "Finalized" (via Finalize(t)). This pass automatically inserts localizations based on key, handles .items -> .values, applies group {defaults = {k = v}} to group children, and implements requires*.
+
+Please note that inline and non-inline groups do not mix well for AceConfigDialog.
+
+Option localization entries should be added under Options/ModuleName namespace -]=] 
+
+-- Create module
 local addon, L = XLoot:NewModule("Options")
 
 -- Global
@@ -6,7 +17,8 @@ _G.XLootOptions = addon
 
 -- Locals
 local print = print
-local popup_panel
+local popup_panel -- Last panel to open profile reset popup
+
 -------------------------------------------------------------------------------
 -- Module init
 -- Construct all option tables
@@ -19,7 +31,7 @@ function addon:OnEnable()
 	local lookup = {}
 	local meta_table = {} -- Not really a metatable. Just a meta table.
 
-	-- Find module options and requested key
+	-- Find module options and requested key from AceConfigDialog info table
 	function path(info)
 		local key = info[#info]
 		local meta = meta_table[info.option]
@@ -88,6 +100,9 @@ function addon:OnEnable()
 	local BetterOptions = {}
 	local table_remove = table.remove
 	-- { "key", "type", [arg1[, ...]] [, key = value[, ...]] }
+	-- thus
+	-- { "key", "group", inline }
+	-- { "key", "execute", func }
 	-- { "key", "select", items }
 	-- { "key", "color", hasAlpha }
 	-- { "key", "range", min, max, step, softMin, softMax, bigStep }
