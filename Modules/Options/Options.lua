@@ -24,18 +24,20 @@ local popup_panel -- Last panel to open profile reset popup
 -- Construct all option tables
 
 function addon:OnEnable()
+
+	local option_metadata = {} -- Stores metadata for option entries outside of library-specific compiled option structure
+	addon.option_metadata = option_metadata -- Until resulting AceOptionsTable can have .values upated, this is the only way to store a new .items table
+	local module_index = {}
+
 	-------------------------------------------------------------------------------
 	-- General config methods
 
-	-- Lookup table for module names
-	local lookup = {}
-	local meta_table = {} -- Not really a metatable. Just a meta table.
-
 	-- Find module options and requested key from AceConfigDialog info table
+	-- Also return meta table for option
 	function path(info)
 		local key = info[#info]
-		local meta = meta_table[info.option]
-		local db = lookup[info.appName].db.profile
+		local meta = option_metadata[info.appName][key]
+		local db = module_index[info.appName].db.profile
 		return meta.key and db[meta.key] or db, meta.subkey or key, meta
 	end
 
@@ -44,8 +46,12 @@ function addon:OnEnable()
 		local db, k, meta = path(info)
 		if info.option.type == "color" then
 			return unpack(db[k])
-		elseif info.option.type == "select" and meta.v_map then
-			return meta.v_map[db[k]]
+		elseif info.option.type == "select" and meta.items then
+			for i,v in ipairs(meta.items) do
+				if db[k] == v[1] then
+					return i
+				end
+			end
 		else
 			return db[k]
 		end
@@ -59,11 +65,22 @@ function addon:OnEnable()
 			db[k][2] = v2
 			db[k][3] = v3
 			db[k][4] = v4
-		elseif info.option.type == "select" and meta.k_map then
-			db[k] = meta.k_map[v]
+		elseif info.option.type == "select" and meta.items then
+			db[k] = meta.items[v][1]
 		else
 			db[k] = v
 		end
+	end
+
+	-- Select value generator
+	local function values_from_items(info)
+		local db, k, meta = path(info)
+		local values = meta.values
+		wipe(values)
+		for i,v in ipairs(meta.items) do
+			values[i] = v[2]
+		end
+		return values
 	end
 
 	-- Sorted select getter
@@ -90,23 +107,20 @@ function addon:OnEnable()
 	end
 
 	-------------------------------------------------------------------------------
-	-- Config upgradeeeee
+	-- Streamlined options tables
 
 	self.configs = {}
 	self.module_list = {}
-
-	-- Better option tables. Why? Because.
-	-- Also. Mutability everywhere, functional programmers beware
 	local BetterOptions = {}
 	local table_remove = table.remove
 	-- { "key", "type", [arg1[, ...]] [, key = value[, ...]] }
-	-- thus
+	-- Examples:
 	-- { "key", "group", inline }
 	-- { "key", "execute", func }
 	-- { "key", "select", items }
 	-- { "key", "color", hasAlpha }
 	-- { "key", "range", min, max, step, softMin, softMax, bigStep }
-	-- 
+	
 	function BetterOptions:CompileToAceOptions(t)
 		self:Iterate(t)
 		return t
@@ -170,11 +184,18 @@ function addon:OnEnable()
 
 	addon.BetterOptions = BetterOptions
 
+	-------------------------------------------------------------------------------
+	-- AceOptionsTable extension
+
 	-- Flesh out AceOptionsTables for a given module
 	-- Add features not directly supported
 	function Finalize(module_name, key, opts)
+		local meta_name = "XLoot"..module_name
 		-- First call
 		if not key then
+			if not option_metadata[meta_name] then
+				option_metadata[meta_name] = {}
+			end
 			for k,v in pairs(opts) do
 				Finalize(module_name, k, v)
 			end
@@ -198,22 +219,15 @@ function addon:OnEnable()
 			end
 
 			-- Sorted select
-			-- TODO: Handle items changing/remap
+			-- TODO: Set metatable on option table to update meta.items?
 			if opts.type == 'select' and opts.items then
-				meta.k_map, meta.v_map = {}, {}
-				local values = {}
-				for i,v in ipairs(opts.items) do
-					meta.k_map[i] = v[1]
-					meta.v_map[v[1]] = i
-					values[i] = v[2]
-				end
-				opts.values = values
-				-- opts.get = function(info) return sorted_get(Vmap, info) end
-				-- opts.set = function(info, v) sorted_set(Kmap, info, v) end
+				opts.values = values_from_items
+				meta.values = {}
+				meta.items = opts.items
 				opts.items = nil
 			end
 
-			meta_table[opts] = meta
+			option_metadata[meta_name][key] = meta
 
 			-- Traverse subgroup
 			if opts.args then
@@ -242,6 +256,8 @@ function addon:OnEnable()
 
 	-- Compose a module's option table
 	function addon:RegisterModuleOptions(module_name, args)
+		-- Initialize metadata
+		option_metadata[module_name] = {}
 		-- Compile nonstandard options
 		Finalize(module_name, nil, args)
 		self.configs[module_name] = {
@@ -252,7 +268,7 @@ function addon:OnEnable()
 			type = "group",
 			args = args
 		}
-		lookup["XLoot"..module_name] = XLoot:GetModule(module_name)
+		module_index["XLoot"..module_name] = XLoot:GetModule(module_name)
 		table.insert(self.module_list, module_name)
 	end
 
@@ -438,32 +454,6 @@ function addon:OpenPanel(module)
 	-- Open panel
 	InterfaceOptionsFrame_OpenToCategory(module.option_panel)
 end
-
--- function addon:StubInit(stub)
--- 	-- Redirect stub clicks
--- 	stub:SetScript("OnShow", StubShow)
-
--- 	-- Register module options
--- 	local key = "XLoot"..stub.module_name
--- 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(key, self.configs[stub.module_name])
-
--- 	-- Generate module options panel
--- 	stub.first_panel = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(key, "Options", stub.name)
--- 	stub.module.option_panel = stub.first_panel
--- 	stub.first_panel.owner = stub -- recurrrrrsion
-
--- 	-- Assign panel methods
--- 	stub.first_panel.default = PanelDefault
-
--- 	-- Generate core profile panel
--- 	if module_name == "Core" then
--- 		stub.profile_panel = LibStub("AceDBOptions-3.0"):GetOptionsTable(XLoot.db)
--- 	end
-
--- 	-- Reassign slash command
--- 	_G.SlashCmdList[stub.slash_name] = function() StubShow(stub) end
--- 	StubShow(stub)
--- end
 
 --@do-not-package@
 -- function print(...)
