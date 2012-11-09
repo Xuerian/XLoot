@@ -69,8 +69,12 @@ XLoot:SetDefaultModulePrototype({
 		local module_name = self:GetName()
 		-- Set up DB namespace
 		self.db = XLoot.db:RegisterNamespace(module_name, defaults)
-		-- Store bootstrap slash command
-		XLoot:SetSlashCommand(("XLoot"..module_name):lower(), function() XLoot:ShowOptionPanel(self) end)
+		
+		function self.ShowOptions()
+			XLoot:ShowOptionPanel(self)
+		end
+		-- Default slash command
+		XLoot:SetSlashCommand(("XLoot"..module_name):lower(), self.ShowOptions)
 		-- Set event handler
 		self:SetEventHandler(frame)
 	end,
