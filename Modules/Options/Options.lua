@@ -109,8 +109,6 @@ function addon:OnEnable()
 	-------------------------------------------------------------------------------
 	-- Streamlined options tables
 
-	self.configs = {}
-	self.module_list = {}
 	local BetterOptions = {}
 	local table_remove = table.remove
 	-- { "key", "type", [arg1[, ...]] [, key = value[, ...]] }
@@ -254,6 +252,12 @@ function addon:OnEnable()
 		end
 	end
 
+	-------------------------------------------------------------------------------
+	-- Module config registration
+
+	self.configs = {} -- AceOptionTables for modules
+	self.module_list = {} -- Maintains list of modules which need options generated
+
 	-- Compose a module's option table
 	function addon:RegisterModuleOptions(module_name, args)
 		-- Initialize metadata
@@ -277,7 +281,7 @@ function addon:OnEnable()
 	end
 
 	-------------------------------------------------------------------------------
-	-- Configs
+	-- Module configs
 
 	-- XLoot Core
 	local skins = {}
@@ -363,6 +367,7 @@ function addon:OnEnable()
 		})
 	end
 
+	-- XLoot Group
 	if XLoot:GetModule("Group", true) then
 		local directions = {
 			{ "up", L.up },
@@ -421,7 +426,7 @@ function addon:OnInitialize()
 end
 
 -------------------------------------------------------------------------------
--- Module methods
+-- Panel methods
 
 local function PanelDefault(self)
 	StaticPopup_Show("XLOOT_RESETPROFILE")
