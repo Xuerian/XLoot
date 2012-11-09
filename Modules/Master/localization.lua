@@ -1,7 +1,15 @@
 ﻿-- See: http://wow.curseforge.com/addons/xloot/localization/ to create or fix translations
 local locales = {
 	enUS = {
-
+		ML_RANDOM = "Raid Roll",
+		ML_SELF = "Self Loot",
+		ML_BANKER = "Banker",
+		ML_DISENCHANTER = "Disenchanter",
+		RECIPIENTS = "Special Recipients",
+		SPECIALROLLS = "Special Rolls",
+		BINDING_BANKER = "Set Banker",
+		BINDING_DISENCHANTER = "Set Disenchanter",
+		ITEM_AWARDED = "%s awarded: %s",
 	},
 	-- Possibly localized
 	ptBR = {
@@ -44,4 +52,4 @@ local locales = {
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore")@
 --@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-subnamespaces="subtable", handle-unlocalized="ignore")@
 
-XLoot:Localize("Monitor", locales)
+XLoot:Localize("Master", locales)
