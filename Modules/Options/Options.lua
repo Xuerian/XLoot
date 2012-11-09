@@ -150,7 +150,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	function BetterOptions:group(t)
 		t.args = t.args or t[1]
-		t.inline = t.inline ~= nil and t.inline or t[2]
+		t.inline = t.inline ~= nil and t.inline or (t[2] ~= nil and t[2] or true)
 
 		self:Iterate(t.args)
 	end
@@ -315,7 +315,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "frame_snap_offset_x", "range", 0, 2000, 1, 0, 250, 25, requires = "frame_snap" },
 				{ "frame_snap_offset_y", "range", 0, 2000, 1, 0, 250, 25, requires = "frame_snap" },
 				{ "frame_draggable", "toggle" },
-			}, true },
+			}},
 			{ "slot_options", "group", {
 				{ "loot_texts_info", "toggle", width = "double" },
 				{ "loot_texts_bind", "toggle" },
@@ -323,7 +323,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_collapse", "toggle" },
 				{ "font_size_loot", "range", 4, 26, 1 },
 				{ "font_size_info", "range", 4, 26, 1 }
-			}, true },
+			}},
 			{ "link_button", "group", {
 				{ "linkall_show", "select", {
 					{ "auto", L.when_auto },
@@ -339,11 +339,11 @@ function addon:OnEnable() -- Construct addon option tables here
 					{ "RAID", CHAT_MSG_RAID },
 					{ "RAID_WARNING", RAID_WARNING }
 				}}
-			}, true },
+			}},
 			{ "autolooting", "group", {
 				{ "autoloot_coin", "select", autoloot_when },
 				{ "autoloot_quest", "select", autoloot_when }
-			}, true },
+			}},
 			{ "colors", "group", {
 				{ "quality_color_frame", "toggle", width = "full" },
 				{ "quality_color_slot", "toggle", width = "full" },
@@ -354,7 +354,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "frame_color_gradient", "color", true, width = "double" },
 				{ "loot_color_gradient", "color", true },
 				{ "loot_color_info", "color", width = "full", requires = "loot_texts_info" }
-			}, true }
+			}}
 		})
 	end
 
