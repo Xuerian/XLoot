@@ -287,17 +287,14 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	-- XLoot Core
 	local skins = {}
-	addon:RegisterModuleOptions("Core", {
-		skin = {
-			type = "select",
-			values = function()
-				wipe(skins)
-				for k,v in pairs(XLoot.Skin.skins) do
-					skins[k] = v.name
-				end
-				return skins
+	addon:RegisterModuleBetterOptions("Core", {
+		{ "skin", "select", values = function()
+			wipe(skins)
+			for k,v in pairs(XLoot.Skin.skins) do
+				skins[k] = v.name
 			end
-		}
+			return skins
+		end}
 	})
 
 	-- XLoot Frame
