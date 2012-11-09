@@ -32,7 +32,7 @@ function addon:OnEnable()
 end
 
 function addon:LOOT(event, pattern, player, arg1, arg2)
-	print(event, pattern, player, arg1, arg2)
+	-- print(event, pattern, player, arg1, arg2)
 	if event == 'item' then
 		local link, num = arg1, arg2
 	elseif event == 'coin' then
