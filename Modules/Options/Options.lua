@@ -19,6 +19,13 @@ _G.XLootOptions = addon
 local print = print
 local popup_panel -- Last panel to open profile reset popup
 
+local function trigger(target, method, ...)
+	local func = target[method]
+	if type(func) == 'function' then
+		func(target, ...)
+	end
+end
+
 -------------------------------------------------------------------------------
 -- Module init
 
@@ -426,7 +433,16 @@ end
 
 local function PanelDefault(self)
 	StaticPopup_Show("XLOOT_RESETPROFILE")
+	trigger(self.owner, "ProfileChanged")
 	popup_panel = self
+end
+
+local function PanelOkay(self)
+	trigger(self.owner, "ConfigSave")
+end
+
+local function PanelCancel(self)
+	trigger(self.owner, "ConfigCancel")
 end
 
 function addon:ResetProfile()
@@ -443,9 +459,14 @@ function addon:OpenPanel(module)
 		for i,this_name in ipairs(self.module_list) do
 			local module, key = XLoot:GetModule(this_name), "XLoot"..this_name
 			LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(key, self.configs[this_name])
-			module.option_panel = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(key, L[this_name].panel_title or "XLoot "..this_name, "XLoot")
+			local panel = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(key, L[this_name].panel_title or "XLoot "..this_name, "XLoot")
 			-- Supply panel methods
-			module.option_panel.default = PanelDefault
+			panel.default = PanelDefault
+			panel.okay = PanelOkay
+			panel.cancel = PanelCancel
+			panel.owner = module
+			panel.key = key
+			module.option_panel = panel
 		end
 		-- Create profile panel
 		LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("XLootProfile", LibStub("AceDBOptions-3.0"):GetOptionsTable(XLoot.db))
