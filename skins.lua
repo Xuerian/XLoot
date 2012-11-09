@@ -324,6 +324,7 @@ end
 -- Default skins
 do
 	lib.base = {
+		bar_texture = [[Interface\AddOns\XLoot\Textures\bar]],
 		color_mod = .75,
 		row_spacing = 2,
 	}
