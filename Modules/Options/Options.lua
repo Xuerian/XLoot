@@ -375,10 +375,10 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "reload_ui", "execute", ReloadUI },
 			}},
 			{ "rolls", "group", {
-				{ "roll_direction", "select", directions, name = L.growth_direction },
+				{ "roll_direction", "select", directions, name = L.growth_direction, key = "roll_anchor", subkey = "direction" },
 				{ "text_outline", "toggle" },
 				{ "text_time", "toggle" },
-				{ "roll_scale", "range", 0.1, 2.0, 0.1, name = L.scale },
+				{ "roll_scale", "range", 0.1, 2.0, 0.1, name = L.scale, key = "roll_anchor", subkey = "scale" },
 				{ "roll_width", "range", 150, 700, 1, 150, 400, 10, name = L.width },
 				{ "roll_button_size", "range", 16, 48, 1 },
 				{ "expiration", "header" },
@@ -395,7 +395,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "alert_direction", "select", directions, key = "alert_anchor", subkey = "direction", name = L.growth_direction },
 				{ "alert_skin", "toggle", width = "double" },
 				{ "alert_scale", "range", 0.1, 2.0, 0.1, name = L.scale },
-				{ "alert_offset", "range", 0.1, 2.0, 0.1, key = "alert_anchor", subkey = "direction" },
+				{ "alert_offset", "range", 0.1, 2.0, 0.1 },
 				{ "alert_alpha", "range", 0.1, 1.0, 0.1, name = L.alpha },
 			}},
 		})
