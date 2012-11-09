@@ -200,6 +200,9 @@ function addon:OnEnable() -- Construct addon option tables here
 			opts.name = opts.name or L[module_name][key] or key
 			opts.desc = opts.desc or L[module_name][key.."_desc"]
 
+			meta.key, meta.subkey = opts.key, opts.subkey
+			opts.key, opts.subkey = nil, nil
+
 			-- Dependencies
 			if opts.requires or opts.requires_inverse then
 				meta.requires, meta.requires_inverse = opts.requires, opts.requires_inverse
