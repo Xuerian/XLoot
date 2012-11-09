@@ -1,7 +1,7 @@
 ﻿local XLoot = LibStub("AceAddon-3.0"):NewAddon(select(2, ...), "XLoot")
 _G.XLoot = XLoot
 local L = XLoot.L
-local print = print
+local print, wprint = print, print
 
 -------------------------------------------------------------------------------
 -- Settings
@@ -10,6 +10,7 @@ local defaults = {
 		skin = "smooth"
 	}
 }
+
 
 -------------------------------------------------------------------------------
 -- Module helpers
@@ -86,12 +87,22 @@ XLoot:SetDefaultModulePrototype({
 -- Addon init
 
 function XLoot:OnInitialize()
+	-- Init DB
 	self.db = LibStub("AceDB-3.0"):New("XLootADB", defaults, true)
 	-- Load skins, import Masque skins
 	self:SkinsOnInitialize()
 end
 
 function XLoot:OnEnable()
+	-- Check for old addons
+	local old = { "XLoot1.0", "XLootGroup" }
+	for _,name in ipairs(old) do
+		if IsAddOnLoaded(name) then
+			DisableAddOn("XLootGroup")
+			wprint(("|c2244dd22XLoot|r now includes |c2244dd22%s|r - the old version will be disabled on next load, and no longer needs to be installed."):format(name))
+		end
+	end	
+
 	-- Create option stub
 	local stub = CreateFrame("Frame", "XLootConfigPanel", UIParent)
 	stub.name = "XLoot"
