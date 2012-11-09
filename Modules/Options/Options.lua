@@ -431,7 +431,7 @@ end
 
 function addon:ResetProfile()
 	XLoot.db:ResetProfile()
-	InterfaceOptionsFrame_OpenToCategory(popup_panel)
+	LibStub("AceConfigRegistry-3.0"):NotifyChange(popup_panel.key)
 end
 
 local init
