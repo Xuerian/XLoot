@@ -370,33 +370,34 @@ function addon:OnEnable() -- Construct addon option tables here
 		}
 		addon:RegisterModuleBetterOptions("Group", {
 			{ "anchors", "group", {
-				{ "roll_direction", "select", { "up", L.direction_up } },
-				{ "roll_scale", "range", 0.1, 2.0, 0.1 },
-				{ "roll_width", "range", 150, 700, 1, 150, 400, 10 },
-				{ "roll_button_size", "range", 16, 48, 1 },
+				{ "anchor_pretty", "toggle" },
+				{ "anchor_toggle", "execute", function() XLootGroup:ToggleAnchors() end },
+				{ "reload_ui", "execute", ReloadUI },
+			}},
+			{ "rolls", "group", {
+				{ "roll_direction", "select", directions, name = L.growth_direction },
 				{ "text_outline", "toggle" },
 				{ "text_time", "toggle" },
-				{ "anchor_pretty", "toggle" },
-				{ "anchor_toggle", "execute", function() XLootGroup:ToggleAnchors() end }
-			}, true },
-			{ "alerts", "group", {
-				{ "alert_direction", "select", directions, key = "alert_anchor", subkey = "direction" },
-				{ "alert_offset", "range", 0.1, 2.0, 0.1, key = "alert_anchor", subkey = "direction" },
-				{ "alert_alpha", "range", 0.1, 1.0, 0.1 },
-				{ "alert_scale", "range", 0.1, 2.0, 0.1 },
-				{ "alert_skin", "toggle" },
-				{ "reload_ui", "execute", ReloadUI }
-			}, true },
-			{ "tracking", "group", {
-				{ "track_all", "toggle" },
-				{ "track_player_roll", "toggle", requires_inverse = "track_all" },
-				{ "track_by_threshold", "toggle", requires_inverse = "track_all" },
-				{ "track_threshold", "select", item_qualities, requires = "track_by_threshold" }
-			}, true },
-			{ "expiration", "group", {
+				{ "roll_scale", "range", 0.1, 2.0, 0.1, name = L.scale },
+				{ "roll_width", "range", 150, 700, 1, 150, 400, 10, name = L.width },
+				{ "roll_button_size", "range", 16, 48, 1 },
+				{ "expiration", "header" },
 				{ "expire_won", "range", 5, 30, 1 },
 				{ "expire_lost", "range", 5, 30, 1 },
-			}, true }
+			}},
+			{ "roll_tracking", "group", {
+				{ "track_all", "toggle", width = "double" },
+				{ "track_player_roll", "toggle", requires_inverse = "track_all" },
+				{ "track_by_threshold", "toggle", requires_inverse = "track_all", width = "double" },
+				{ "track_threshold", "select", item_qualities, requires = "track_by_threshold", name = L.minimum_quality },
+			}},
+			{ "alerts", "group", {
+				{ "alert_direction", "select", directions, key = "alert_anchor", subkey = "direction", name = L.growth_direction },
+				{ "alert_skin", "toggle", width = "double" },
+				{ "alert_scale", "range", 0.1, 2.0, 0.1, name = L.scale },
+				{ "alert_offset", "range", 0.1, 2.0, 0.1, key = "alert_anchor", subkey = "direction" },
+				{ "alert_alpha", "range", 0.1, 1.0, 0.1, name = L.alpha },
+			}},
 		})
 	end
 
