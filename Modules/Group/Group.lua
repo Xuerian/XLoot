@@ -6,8 +6,8 @@ XLootGroup = addon
 local opt, anchor, alert_anchor, mouse_focus, Skinner
 local rolls = {}
 local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
-local GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print
-	= GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print
+local GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string_format
+	= GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string.format
 local HistoryGetItem, HistoryGetPlayerInfo, HistoryGetNumItems
 	= C_LootHistory.GetItem, C_LootHistory.GetPlayerInfo, C_LootHistory.GetNumItems
 
@@ -152,6 +152,25 @@ function addon:OnEnable()
 	-- Hook alert actions
 	hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
 	hooksecurefunc('AlertFrame_SetLootWonAnchors', self.AlertFrameAnchorHook)
+end
+
+-------------------------------------------------------------------------------
+-- Frame helpers
+
+-- Tack role icon on to player name and return class colors
+local white = { r = 1, g = 1, b = 1 }
+local dimensions = {
+	HEALER = '48:64',
+	DAMAGER = '16:32',
+	TANK = '32:48'
+}
+local function FancyPlayerName(name, class)
+	local c = RAID_CLASS_COLORS[class] or white
+	local role = UnitGroupRolesAssigned(name)
+	if role ~= 'NONE' and opt.role_icon then
+		name = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], name)
+	end
+	return name, c.r, c.g, c.b
 end
 
 -------------------------------------------------------------------------------
@@ -459,26 +478,6 @@ function addon.ToggleAnchors()
 		anchor:Show()
 		alert_anchor:Show()
 	end
-end
-
--------------------------------------------------------------------------------
--- Frame helpers
-
--- Tack role icon on to player name and return class colors
-local white = { r = 1, g = 1, b = 1 }
-local dimensions = {
-	HEALER = '48:64',
-	DAMAGER = '16:32',
-	TANK = '32:48'
-}
-local string_format = string.format
-local function FancyPlayerName(name, class)
-	local c = RAID_CLASS_COLORS[class] or white
-	local role = UnitGroupRolesAssigned(name)
-	if role ~= 'NONE' and opt.role_icon then
-		name = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], name)
-	end
-	return name, c.r, c.g, c.b
 end
 
 -------------------------------------------------------------------------------
