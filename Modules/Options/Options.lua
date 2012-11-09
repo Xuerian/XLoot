@@ -21,9 +21,8 @@ local popup_panel -- Last panel to open profile reset popup
 
 -------------------------------------------------------------------------------
 -- Module init
--- Construct all option tables
 
-function addon:OnEnable()
+function addon:OnEnable() -- Construct addon option tables here
 
 	local option_metadata = {} -- Stores metadata for option entries outside of library-specific compiled option structure
 	addon.option_metadata = option_metadata -- Until resulting AceOptionsTable can have .values upated, this is the only way to store a new .items table
@@ -96,14 +95,11 @@ function addon:OnEnable()
 	end
 
 	-- Dependencies
+	-- TODO: Recursive dependencies
 	local function requires(info)
 		local db, k, meta = path(info)
-		return db[meta.requires]
-	end
-
-	local function requires_inverse(info)
-		local db, k, meta = path(info)
-		return db[meta.requires_inverse]
+		return ((meta.requires and (not db[meta.requires]) or false)
+				or (meta.requires_inverse and db[meta.requires_inverse] or false))
 	end
 
 	-------------------------------------------------------------------------------
@@ -205,15 +201,10 @@ function addon:OnEnable()
 			opts.desc = opts.desc or L[module_name][key.."_desc"]
 
 			-- Dependencies
-			if opts.requires then
-				meta.requires = opts.requires
+			if opts.requires or opts.requires_inverse then
+				meta.requires, meta.requires_inverse = opts.requires, opts.requires_inverse
 				opts.disabled = requires
-				opts.requires = nil
-			end
-			if opts.requires_inverse then
-				meta.requires_inverse = opts.requires_inverse
-				opts.disabled = requires_inverse
-				opts.requires_inverse = nil
+				opts.requires, opts.requires_inverse = nil, nil
 			end
 
 			-- Sorted select
