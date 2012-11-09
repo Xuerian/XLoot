@@ -17,6 +17,7 @@ Libs\Embeds.xml
 localization.lua
 XLoot.lua
 skins.lua
+stacks.lua
 
 #@do-not-package@
 Modules\Modules.xml
