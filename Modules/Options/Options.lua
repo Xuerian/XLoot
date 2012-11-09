@@ -272,6 +272,17 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	-------------------------------------------------------------------------------
+	-- Generic select values
+
+	local item_qualities = {}
+	do
+		for k, v in ipairs(ITEM_QUALITY_COLORS) do
+			local hex = select(4, GetItemQualityColor(k))
+			item_qualities[k] = { k, ("|c%s%s"):format(hex, _G["ITEM_QUALITY"..tostring(k).."_DESC"]) }
+		end
+	end 
+
+	-------------------------------------------------------------------------------
 	-- Module configs
 
 	-- XLoot Core
@@ -296,13 +307,6 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "solo", L.when_solo },
 			{ "always", L.when_always }
 		}
-		local item_qualities = {}
-		do
-			for k, v in ipairs(ITEM_QUALITY_COLORS) do
-				local hex = select(4, GetItemQualityColor(k))
-				item_qualities[k] = { k, ("|c%s%s"):format(hex, _G["ITEM_QUALITY"..tostring(k).."_DESC"]) }
-			end
-		end 
 
  		addon:RegisterModuleBetterOptions("Frame", {
 			{ "frame_options", "group", {
