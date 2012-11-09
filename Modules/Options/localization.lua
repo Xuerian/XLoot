@@ -62,7 +62,8 @@ local locales = {
 			-- Option labels
 			text_outline = "Outline text",
 			text_time = "Show time remaining",
-			anchor_pretty = "Skin anchors",
+			anchor_pretty = "Pretty anchors",
+			anchor_pretty_desc = "Applies full skin to anchors",
 			anchor_toggle = "Show/Hide anchors",
 			role_icon = "Show role icons",
 			win_icon = "Show winning type icon",
