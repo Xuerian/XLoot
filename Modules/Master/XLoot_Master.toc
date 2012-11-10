@@ -1,5 +1,5 @@
 ﻿## Interface: 50001
-## Title: XLoot Options
+## Title: XLoot Master
 ## Notes: Configurable Master Looter interface
 ## Version: @project-version@
 ## Author: Xuerian, Dridzt
