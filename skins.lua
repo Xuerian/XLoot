@@ -234,6 +234,7 @@ end
 do
 	-- Merge current skin with set options
 	function compile(data, name)
+		assert(data.sets[name], "Bad set name given to XLoot.Skin")
 		-- Return cached
 		if not data.compiled[name] then
 			data.compiled[name] = {}
