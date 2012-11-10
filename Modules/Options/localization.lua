@@ -3,11 +3,13 @@ local locales = {
 	enUS = {
 		Core = {
 			panel_title = "Global options",
+			panel_desc = "These settings are applied to all applicable XLoot modules",
 			skin = "Skin",
-			skin_desc = "Select skin to apply to all modules. Includes Masque skins"
+			skin_desc = "Select skin to use. Includes Masque skins"
 		},
 		Frame = {
 			panel_title = "Loot Frame",
+			panel_desc = "Provides a adjustable loot frame",
 			-- Group labels
 			frame_options = "Frame settings",
 			slot_options = "Loot slots",
@@ -92,7 +94,7 @@ local locales = {
 		when_solo = "Solo",
 		when_always = "Always",
 		when_auto = "Automatic",
-		confirm_reset_profile = "This will reset all XLoot options for this profile. Are you sure?",
+		confirm_reset_profile = "This will reset all options for this profile. Are you sure?",
 		profile = "Profile"
 	},
 	-- Possibly localized
