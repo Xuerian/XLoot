@@ -481,7 +481,6 @@ function addon.BonusFrameOpen()
 			overlay:SetBorderColor(1, .8, .1)
 			bonus_elements.overlay = overlay
 		end
-		frame:SetScale(opt.bonus_scale)
 	end
 
 	-- Relocate
