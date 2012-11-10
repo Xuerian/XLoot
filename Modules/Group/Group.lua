@@ -30,6 +30,8 @@ local defaults = {
 		alert_scale = 1,
 		alert_offset = 4,
 
+		bonus_skin = true,
+
 		roll_button_size = 28,
 		roll_width = 325,
 
@@ -90,7 +92,8 @@ function addon:OnEnable()
 		row = { gradient = false },
 		item = { backdrop = false },
 		alert = { gradient = false },
-		alert_item = { gradient = false, backdrop = false }
+		alert_item = { gradient = false, backdrop = false },
+		bonus = { }
 	}, 'row')
 
 	-- Create Roll anchor
@@ -152,6 +155,8 @@ function addon:OnEnable()
 	-- Hook alert actions
 	hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
 	hooksecurefunc('AlertFrame_SetLootWonAnchors', self.AlertFrameAnchorHook)
+	hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusFrameOpen)
+	hooksecurefunc('BonusRollFrame_CloseBonusRoll', self.BonusFrameClose)
 end
 
 -------------------------------------------------------------------------------
@@ -456,6 +461,43 @@ function addon.AlertFrameAnchorHook()
 				first, x, y = false, 0, opt.alert_offset - 24
 			end
 		end
+	end
+end
+
+local bonus_elements
+function addon.BonusFrameOpen()
+	local frame = BonusRollFrame
+
+	if not bonus_elements then
+		bonus_elements = {}
+
+		if opt.bonus_skin then
+			frame.Background:Hide()
+			local overlay = CreateFrame('Frame', nil, frame)
+			overlay:SetAllPoints()
+			overlay:SetFrameLevel(frame:GetFrameLevel()-1)
+			Skinner:Skin(overlay, 'bonus')
+			overlay:SetGradientColor(.5, .5, .5, .4)
+			overlay:SetBorderColor(1, .8, .1)
+			bonus_elements.overlay = overlay
+		end
+		frame:SetScale(opt.bonus_scale)
+	end
+
+	-- Relocate
+	GroupLootContainer_RemoveFrame(GroupLootContainer, frame)
+	frame:Show()
+	table.insert(anchor.children, 1, frame)
+	frame.active = true -- Prevent anchor from acquiring as child
+	frame.scale_mod = 0.9 -- Tell anchor to scale at .8 of other rolls
+	anchor:Restack()
+end
+
+function addon.BonusFrameClose()
+	local frame = BonusRollFrame
+	if frame.state == "prompt" then
+		table.remove(anchor.children, 1)
+		anchor:Restack()
 	end
 end
 
@@ -1030,6 +1072,21 @@ end
 
 SLASH_XLOOTGROUPA1 = '/xlga'
 SlashCmdList['XLOOTGROUPA'] = alert
+
+local function bonus()
+	BONUS_ROLL_REQUIRED_CURRENCY = JUSTICE_CURRENCY
+	BonusRollFrame_StartBonusRoll(6603, "test", 30)
+end
+
+SLASH_XLOOTGROUPB1 = '/xlgb'
+SlashCmdList['XLOOTGROUPB'] = bonus
+
+local function bonus_close()
+	BonusRollFrame_CloseBonusRoll()
+end
+
+SLASH_XLOOTGROUPBC1 = '/xlgbc'
+SlashCmdList['XLOOTGROUPBC'] = bonus_close
 
 local AC = LibStub('AceConsole-2.0', true)
 if AC then print = function(...) AC:PrintLiteral(...) end end

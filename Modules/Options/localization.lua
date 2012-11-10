@@ -55,6 +55,7 @@ local locales = {
 			-- Group labels
 			anchors = "Anchors",
 			rolls = "Loot rolls",
+			bonus_roll = "Bonus roll",
 			roll_tracking = "Loot roll tracking",
 			alerts = "Loot alerts",
 
@@ -73,6 +74,7 @@ local locales = {
 			show_undecided = "Show undecided",
 			alert_skin = "Skin popups",
 			alert_offset = "Vertical spacing",
+			bonus_skin = "Skin bonus roll frame",
 			reload_ui = "Reload UI",
 			roll_width = "Roll frame width",
 			roll_button_size = "Roll button size",
