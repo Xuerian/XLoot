@@ -408,6 +408,45 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
+	-- XLoot Master
+	if XLoot:GetModule("Master", true) then
+		-- Item quality dropdown generator
+		local item_qualities = {}
+		do
+			for i, v in ipairs(UnitPopupMenus["LOOT_THRESHOLD"]) do -- we only care for the qualities available as ML filters
+				local quality = tonumber(strmatch(v,"%d+"))
+				if quality then
+					local hex = select(4, GetItemQualityColor(quality))
+					item_qualities[i] = { quality, ('|c%s%s'):format(hex, _G[v]) }
+				end
+			end
+		end
+		local channels = {
+				{ 'AUTO', L.desc_channel_auto },
+				{ 'SAY', CHAT_MSG_SAY },
+				{ 'PARTY', CHAT_MSG_PARTY },
+				{ 'RAID', CHAT_MSG_RAID },
+				{ 'RAID_WARNING', RAID_WARNING },
+				{ 'OFFICER', CHAT_MSG_OFFICER },
+				{ 'NONE', NONE },
+		}
+		addon:RegisterModuleBetterOptions("Master", {
+			{ "specialrecipients", "group", {
+				{ "menu_disenchant", "toggle" },
+				{ "menu_bank", "toggle" },
+				{ "menu_self", "toggle" },
+			}},
+			{ "raidroll", "group", {
+				{ "menu_roll", "toggle" },
+			}},
+			{ "awardannounce", "group", {
+				{ "award_qualitythreshold", "select", item_qualities },
+				{ "award_channel", "select", channels },
+				{ "award_guildannounce", "toggle" },
+			}},
+		})
+	end
+	
 	-- Generate reset staticpopup
 	if not StaticPopupDialogs['XLOOT_RESETPROFILE'] then
 		StaticPopupDialogs['XLOOT_RESETPROFILE'] = {
