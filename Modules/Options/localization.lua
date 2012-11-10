@@ -83,6 +83,22 @@ local locales = {
 			expire_lost = "Lost/Passed rolls",
 			preview_show = "Show Preview"
 		},
+		Master = {
+			panel_title = "Loot Master",
+			-- Group labels
+			specialrecipients = "Special Recipients Menu",
+			raidroll = "Special Rolls Menu",
+			awardannounce = "Announce Item Distribution",
+			-- Option labels
+			menu_roll = "Show raid roll",
+			menu_disenchant = "Show disenchanter",
+			menu_bank = "Show banker",
+			menu_self = "Show self",
+			award_qualitythreshold = "Minimum announce quality",
+			award_channel = "Default chat announce channel",
+			award_guildannounce = "Echo in guild chat",
+		},
+		desc_channel_auto = "Highest available",
 		growth_direction = "Growth direction",
 		scale = "Scale",
 		width = "Width",

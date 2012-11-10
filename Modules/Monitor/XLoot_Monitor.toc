@@ -1,6 +1,6 @@
 ﻿## Interface: 50001
-## Title: XLoot Options
-## Notes: Configuration interface for XLoot
+## Title: XLoot Monitor
+## Notes: A graphical presentation of items looted by yourself and your group
 ## Version: @project-version@
 ## Author: Xuerian
 ## X-Category: Inventory
