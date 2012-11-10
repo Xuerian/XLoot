@@ -74,7 +74,9 @@ do
 			child:SetPoint(a, self, b)
 		end
 		if self.data and self.data.scale then
-			child:SetScale(self.data.scale)
+			child:SetScale(child.scale_mod and self.data.scale * child.scale_mod or self.data.scale)
+		elseif child.scale_mod then
+			child:SetScale(child.scale_mod)
 		end
 	end
 
