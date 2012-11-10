@@ -95,7 +95,7 @@ end
 
 function XLoot:OnEnable()
 	-- Check for old addons
-	local old = { "XLoot1.0", "XLootGroup" }
+	local old = { "XLoot1.0", "XLootGroup", "XLootMaster" }
 	for _,name in ipairs(old) do
 		if IsAddOnLoaded(name) then
 			DisableAddOn("XLootGroup")
