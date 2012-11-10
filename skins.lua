@@ -307,12 +307,15 @@ do
 
 	-- Embed required functions and create data set to skin multiple similar frames
 	function XLoot:MakeSkinner(target, sets, default_set)
+		if not default_set and not sets.default then
+			sets.default = {}
+		end
 		target._skin_data = {
 			skinned = {},
 			highlighted = {},
 			compiled = {},
 			sets = sets,
-			default = default_set
+			default = default_set or "default"
 		}
 		target.Reskin = Reskin
 		target.Skin = Skin
