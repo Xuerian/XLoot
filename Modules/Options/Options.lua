@@ -309,7 +309,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	-- XLoot Frame
 	if XLoot:GetModule("Frame", true) then
-		local autoloot_when = {
+		local when_group = {
 			{ "never", L.when_never },
 			{ "solo", L.when_solo },
 			{ "always", L.when_always }
@@ -336,11 +336,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "font_size_info", "range", 4, 26, 1 }
 			}},
 			{ "link_button", "group", {
-				{ "linkall_show", "select", {
-					{ "auto", L.when_auto },
-					{ "always", L.when_always },
-					{ "never", L.when_never }
-				}},
+				{ "linkall_show", "select", when_group },
 				{ "linkall_threshold", "select", item_qualities },
 				{ "linkall_channel", "select", {
 					{ "SAY", CHAT_MSG_SAY },
@@ -352,8 +348,8 @@ function addon:OnEnable() -- Construct addon option tables here
 				}}
 			}},
 			{ "autolooting", "group", {
-				{ "autoloot_coin", "select", autoloot_when },
-				{ "autoloot_quest", "select", autoloot_when }
+				{ "autoloot_coin", "select", when_group },
+				{ "autoloot_quest", "select", when_group }
 			}},
 			{ "colors", "group", {
 				{ "quality_color_frame", "toggle", width = "full" },
