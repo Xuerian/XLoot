@@ -157,6 +157,7 @@ function addon:OnEnable()
 	hooksecurefunc('AlertFrame_SetLootWonAnchors', self.AlertFrameAnchorHook)
 	hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusFrameOpen)
 	hooksecurefunc('BonusRollFrame_CloseBonusRoll', self.BonusFrameClose)
+	hooksecurefunc('BonusRollFrame_FinishedFading', self.RemoveBonusFrame)
 end
 
 -------------------------------------------------------------------------------
@@ -492,11 +493,16 @@ function addon.BonusFrameOpen()
 	anchor:Restack()
 end
 
-function addon.BonusFrameClose()
-	local frame = BonusRollFrame
-	if frame.state == "prompt" then
+function addon.RemoveBonusFrame()
+	if anchor.children[1] == BonusRollFrame then
 		table.remove(anchor.children, 1)
 		anchor:Restack()
+	end
+end
+
+function addon.BonusFrameClose()
+	if BonusRollFrame.state == "prompt" then
+		addon.RemoveBonusFrame()
 	end
 end
 
