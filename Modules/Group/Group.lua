@@ -816,7 +816,7 @@ do
 		local bar = CreateFrame('StatusBar', nil, frame)
 		bar:SetFrameLevel(frame:GetFrameLevel())
 		local skin = XLoot.Skin.current
-		local pad = skin.padding or skin_default.padding
+		local pad = skin.padding or 2
 		bar:SetPoint('TOPRIGHT', -pad - 3, -pad - 3)
 		bar:SetPoint('BOTTOMRIGHT', -pad - 3, pad + 3)
 		bar:SetPoint('LEFT', icon_frame, 'RIGHT', -pad, 0)
