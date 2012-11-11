@@ -200,8 +200,6 @@ end
 --  >Rows
 --  >Loot frame
 
-local font = STANDARD_TEXT_FONT
-
 -- Universal events
 local function OnDragStart()
 	if opt.frame_draggable then
@@ -250,7 +248,7 @@ local BuildRow
 do
 	-- Text helpers
 	local function smalltext(text, size, ext)
-		text:SetFont(font, size or 10, ext or '')
+		text:SetFont(STANDARD_TEXT_FONT, size or 10, ext or '')
 		text:SetDrawLayer'OVERLAY'
 		text:SetHeight(10)
 		text:SetJustifyH'LEFT'
@@ -361,8 +359,8 @@ do
 		self:SetAlpha(opt.loot_alpha)
 		
 		-- Text
-		self.text_name:SetFont(font, opt.font_size_loot)
-		self.text_info:SetFont(font, opt.font_size_info)
+		self.text_name:SetFont(STANDARD_TEXT_FONT, opt.font_size_loot)
+		self.text_info:SetFont(STANDARD_TEXT_FONT, opt.font_size_info)
 		
 		-- Calculated row height
 		owner.row_height = self:GetHeight() + owner.skin.row_spacing

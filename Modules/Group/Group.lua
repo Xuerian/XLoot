@@ -683,7 +683,7 @@ do
 			b.parent = parent
 
 			local text = b:CreateFontString(nil, 'OVERLAY')
-			text:SetFont([[Fonts\FRIZQT__.TTF]], 12, 'THICKOUTLINE')
+			text:SetFont(STANDARD_TEXT_FONT, 12, 'THICKOUTLINE')
 			text:SetPoint("CENTER", -x + 1, tex == 'DE' and -y +2 or -y)
 			b.text = text
 
@@ -839,12 +839,12 @@ do
 		-- Bind text
 		local bind = icon_frame:CreateFontString(nil, 'OVERLAY')
 		bind:SetPoint('BOTTOM', 0, 1)
-		bind:SetFont([[Fonts\FRIZQT__.TTF]], 8, 'THICKOUTLINE')
+		bind:SetFont(STANDARD_TEXT_FONT, 8, 'THICKOUTLINE')
 
 		-- Time text
 		local time = icon_frame:CreateFontString(nil, 'OVERLAY')
 		time:SetPoint('CENTER', 0, 2)
-		time:SetFont([[Fonts\FRIZQT__.TTF]], 12, 'OUTLINE')
+		time:SetFont(STANDARD_TEXT_FONT, 12, 'OUTLINE')
 
 		-- Roll buttons
 		local n = CreateRollButton(frame, 1, NEED, 'Dice', icon_frame, 3, -1)
