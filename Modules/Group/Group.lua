@@ -471,6 +471,8 @@ function addon.BonusFrameOpen()
 	if not bonus_elements then
 		bonus_elements = {}
 
+		frame.active = true -- Prevent anchor from acquiring as child
+		frame.scale_mod = 0.9 -- Anchor's scale modifier
 		if opt.bonus_skin then
 			frame.Background:Hide()
 			local overlay = CreateFrame('Frame', nil, frame)
@@ -484,11 +486,12 @@ function addon.BonusFrameOpen()
 	end
 
 	-- Relocate
-	GroupLootContainer_RemoveFrame(GroupLootContainer, frame)
+	--GroupLootContainer_RemoveFrame(GroupLootContainer, frame)
+	
+	if anchor.children[1] ~= BonusRollFrame then
+		table.insert(anchor.children, 1, frame) -- Force in first position
+	end
 	frame:Show()
-	table.insert(anchor.children, 1, frame)
-	frame.active = true -- Prevent anchor from acquiring as child
-	frame.scale_mod = 0.9 -- Tell anchor to scale at .8 of other rolls
 	anchor:Restack()
 end
 
@@ -1081,7 +1084,8 @@ SLASH_XLOOTGROUPB1 = '/xlgb'
 SlashCmdList['XLOOTGROUPB'] = bonus
 
 local function bonus_close()
-	BonusRollFrame_CloseBonusRoll()
+	-- BonusRollFrame_CloseBonusRoll()
+	addon.RemoveBonusFrame()
 end
 
 SLASH_XLOOTGROUPBC1 = '/xlgbc'
