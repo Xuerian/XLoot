@@ -496,6 +496,7 @@ end
 function addon.RemoveBonusFrame()
 	if anchor.children[1] == BonusRollFrame then
 		table.remove(anchor.children, 1)
+		BonusRollFrame:Hide()
 		anchor:Restack()
 	end
 end
