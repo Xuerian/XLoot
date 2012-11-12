@@ -155,10 +155,8 @@ function addon:OnEnable()
 	-- Hook alert actions
 	hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
 	hooksecurefunc('AlertFrame_SetLootWonAnchors', self.AlertFrameAnchorHook)
-	-- hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusFrameOpen)
-	-- hooksecurefunc('BonusRollFrame_OnHide', self.RemoveBonusFrame)
-	hooksecurefunc('GroupLootContainer_RemoveFrame', self.GroupLootContainer_RemoveFrame)
-	hooksecurefunc('GroupLootContainer_AddFrame', self.GroupLootContainer_AddFrame)
+	hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusRollFrame_StartBonusRoll)
+	hooksecurefunc('BonusRollFrame_FinishedFading', self.BonusRollFrame_Hide)
 end
 
 -------------------------------------------------------------------------------
@@ -466,23 +464,15 @@ function addon.AlertFrameAnchorHook()
 	end
 end
 
-function addon.GroupLootContainer_AddFrame(self, frame)
-	if frame == BonusRollFrame then
-		GroupLootContainer_RemoveFrame(self, frame, true)
+function addon.BonusRollFrame_StartBonusRoll()
+	if BonusRollFrame:IsShown() then
 		addon.BonusRollFrame_Show()
-	end
-end
-
-function addon.GroupLootContainer_RemoveFrame(self, frame, ignore)
-	if frame == BonusRollFrame and not ignore then
-		addon.BonusRollFrame_Hide()
 	end
 end
 
 local bonus_elements
 function addon.BonusRollFrame_Show()
 	local frame = BonusRollFrame
-
 	if not bonus_elements then
 		bonus_elements = {}
 
@@ -500,6 +490,7 @@ function addon.BonusRollFrame_Show()
 		end
 	end
 
+	GroupLootContainer_RemoveFrame(GroupLootContainer, frame)
 	if anchor.children[1] ~= BonusRollFrame then
 		table.insert(anchor.children, 1, frame) -- Force in first position
 	end
@@ -512,7 +503,7 @@ function addon.BonusRollFrame_Hide()
 		table.remove(anchor.children, 1)
 		anchor:Restack()
 	end
-	BonusRollFrame:Hide()
+	--BonusRollFrame:Hide()
 end
 
 function addon.SlashHandler(msg)
@@ -1096,8 +1087,7 @@ SLASH_XLOOTGROUPB1 = '/xlgb'
 SlashCmdList['XLOOTGROUPB'] = bonus
 
 local function bonus_close()
-	-- BonusRollFrame_CloseBonusRoll()
-	addon.BonusRollFrame_Hide()
+	BonusRollFrame_FinishedFading(BonusRollFrame)
 end
 
 SLASH_XLOOTGROUPBC1 = '/xlgbc'
