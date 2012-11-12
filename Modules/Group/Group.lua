@@ -155,8 +155,10 @@ function addon:OnEnable()
 	-- Hook alert actions
 	hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
 	hooksecurefunc('AlertFrame_SetLootWonAnchors', self.AlertFrameAnchorHook)
-	hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusFrameOpen)
-	hooksecurefunc('BonusRollFrame_OnHide', self.RemoveBonusFrame)
+	-- hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusFrameOpen)
+	-- hooksecurefunc('BonusRollFrame_OnHide', self.RemoveBonusFrame)
+	hooksecurefunc('GroupLootContainer_RemoveFrame', self.GroupLootContainer_RemoveFrame)
+	hooksecurefunc('GroupLootContainer_AddFrame', self.GroupLootContainer_AddFrame)
 end
 
 -------------------------------------------------------------------------------
@@ -464,8 +466,21 @@ function addon.AlertFrameAnchorHook()
 	end
 end
 
+function addon.GroupLootContainer_AddFrame(self, frame)
+	if frame == BonusRollFrame then
+		GroupLootContainer_RemoveFrame(self, frame, true)
+		addon.BonusRollFrame_Show()
+	end
+end
+
+function addon.GroupLootContainer_RemoveFrame(self, frame, ignore)
+	if frame == BonusRollFrame and not ignore then
+		addon.BonusRollFrame_Hide()
+	end
+end
+
 local bonus_elements
-function addon.BonusFrameOpen()
+function addon.BonusRollFrame_Show()
 	local frame = BonusRollFrame
 
 	if not bonus_elements then
@@ -485,9 +500,6 @@ function addon.BonusFrameOpen()
 		end
 	end
 
-	-- Relocate
-	--GroupLootContainer_RemoveFrame(GroupLootContainer, frame)
-	
 	if anchor.children[1] ~= BonusRollFrame then
 		table.insert(anchor.children, 1, frame) -- Force in first position
 	end
@@ -495,7 +507,7 @@ function addon.BonusFrameOpen()
 	anchor:Restack()
 end
 
-function addon.RemoveBonusFrame()
+function addon.BonusRollFrame_Hide()
 	if anchor.children[1] == BonusRollFrame then
 		table.remove(anchor.children, 1)
 		anchor:Restack()
@@ -1085,7 +1097,7 @@ SlashCmdList['XLOOTGROUPB'] = bonus
 
 local function bonus_close()
 	-- BonusRollFrame_CloseBonusRoll()
-	addon.RemoveBonusFrame()
+	addon.BonusRollFrame_Hide()
 end
 
 SLASH_XLOOTGROUPBC1 = '/xlgbc'
