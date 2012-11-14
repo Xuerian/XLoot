@@ -64,12 +64,17 @@ function XLoot:ShowOptionPanel(module)
 	XLootOptions:OpenPanel(module)
 end
 
+function XLoot.ProfileChanged(self)
+	self.opt = self.db.profile
+end
+
 -- Add shortcuts for modules
 XLoot:SetDefaultModulePrototype({
 	InitializeModule = function(self, defaults, frame)
 		local module_name = self:GetName()
 		-- Set up DB namespace
 		self.db = XLoot.db:RegisterNamespace(module_name, defaults)
+		self.opt = self.db.profile
 		
 		function self.ShowOptions()
 			XLoot:ShowOptionPanel(self)
@@ -79,8 +84,8 @@ XLoot:SetDefaultModulePrototype({
 		-- Set event handler
 		self:SetEventHandler(frame)
 	end,
-	ShowOptions = ShowOptions,
-	SetEventHandler = SetEventHandler
+	SetEventHandler = SetEventHandler,
+	ProfileChanged = XLoot.ProfileChanged,
 })
 
 -------------------------------------------------------------------------------
@@ -89,6 +94,7 @@ XLoot:SetDefaultModulePrototype({
 function XLoot:OnInitialize()
 	-- Init DB
 	self.db = LibStub("AceDB-3.0"):New("XLootADB", defaults, true)
+	self.opt = self.db.profile
 	-- Load skins, import Masque skins
 	self:SkinsOnInitialize()
 end
