@@ -67,7 +67,7 @@ local defaults = {
 
 		linkall_threshold = 2, -- Quality from 0 - 6, Poor - Artifact
 		linkall_channel = 'RAID',
-		linkall_show = 'auto',
+		linkall_show = 'grouped',
 
 		frame_color_border = { .5, .5, .5 },
 		frame_color_backdrop = { 0, 0, 0, .7 },

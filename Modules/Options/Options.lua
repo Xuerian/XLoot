@@ -318,7 +318,8 @@ function addon:OnEnable() -- Construct addon option tables here
 		local when_group = {
 			{ "never", L.when_never },
 			{ "solo", L.when_solo },
-			{ "always", L.when_always }
+			{ "always", L.when_always },
+			{ "grouped", L.when_grouped }
 		}
 
  		addon:RegisterModuleBetterOptions("Frame", {

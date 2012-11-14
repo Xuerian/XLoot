@@ -112,6 +112,7 @@ local locales = {
 		when_solo = "Solo",
 		when_always = "Always",
 		when_auto = "Automatic",
+		when_grouped = "In groups",
 		confirm_reset_profile = "This will reset all options for this profile. Are you sure?",
 		profile = "Profile"
 	},
