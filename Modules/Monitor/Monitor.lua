@@ -3,18 +3,48 @@ local addon, L = XLoot:NewModule("Monitor")
 local XLootMonitor = CreateFrame("Frame", "XLootMonitor", UIParent)
 XLootMonitor.addon = addon
 -- Grab locals
-local print, opt, eframe = print
--- Libraries
-local LootEvents
+local print, opt, eframe, anchor = print
+local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
+local me = UnitName("player")
 
 -------------------------------------------------------------------------------
 -- Settings
 
 local defaults = {
 	profile = {
+		anchor = {
+			direction = "up",
+			visible = true,
+			scale = 1.0,
+			x = UIParent:GetWidth() * .85,
+			y = UIParent:GetHeight() * .2
+		},
+		name_width = 50,
 
+		threshold_own = 3,
+		threshold_other = 4,
+
+		fade_own = 5,
+		fade_other = 3,
 	}
 }
+
+-------------------------------------------------------------------------------
+-- Helpers
+local white = { r = 1, g = 1, b = 1 }
+local dimensions = {
+	HEALER = '48:64',
+	DAMAGER = '16:32',
+	TANK = '32:48'
+}
+local function FancyPlayerName(name, class)
+	local c = RAID_CLASS_COLORS[class] or white
+	local role = UnitGroupRolesAssigned(name)
+	if role ~= 'NONE' and opt.role_icon then
+		name = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], name)
+	end
+	return name, c.r, c.g, c.b
+end
 
 -------------------------------------------------------------------------------
 -- Module init
@@ -22,25 +52,255 @@ local defaults = {
 function addon:OnInitialize()
 	eframe = CreateFrame("Frame")
 	self:InitializeModule(defaults, eframe)
+	XLoot:SetSlashCommand("xlm", self.SlashHandler)
 	opt = self.db.profile
-	LootEvents = LibStub("LootEvents")
 end
 
 function addon:OnEnable()
-	LootEvents:RegisterLootCallback(function(...) self:LOOT(...) end)
-
+	-- Register for loot events
+	LibStub("LootEvents"):RegisterLootCallback(self.LOOT_EVENT)
+	-- Set up skins
+	XLoot:MakeSkinner(self, {
+		anchor = { r = .4, g = .4, b = .4, a = .6, gradient = false },
+		anchor_pretty = { r = .6, g = .6, b = .6, a = .8 },
+		item = { backdrop = false },
+		item_highlight = { type = "highlight", layer = "overlay" },
+		row_highlight = { type = "highlight" }
+	})
+	-- Set up anchor
+	anchor = XLoot.Stack:CreateStaticStack(self.CreateRow, L.anchor, opt.anchor)
+	self:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
 end
 
-function addon:LOOT(event, pattern, player, arg1, arg2)
-	-- print(event, pattern, player, arg1, arg2)
+local rows, stack = {}, {}
+
+function addon:PushRow(icon, expires, ir, ig, ib, rr, rg, rb)
+	local row = anchor:Push()
+	row.icon:SetTexture(icon)
+	row.icon_frame:SetBorderColor(ir, ig, ib)
+	row:SetBorderColor(rr or ir, rg or ig, rb or ib)
+	return row
+end
+
+function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
 	if event == 'item' then
 		local link, num = arg1, arg2
+		local name, _, quality, _, _, _, _, _, _, icon = GetItemInfo(link)
+		if (player == me and opt.threshold_own or threshold_other) > quality then
+			return -- Doesn't meet threshold requirements
+		end
+		print(event, pattern, player, name, num)
+		local r, g, b = GetItemQualityColor(quality)
+		local row = addon:PushRow(icon, 5, r, g, b)
+		local nr, ng, nb
+		if player == me then
+			player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)))
+		else
+			player = nil
+		end
+		row:SetTexts(player, link, nr, ng, nb)
 	elseif event == 'coin' then
 		local copper, coin_string = arg1, arg2
+		local str, r, g, b
+		if copper >= 100000 then
+			r, g, b = 1, .8, .2
+			str = [[Interface\ICONS\INV_Misc_Coin_02]]
+		elseif copper >= 10000 then
+			r, g, b = 1, .8, .2
+			str = [[Interface\ICONS\INV_Misc_Coin_01]]
+		elseif copper >= 1000 then
+			r, g, b = .8, .8, .8
+			str = [[Interface\ICONS\INV_Misc_Coin_04]]
+		elseif copper >= 100 then
+			r, g, b = .8, .8, .8
+			str = [[Interface\ICONS\INV_Misc_Coin_03]]
+		elseif copper >= 10 then
+			r, g, b = 1, .6, .4
+			str = [[Interface\ICONS\INV_Misc_Coin_06]]
+		else
+			r, g, b = 1, .6, .4
+			str = [[Interface\ICONS\INV_Misc_Coin_05]]
+		end
+		addon:PushRow(str, nil, r, g, b, .6, .6, .6):SetTexts(nil, coin_string)
+	end
+end
+
+-------------------------------------------------------------------------------
+-- Frame methods
+do
+	local function OnEnter(self)
+		mouse_focus = self
+		if self._highlights then
+			self.icon_frame:ShowHighlight()
+		end
+	end
+
+	local function OnLeave(self)
+		mouse_focus = nil
+		if self._highlights then
+			self.icon_frame:HideHighlight()
+		end
+		GameTooltip:Hide()
+		ResetCursor()
+	end
+
+	local function FitToText(self)
+		self:SetWidth(self.name:GetWidth() + self.text:GetWidth() + 8 + self.icon_frame:GetWidth())
+	end
+
+	local function SetTexts(self, name, text, nr, ng, nb, tr, tg, tb)
+		self.name:SetText(name and name.." " or " ")
+		self.text:SetText(text)
+		self.name:SetVertexColor(nr or 1, ng or 1, nb or 1)
+		self.text:SetVertexColor(nr or 1, ng or 1, nb or 1)
+		if name then
+			self.name:SetWidth(opt.name_width)
+		else
+			self.name:SetWidth(0)
+		end
+		self:FitToText()
+	end
+
+	function addon.CreateRow()
+		local frame = CreateFrame("Button", nil, UIParent)
+		frame:SetFrameLevel(anchor:GetFrameLevel())
+		frame:SetHeight(24)
+		frame:SetWidth(250)
+
+		addon:Skin(frame)
+		addon:Highlight(frame, "row_highlight")
+		frame:SetHighlightColor(.8, .8, .8)
+
+		frame:SetScript("OnEnter", OnEnter)
+		frame:SetScript("OnLeave", OnLeave)
+
+		-- Item icon (For skin border)
+		local icon_frame = CreateFrame("Frame", nil, frame)
+		icon_frame:SetPoint("LEFT", 0, 0)
+		icon_frame:SetWidth(28)
+		icon_frame:SetHeight(28)
+		addon:Skin(icon_frame, "item")
+		addon:Highlight(icon_frame, "item_highlight")
+
+		-- Item texture
+		local icon = icon_frame:CreateTexture(nil, "BACKGROUND")
+		icon:SetPoint("TOPLEFT", 3, -3)
+		icon:SetPoint("BOTTOMRIGHT", -3, 3)
+		icon:SetTexCoord(.07,.93,.07,.93)
+
+		local name = frame:CreateFontString(nil, "OVERLAY")
+		name:SetPoint("LEFT", icon_frame, "RIGHT", 2, 0)
+		name:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
+		name:SetJustifyH("LEFT")
+
+		local text = frame:CreateFontString(nil, "OVERLAY")
+		text:SetPoint("LEFT", name, "RIGHT", 0, 0)
+		text:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
+		text:SetJustifyH("LEFT")
+
+		frame.icon = icon
+		frame.icon_frame = icon_frame
+		frame.name = name
+		frame.text = text
+		frame.FitToText = FitToText
+		frame.SetTexts = SetTexts
+
+		return frame
+	end
+end
+
+function XLootMonitor:Setup()
+	self:SetWidth(250)
+	self:UpdateAnchor()
+end
+--[=[ 
+function XLootMonitor:UpdateAnchor()
+	self:SetAlpha(opt.show_anchor and 1 or 0)
+	if self.stack[1] then
+		if opt.growth_direction == "up" then
+			self.stack[1]:SetPoint("BOTTOMLEFT", )
+	end
+end--]=] 
+
+function XLootMonitor:Restack()
+	
+end
+
+function addon.SlashHandler(msg)
+	if anchor:IsShown() then
+		anchor:Hide()
+	else
+		anchor:Show()
 	end
 end
 
 --@do-not-package@
 local AC = LibStub('AceConsole-2.0', true)
 if AC then print = function(...) AC:PrintLiteral(...) end end
+
+local items = {
+	{ 52722 },
+	{ 31304 },
+	{ 37254 },
+	{ 13262 },
+	{ 15487 }
+}
+for i,v in ipairs(items) do
+	GetItemInfo(v[1])
+end
+
+local players = {
+	{ UnitName("player"), select(2, UnitClass('player')) },
+	{ 'Player1', 'MAGE' },
+	{ 'Player2', 'PRIEST' },
+	{ 'Player3', 'WARRIOR' },
+	{ 'Player4', 'SHAMAN' }
+}
+
+local random = math.random
+local function random_player(is_me)
+	return is_me and players[1][1] or players[random(2, 5)][1]
+end
+
+local function test_item(event, is_me)
+	addon.LOOT_EVENT('item', event, random_player(is_me), select(2, GetItemInfo(items[random(1, #items)][1])), random(1, 2) == 2 and random(1, 20) or 1)
+end
+
+local function test_coin(event, is_me)
+	addon.LOOT_EVENT('coin', event, random_player(is_me), random(1, 500000), "TODO")
+end
+
+local tests = {
+	-- { test_item, "LOOT_ITEM" },
+	{ test_item, "LOOT_ITEM_SELF", true },
+	-- { test_item, "LOOT_ITEM_MULTIPLE" },
+	{ test_item, "LOOT_ITEM_SELF_MULTIPLE", true },
+	{ test_item, "LOOT_ITEM_PUSHED_SELF", true },
+	{ test_item, "LOOT_ITEM_PUSHED_SELF_MULTIPLE", true },
+	-- { test_coin, "LOOT_MONEY" },
+	-- { test_coin, "LOOT_MONEY_SPLIT", true },
+	-- { test_coin, "YOU_LOOT_MONEY", true },
+}
+
+local queue, queueframe, tick = {}, CreateFrame("Frame"), 0
+queueframe:SetScript("OnUpdate", function(self, elapsed)
+	tick = tick + elapsed
+	if tick > 0.5 then
+		tick = 0
+		local time = GetTime()
+		for k,v in pairs(queue) do
+			if v[1] < time then
+				v[2](select(3, unpack(v)))
+				queue[k] = nil
+			end
+		end
+	end
+end)
+
+XLoot:SetSlashCommand("xlmd", function(msg)
+	local now = GetTime()
+	for i=1,15 do
+		table.insert(queue, { now + i, unpack(tests[random(1, #tests)]) })
+	end
+end)
 --@end-do-not-package@

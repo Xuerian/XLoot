@@ -85,6 +85,9 @@ local locales = {
 			expire_lost = "Lost/Passed rolls",
 			preview_show = "Show Preview"
 		},
+		Monitor = {
+			panel_title = "Loot Monitor"
+		},
 		Master = {
 			panel_title = "Loot Master",
 			-- Group labels

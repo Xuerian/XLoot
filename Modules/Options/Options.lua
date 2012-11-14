@@ -409,6 +409,25 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
+	-- XLoot Monitor
+	if XLoot:GetModule("Monitor", true) then
+		addon:RegisterModuleBetterOptions("Monitor", {
+			{ "anchor", "group", {
+				{ "direction", "select", directions, name = L.growth_direction },
+				{ "visible", "toggle" },
+				{ "scale", "range", 0.1, 2.0, 0.1, name = L.scale }
+			}, defaults = { key = "anchor" } },
+			{ "thresholds", "group", {
+				{ "threshold_own", "select", item_qualities },
+				{ "threshold_other", "select", item_qualities }
+			}},
+			{ "fading", "group", {
+				{ "fade_own", "range", 1, 30, 1 },
+				{ "fade_other", "range", 1, 30, 1 }
+			}}
+		})
+	end
+
 	-- XLoot Master
 	if XLoot:GetModule("Master", true) then
 		-- Item quality dropdown generator
