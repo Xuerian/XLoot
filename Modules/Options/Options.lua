@@ -292,6 +292,11 @@ function addon:OnEnable() -- Construct addon option tables here
 		end
 	end 
 
+	local directions = {
+		{ "up", L.up },
+		{ "down", L.down }
+	}
+
 	-------------------------------------------------------------------------------
 	-- Module configs
 
@@ -367,10 +372,6 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	-- XLoot Group
 	if XLoot:GetModule("Group", true) then
-		local directions = {
-			{ "up", L.up },
-			{ "down", L.down }
-		}
 		addon:RegisterModuleBetterOptions("Group", {
 			{ "anchors", "group", {
 				{ "anchor_pretty", "toggle" },
