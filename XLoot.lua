@@ -7,7 +7,8 @@ local print, wprint = print, print
 -- Settings
 local defaults = {
 	profile = {
-		skin = "smooth"
+		skin = "smooth",
+		skin_anchors = false
 	}
 }
 
