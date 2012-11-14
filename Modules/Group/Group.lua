@@ -19,7 +19,6 @@ local defaults = {
 	profile = {
 		text_outline = true,
 		text_time = false,
-		anchor_pretty = false,
 		role_icon = true,
 		win_icon = false,
 		show_decided = true,
@@ -108,8 +107,8 @@ function addon:OnEnable()
 	addon.alert_anchor = alert_anchor
 
 	-- Skin anchor
-	Skinner:Skin(anchor, opt.anchor_pretty and 'anchor_pretty' or 'anchor')
-	Skinner:Skin(alert_anchor, opt.anchor_pretty and 'anchor_pretty' or 'anchor')
+	Skinner:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
+	Skinner:Skin(alert_anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
 
 	-- Row fader
 	local fader = CreateFrame('Frame')

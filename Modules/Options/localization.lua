@@ -5,7 +5,9 @@ local locales = {
 			panel_title = "Global options",
 			panel_desc = "These settings are applied to all applicable XLoot modules",
 			skin = "Skin",
-			skin_desc = "Select skin to use. Includes Masque skins"
+			skin_desc = "Select skin to use. Includes Masque skins",
+			skin_anchors = "Apply to anchors",
+			skin_anchors_desc = "Apply skin to anchors modules create",
 		},
 		Frame = {
 			panel_title = "Loot Frame",
@@ -65,8 +67,6 @@ local locales = {
 			-- Option labels
 			text_outline = "Outline text",
 			text_time = "Show time remaining",
-			anchor_pretty = "Pretty anchors",
-			anchor_pretty_desc = "Applies full skin to anchors",
 			anchor_toggle = "Show/Hide anchors",
 			role_icon = "Show role icons",
 			win_icon = "Show winning type icon",

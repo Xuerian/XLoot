@@ -309,7 +309,8 @@ function addon:OnEnable() -- Construct addon option tables here
 				skins[k] = v.name
 			end
 			return skins
-		end}
+		end},
+		{ "skin_anchors", "toggle" }
 	})
 
 	-- XLoot Frame
@@ -374,7 +375,6 @@ function addon:OnEnable() -- Construct addon option tables here
 	if XLoot:GetModule("Group", true) then
 		addon:RegisterModuleBetterOptions("Group", {
 			{ "anchors", "group", {
-				{ "anchor_pretty", "toggle" },
 				{ "anchor_toggle", "execute", function() XLootGroup:ToggleAnchors() end },
 				{ "reload_ui", "execute", ReloadUI },
 			}},
