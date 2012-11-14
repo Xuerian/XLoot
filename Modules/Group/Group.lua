@@ -155,8 +155,12 @@ function addon:OnEnable()
 	-- Hook alert actions
 	hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
 	hooksecurefunc('AlertFrame_SetLootWonAnchors', self.AlertFrameAnchorHook)
-	hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusRollFrame_StartBonusRoll)
-	hooksecurefunc('BonusRollFrame_FinishedFading', self.BonusRollFrame_Hide)
+	-- hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusRollFrame_StartBonusRoll)
+	-- hooksecurefunc('BonusRollFrame_FinishedFading', self.BonusRollFrame_Hide)
+	-- BonusRollFrame._SetPoint, BonusRollFrame.SetPoint = BonusRollFrame.SetPoint, addon.BonusRollFrame_SetPoint
+	hooksecurefunc(BonusRollFrame, 'SetPoint', addon.BonusRollFrame_SetPoint)
+	hooksecurefunc(BonusRollFrame, 'Show', addon.BonusRollFrame_Show)
+	hooksecurefunc(BonusRollFrame, 'Hide', addon.BonusRollFrame_Hide)
 end
 
 -------------------------------------------------------------------------------
@@ -464,9 +468,15 @@ function addon.AlertFrameAnchorHook()
 	end
 end
 
-function addon.BonusRollFrame_StartBonusRoll()
-	if BonusRollFrame:IsShown() then
-		addon.BonusRollFrame_Show()
+-- function addon.BonusRollFrame_StartBonusRoll()
+-- 	if BonusRollFrame:IsShown() then
+-- 		addon.BonusRollFrame_Show()
+-- 	end
+-- end
+
+function addon.BonusRollFrame_SetPoint(self, _, frame)
+	if frame ~= anchor then
+		self:ClearAllPoints()
 	end
 end
 
@@ -490,11 +500,11 @@ function addon.BonusRollFrame_Show()
 		end
 	end
 
-	GroupLootContainer_RemoveFrame(GroupLootContainer, frame)
+	-- GroupLootContainer_RemoveFrame(GroupLootContainer, frame) -- Prevent GLC from restacking
 	if anchor.children[1] ~= BonusRollFrame then
 		table.insert(anchor.children, 1, frame) -- Force in first position
 	end
-	frame:Show()
+	--frame:Show()
 	anchor:Restack()
 end
 
