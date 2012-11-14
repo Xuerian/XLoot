@@ -323,8 +323,8 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "frame_alpha", "range", 0.1, 1.0, 0.1 },
 				{ "loot_alpha", "range", 0.1, 1.0, 0.1 },
 				{ "frame_snap", "toggle" },
-				{ "frame_snap_offset_x", "range", 0, 2000, 1, 0, 250, 25, requires = "frame_snap" },
-				{ "frame_snap_offset_y", "range", 0, 2000, 1, 0, 250, 25, requires = "frame_snap" },
+				{ "frame_snap_offset_x", "range", -2000, 2000, 1, -250, 250, 10, requires = "frame_snap" },
+				{ "frame_snap_offset_y", "range", -2000, 2000, 1, -250, 250, 10, requires = "frame_snap" },
 				{ "frame_draggable", "toggle" },
 			}},
 			{ "slot_options", "group", {
