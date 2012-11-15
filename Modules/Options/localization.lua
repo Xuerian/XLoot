@@ -7,7 +7,7 @@ local locales = {
 			skin = "Skin",
 			skin_desc = "Select skin to use. Includes Masque skins",
 			skin_anchors = "Apply to anchors",
-			skin_anchors_desc = "Apply skin to anchors modules create",
+			skin_anchors_desc = "Apply skin to anchors that XLoot uses",
 		},
 		Frame = {
 			panel_title = "Loot Frame",
