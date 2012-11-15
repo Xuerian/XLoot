@@ -738,7 +738,6 @@ do
 		
 		-- Set up frame skins
 		XLoot:MakeSkinner(f, {
-			default = {},
 			item = {
 				backdrop = false
 			},
@@ -749,7 +748,7 @@ do
 				type = 'highlight',
 				layer = 'OVERLAY'
 			}
-		}, 'default')
+		})
 
 		
 		-- Use a secondary frame for backdrop/border to allow the "frame" opacity to be changed

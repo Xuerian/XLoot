@@ -242,7 +242,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 			-- Sorted select
 			-- TODO: Set metatable on option table to update meta.items?
-			if opts.type == 'select' and opts.items then
+			if opts.type == "select" and opts.items then
 				opts.values = values_from_items
 				meta.values = {}
 				meta.items = opts.items
