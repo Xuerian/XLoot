@@ -166,6 +166,22 @@ function addon:OnEnable() -- Construct addon option tables here
 		t.items = t.items or t[1]
 	end
 
+	function BetterOptions:alpha(t)
+		t.min = 0.0
+		t.max = 1.0
+		t.step = 0.1
+		t.key = t.key or t[1]
+		t.subkey = t.subkey or t[2]
+	end
+
+	function BetterOptions:scale(t)
+		t.min = 0.1
+		t.max = 2.0
+		t.step = 0.1
+		t.key = t.key or t[1]
+		t.subkey = t.subkey or t[2]
+	end
+
 	function BetterOptions:color(t)
 		t.hasAlpha = t.hasAlpha or t[1]
 	end
@@ -203,6 +219,13 @@ function addon:OnEnable() -- Construct addon option tables here
 		-- Recursion
 		else
 			local meta = {}
+
+			-- Automatically localized selects
+			if opts.type == "alpha" or opts.type == "scale" then
+				opts.name = opts.name or L[module_name][key] or L[opts.type]
+				opts.type = "range" 
+			end
+
 			-- Fill in localized name/description
 			opts.name = opts.name or L[module_name][key] or key
 			opts.desc = opts.desc or L[module_name][key.."_desc"]
@@ -326,9 +349,8 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "frame_options", "group", {
 				{ "frame_width_automatic", "toggle", width = "double" },
 				{ "frame_width", "range", 75, 300, 5, requires_inverse = "frame_width_automatic" },
-				{ "frame_scale", "range", 0.1, 2.0, 0.1 },
-				{ "frame_alpha", "range", 0.1, 1.0, 0.1 },
-				{ "loot_alpha", "range", 0.1, 1.0, 0.1 },
+				{ "frame_scale", "scale" },
+				{ "frame_alpha", "alpha" },
 				{ "frame_snap", "toggle" },
 				{ "frame_snap_offset_x", "range", -2000, 2000, 1, -250, 250, 10, requires = "frame_snap" },
 				{ "frame_snap_offset_y", "range", -2000, 2000, 1, -250, 250, 10, requires = "frame_snap" },
@@ -339,6 +361,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_texts_bind", "toggle" },
 				{ "loot_highlight", "toggle", width = "double", },
 				{ "loot_collapse", "toggle" },
+				{ "loot_alpha", "alpha" },
 				{ "font_size_loot", "range", 4, 26, 1 },
 				{ "font_size_info", "range", 4, 26, 1 }
 			}},
@@ -383,7 +406,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "roll_direction", "select", directions, name = L.growth_direction, key = "roll_anchor", subkey = "direction" },
 				{ "text_outline", "toggle" },
 				{ "text_time", "toggle" },
-				{ "roll_scale", "range", 0.1, 2.0, 0.1, name = L.scale, key = "roll_anchor", subkey = "scale" },
+				{ "roll_scale", "scale", "roll_anchor", "scale" },
 				{ "roll_width", "range", 150, 700, 1, 150, 400, 10, name = L.width },
 				{ "roll_button_size", "range", 16, 48, 1 },
 				{ "expiration", "header" },
@@ -402,9 +425,9 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "alerts", "group", {
 				{ "alert_direction", "select", directions, key = "alert_anchor", subkey = "direction", name = L.growth_direction },
 				{ "alert_skin", "toggle", width = "double" },
-				{ "alert_scale", "range", 0.1, 2.0, 0.1, name = L.scale },
-				{ "alert_offset", "range", 0.1, 2.0, 0.1 },
-				{ "alert_alpha", "range", 0.1, 1.0, 0.1, name = L.alpha },
+				{ "alert_scale", "scale" },
+				{ "alert_offset", "range", 0.1, 10.0, 0.1 },
+				{ "alert_alpha", "alpha" },
 			}},
 		})
 	end
@@ -415,7 +438,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "anchor", "group", {
 				{ "direction", "select", directions, name = L.growth_direction },
 				{ "visible", "toggle" },
-				{ "scale", "range", 0.1, 2.0, 0.1, name = L.scale }
+				{ "scale", "scale" }
 			}, defaults = { key = "anchor" } },
 			{ "thresholds", "group", {
 				{ "threshold_own", "select", item_qualities },
