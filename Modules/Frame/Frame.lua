@@ -770,15 +770,15 @@ do
 		-- Legacy close button
 		local x = CreateFrame("Button", nil, f)
 		x:SetScript('OnClick', CloseLoot)
-		x:SetWidth(32)
-		x:SetHeight(32)
+		x:SetWidth(30)
+		x:SetHeight(30)
 		local xtex = [[Interface\Buttons\UI-Panel-MinimizeButton-]]
 		x:SetNormalTexture(xtex..'Up')
 		x:SetPushedTexture(xtex..'Down')
 		x:SetHighlightTexture(xtex..'Highlight')
 		x:SetPoint('TOPRIGHT', 3, 3)
 		x:SetHitRectInsets(3, 3, 3, 3)
-		-- x:SetFrameLevel(f:GetFrameLevel()+2)
+		x:SetFrameLevel(f:GetFrameLevel()+2)
 		-- f:Skin(x)
 		-- x:SetBorderColor(.7, .7, .7)
 
