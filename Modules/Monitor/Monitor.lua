@@ -5,6 +5,7 @@ XLootMonitor.addon = addon
 -- Grab locals
 local print, opt, eframe, anchor = print
 local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
+local CopperToString = XLoot.CopperToString
 local me = UnitName("player")
 
 -------------------------------------------------------------------------------
@@ -91,37 +92,16 @@ function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
 		end
 		print(event, pattern, player, name, num)
 		local r, g, b = GetItemQualityColor(quality)
-		local row = addon:PushRow(icon, 5, r, g, b)
 		local nr, ng, nb
 		if player == me then
 			player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)))
 		else
 			player = nil
 		end
-		row:SetTexts(player, link, nr, ng, nb)
+		addon:PushRow(icon, (player == me and opt.fade_own or opt.fade_other), r, g, b):SetTexts(player, link, nr, ng, nb)
 	elseif event == 'coin' then
 		local copper, coin_string = arg1, arg2
-		local str, r, g, b
-		if copper >= 100000 then
-			r, g, b = 1, .8, .2
-			str = [[Interface\ICONS\INV_Misc_Coin_02]]
-		elseif copper >= 10000 then
-			r, g, b = 1, .8, .2
-			str = [[Interface\ICONS\INV_Misc_Coin_01]]
-		elseif copper >= 1000 then
-			r, g, b = .8, .8, .8
-			str = [[Interface\ICONS\INV_Misc_Coin_04]]
-		elseif copper >= 100 then
-			r, g, b = .8, .8, .8
-			str = [[Interface\ICONS\INV_Misc_Coin_03]]
-		elseif copper >= 10 then
-			r, g, b = 1, .6, .4
-			str = [[Interface\ICONS\INV_Misc_Coin_06]]
-		else
-			r, g, b = 1, .6, .4
-			str = [[Interface\ICONS\INV_Misc_Coin_05]]
-		end
-		addon:PushRow(str, nil, r, g, b, .6, .6, .6):SetTexts(nil, coin_string)
+		addon:PushRow(GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
 	end
 end
 
@@ -149,7 +129,7 @@ do
 	end
 
 	local function SetTexts(self, name, text, nr, ng, nb, tr, tg, tb)
-		self.name:SetText(name and name.." " or " ")
+		self.name:SetText(name and name.." " or nil)
 		self.text:SetText(text)
 		self.name:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		self.text:SetVertexColor(nr or 1, ng or 1, nb or 1)
@@ -277,9 +257,9 @@ local tests = {
 	{ test_item, "LOOT_ITEM_SELF_MULTIPLE", true },
 	{ test_item, "LOOT_ITEM_PUSHED_SELF", true },
 	{ test_item, "LOOT_ITEM_PUSHED_SELF_MULTIPLE", true },
-	-- { test_coin, "LOOT_MONEY" },
-	-- { test_coin, "LOOT_MONEY_SPLIT", true },
-	-- { test_coin, "YOU_LOOT_MONEY", true },
+	{ test_coin, "LOOT_MONEY" },
+	{ test_coin, "LOOT_MONEY_SPLIT", true },
+	{ test_coin, "YOU_LOOT_MONEY", true },
 }
 
 local queue, queueframe, tick = {}, CreateFrame("Frame"), 0

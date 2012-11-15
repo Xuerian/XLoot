@@ -18,6 +18,7 @@ localization.lua
 XLoot.lua
 skins.lua
 stacks.lua
+helpers.lua
 
 #@do-not-package@
 Modules\Modules.xml
