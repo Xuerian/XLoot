@@ -31,6 +31,7 @@ local locales = {
 			frame_color_gradient = "Frame gradient color",
 			frame_width_automatic = "Automatically expand frame",
 			frame_width = "Frame width",
+			old_close_button = "Use old close button",
 			loot_highlight = "Highlight slots on mouseover",
 			-- loot_alpha = "Slot alpha",
 			loot_color_border = "Loot border color",

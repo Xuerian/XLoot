@@ -348,6 +348,7 @@ function addon:OnEnable() -- Construct addon option tables here
  		addon:RegisterModuleBetterOptions("Frame", {
 			{ "frame_options", "group", {
 				{ "frame_width_automatic", "toggle", width = "double" },
+				{ "old_close_button", "toggle" },
 				{ "frame_width", "range", 75, 300, 5, requires_inverse = "frame_width_automatic" },
 				{ "frame_scale", "scale" },
 				{ "frame_alpha", "alpha" },

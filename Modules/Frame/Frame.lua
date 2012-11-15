@@ -69,6 +69,8 @@ local defaults = {
 		linkall_channel = 'RAID',
 		linkall_show = 'grouped',
 
+		old_close_button = false,
+
 		frame_color_border = { .5, .5, .5 },
 		frame_color_backdrop = { 0, 0, 0, .7 },
 		frame_color_gradient = { .5, .5, .5, .3 },
@@ -765,6 +767,27 @@ do
 		local cb = BottomButton(f, name..'Close', L.button_close, 'MIDDLE')
 		cb:SetPoint('RIGHT', -6, 0)
 
+		-- Legacy close button
+		local x = CreateFrame("Button", nil, f)
+		x:SetScript('OnClick', CloseLoot)
+		x:SetWidth(32)
+		x:SetHeight(32)
+		local xtex = [[Interface\Buttons\UI-Panel-MinimizeButton-]]
+		x:SetNormalTexture(xtex..'Up')
+		x:SetPushedTexture(xtex..'Down')
+		x:SetHighlightTexture(xtex..'Highlight')
+		x:SetPoint('TOPRIGHT', 3, 3)
+		x:SetHitRectInsets(3, 3, 3, 3)
+		-- x:SetFrameLevel(f:GetFrameLevel()+2)
+		-- f:Skin(x)
+		-- x:SetBorderColor(.7, .7, .7)
+
+		if opt.old_close_button then
+			cb:Hide()
+		else
+			x:Hide()
+		end
+
 		-- Events
 		if not f.fake then
 			f:SetMovable(1)
@@ -772,7 +795,7 @@ do
 			f:SetScript('OnDragStart', OnDragStart)
 			f:SetScript('OnDragStop', OnDragStop)
 			lb:SetScript('OnClick', LinkClick)
-			cb:SetScript('OnClick', function() CloseLoot() end)
+			cb:SetScript('OnClick', CloseLoot)
 			f.SnapToCursor = SnapToCursor
 		end
 
