@@ -62,6 +62,7 @@ end
 function addon:OnEnable()
 	-- Register for loot events
 	LibStub("LootEvents"):RegisterLootCallback(self.LOOT_EVENT)
+	eframe:RegisterEvent("MODIFIER_STATE_CHANGED")
 	-- Set up skins
 	XLoot:MakeSkinner(self, {
 		anchor = { r = .4, g = .4, b = .4, a = .6, gradient = false },
@@ -90,10 +91,19 @@ function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
 		else
 			player = nil
 		end
-		addon:AddRow(icon, (player == me and opt.fade_own or opt.fade_other), r, g, b):SetTexts(player, link, nr, ng, nb)
+		local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
+		row:SetTexts(player, link, nr, ng, nb)
+		row.item = link
+
 	elseif event == 'coin' and opt.show_coin then
 		local copper, coin_string = arg1, arg2
 		addon:AddRow(GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
+	end
+end
+
+function addon:MODIFIER_STATE_CHANGED(self, modifier, state)
+	if mouse_focus and MouseIsOver(mouse_focus) then
+		mouse_focus:ShowTooltip()
 	end
 end
 
@@ -107,12 +117,12 @@ function addon.EframeUpdate(self, elapsed)
 		if remaining < 0 then
 			row:SetAlpha(0)
 			addon:RemoveRow(row)
-		elseif remaining <= 1 then
-			row:SetAlpha(remaining)
+		elseif remaining <= .5 then
+			row:SetAlpha(remaining * 2)
 		else
 			local since = timer - row.started
-			if since <= 1 then
-				row:SetAlpha(since)
+			if since <= .5 then
+				row:SetAlpha(since * 2)
 			end
 		end
 	end
@@ -151,6 +161,7 @@ function addon:AddRow(icon, fade_time, ir, ig, ib, rr, rg, rb)
 	row:SetBorderColor(rr or ir, rg or ig, rb or ib)
 	row.expires = timer + fade_time
 	row.started = timer
+	row.item = nil
 
 	-- Anchor
 	anchor:AnchorChild(row)
@@ -177,11 +188,20 @@ end
 -------------------------------------------------------------------------------
 -- Frame methods
 do
+	local function ShowTooltip(self)
+		if self.item then
+			GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT', 28, 0)
+			GameTooltip:SetHyperlink(self.item)
+			CursorUpdate(self)
+		end
+	end
+
 	local function OnEnter(self)
 		mouse_focus = self
 		if self._highlights then
 			self.icon_frame:ShowHighlight()
 		end
+		self:ShowTooltip()
 	end
 
 	local function OnLeave(self)
@@ -191,6 +211,12 @@ do
 		end
 		GameTooltip:Hide()
 		ResetCursor()
+	end
+
+	local function OnClick(self, button)
+		if IsModifiedClick() and self.item then
+			HandleModifiedItemClick(self.item)
+		end
 	end
 
 	local function FitToText(self)
@@ -220,6 +246,8 @@ do
 		addon:Highlight(frame, "row_highlight")
 		frame:SetHighlightColor(.8, .8, .8)
 
+		frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+		frame:SetScript("OnClick", OnClick)
 		frame:SetScript("OnEnter", OnEnter)
 		frame:SetScript("OnLeave", OnLeave)
 
@@ -253,26 +281,10 @@ do
 		frame.text = text
 		frame.FitToText = FitToText
 		frame.SetTexts = SetTexts
+		frame.ShowTooltip = ShowTooltip
 
 		return frame
 	end
-end
-
-function XLootMonitor:Setup()
-	self:SetWidth(250)
-	self:UpdateAnchor()
-end
---[=[ 
-function XLootMonitor:UpdateAnchor()
-	self:SetAlpha(opt.show_anchor and 1 or 0)
-	if self.stack[1] then
-		if opt.growth_direction == "up" then
-			self.stack[1]:SetPoint("BOTTOMLEFT", )
-	end
-end--]=] 
-
-function XLootMonitor:Restack()
-	
 end
 
 function addon.SlashHandler(msg)
