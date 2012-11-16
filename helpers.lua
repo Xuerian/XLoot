@@ -1,5 +1,5 @@
 local XLoot = select(2, ...)
-local buffer = {}
+local buffer, print = {}
 
 local table_insert, table_concat, string_format = table.insert, table.concat, string.format
 
@@ -27,6 +27,7 @@ function XLoot.CopperToString(copper)
 	return table_concat(buffer, ", ")
 end
 
+--@do-not-package@
 -- Debug
 local AC = LibStub('AceConsole-2.0', true)
 if AC then print = function(...) AC:PrintLiteral(...) end end
