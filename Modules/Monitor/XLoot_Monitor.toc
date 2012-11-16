@@ -6,6 +6,5 @@
 ## X-Category: Inventory
 
 ## Dependencies: XLoot
-## LoadOnDemand: 1
 
 load.xml

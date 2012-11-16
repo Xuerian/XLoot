@@ -6,6 +6,7 @@ XLootMonitor.addon = addon
 local print, opt, eframe, anchor = print
 local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
 local CopperToString = XLoot.CopperToString
+local table_insert, table_remove = table.insert, table.remove
 local me = UnitName("player")
 
 -------------------------------------------------------------------------------
@@ -26,8 +27,8 @@ local defaults = {
 		threshold_other = 4,
 		show_coin = true,
 
-		fade_own = 5,
-		fade_other = 3,
+		fade_own = 10,
+		fade_other = 5,
 	}
 }
 
@@ -74,27 +75,17 @@ function addon:OnEnable()
 	self:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
 end
 
-local rows, stack = {}, {}
-
-function addon:PushRow(icon, expires, ir, ig, ib, rr, rg, rb)
-	local row = anchor:Push()
-	row.icon:SetTexture(icon)
-	row.icon_frame:SetBorderColor(ir, ig, ib)
-	row:SetBorderColor(rr or ir, rg or ig, rb or ib)
-	return row
-end
-
 function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
 	if event == 'item' then
 		local link, num = arg1, arg2
 		local name, _, quality, _, _, _, _, _, _, icon = GetItemInfo(link)
-		if (player == me and opt.threshold_own or threshold_other) > quality then
+		if (player == me and opt.threshold_own or opt.threshold_other) > quality then
 			return -- Doesn't meet threshold requirements
 		end
-		print(event, pattern, player, name, num)
+		--print(event, pattern, player, name, num)
 		local r, g, b = GetItemQualityColor(quality)
 		local nr, ng, nb
-		if player == me then
+		if player ~= me then
 			player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)))
 		else
 			player = nil
@@ -102,10 +93,87 @@ function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
 		addon:AddRow(icon, (player == me and opt.fade_own or opt.fade_other), r, g, b):SetTexts(player, link, nr, ng, nb)
 	elseif event == 'coin' and opt.show_coin then
 		local copper, coin_string = arg1, arg2
-		addon:PushRow(GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
+		addon:AddRow(GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
 	end
 end
 
+local pool, stack, active = {}, {}, false
+
+local timer = 0
+function addon.EframeUpdate(self, elapsed)
+	timer = timer + elapsed
+	for i,row in ipairs(stack) do
+		local remaining = row.expires - timer
+		if remaining < 0 then
+			row:SetAlpha(0)
+			addon:RemoveRow(row)
+		elseif remaining <= 1 then
+			row:SetAlpha(remaining)
+		else
+			local since = timer - row.started
+			if since <= 1 then
+				row:SetAlpha(since)
+			end
+		end
+	end
+end
+
+function addon:RemoveRow(row)
+	row:Hide()
+	for i,v in ipairs(stack) do
+		if v == row then
+			table_remove(stack, i)
+			table_insert(pool, row)
+			if stack[i] then
+				anchor:AnchorChild(stack[i], stack[i-1])
+			end
+			break
+		end
+	end
+
+	-- Disable OnUpdate
+	if #stack == 0 then
+		active, timer = false, 0
+		eframe:SetScript("OnUpdate", nil)
+	end
+end
+
+function addon:AddRow(icon, fade_time, ir, ig, ib, rr, rg, rb)
+	-- Acquire
+	local row = table_remove(pool)
+	if not row then
+		row = self.CreateRow()
+	end
+
+	-- Set up row
+	row.icon:SetTexture(icon)
+	row.icon_frame:SetBorderColor(ir, ig, ib)
+	row:SetBorderColor(rr or ir, rg or ig, rb or ib)
+	row.expires = timer + fade_time
+	row.started = timer
+
+	-- Anchor
+	anchor:AnchorChild(row)
+	table_insert(stack, 1, row)
+	if stack[2] then
+		anchor:AnchorChild(stack[2], row)
+	end
+	row:Show()
+
+	-- Enable OnUpdate
+	if not active then
+		active = true
+		eframe:SetScript("OnUpdate", self.EframeUpdate)
+	end
+	return row
+end
+
+function addon:Restack()
+	for i,v in ipairs(stack) do
+		v:ClearAllPoints()
+		anchor:AnchorChild(v, i == 1 and nil or stack[i-1])
+	end
+end
 -------------------------------------------------------------------------------
 -- Frame methods
 do
@@ -252,9 +320,9 @@ local function test_coin(event, is_me)
 end
 
 local tests = {
-	-- { test_item, "LOOT_ITEM" },
+	{ test_item, "LOOT_ITEM" },
 	{ test_item, "LOOT_ITEM_SELF", true },
-	-- { test_item, "LOOT_ITEM_MULTIPLE" },
+	{ test_item, "LOOT_ITEM_MULTIPLE" },
 	{ test_item, "LOOT_ITEM_SELF_MULTIPLE", true },
 	{ test_item, "LOOT_ITEM_PUSHED_SELF", true },
 	{ test_item, "LOOT_ITEM_PUSHED_SELF_MULTIPLE", true },
