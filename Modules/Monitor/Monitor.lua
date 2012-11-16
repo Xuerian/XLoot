@@ -24,6 +24,7 @@ local defaults = {
 
 		threshold_own = 3,
 		threshold_other = 4,
+		show_coin = true,
 
 		fade_own = 5,
 		fade_other = 3,
@@ -98,8 +99,8 @@ function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
 		else
 			player = nil
 		end
-		addon:PushRow(icon, (player == me and opt.fade_own or opt.fade_other), r, g, b):SetTexts(player, link, nr, ng, nb)
-	elseif event == 'coin' then
+		addon:AddRow(icon, (player == me and opt.fade_own or opt.fade_other), r, g, b):SetTexts(player, link, nr, ng, nb)
+	elseif event == 'coin' and opt.show_coin then
 		local copper, coin_string = arg1, arg2
 		addon:PushRow(GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
 	end

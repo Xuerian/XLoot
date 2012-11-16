@@ -443,7 +443,8 @@ function addon:OnEnable() -- Construct addon option tables here
 			}, defaults = { key = "anchor" } },
 			{ "thresholds", "group", {
 				{ "threshold_own", "select", item_qualities },
-				{ "threshold_other", "select", item_qualities }
+				{ "threshold_other", "select", item_qualities },
+				{ "show_coin", "toggle" }
 			}},
 			{ "fading", "group", {
 				{ "fade_own", "range", 1, 30, 1 },
