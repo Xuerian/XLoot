@@ -654,7 +654,7 @@ do
 
 	local function UpdateHeight(self)
 		if self.row_height then
-			self:SetHeight((self.link:IsShown() or self.close:IsShown()) and 26 or 20 + #self.slots * self.row_height)
+			self:SetHeight(((self.link:IsShown() or self.close:IsShown()) and 26 or 20) + #self.slots * self.row_height)
 		end
 	end
 
