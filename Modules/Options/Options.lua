@@ -414,14 +414,14 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "expire_won", "range", 5, 30, 1 },
 				{ "expire_lost", "range", 5, 30, 1 },
 			}},
-			{ "bonus_roll", "group", {
-				{ "bonus_skin", "toggle" },
-			}},
 			{ "roll_tracking", "group", {
 				{ "track_all", "toggle", width = "double" },
 				{ "track_player_roll", "toggle", requires_inverse = "track_all" },
 				{ "track_by_threshold", "toggle", requires_inverse = "track_all", width = "double" },
 				{ "track_threshold", "select", item_qualities, requires = "track_by_threshold", name = L.minimum_quality },
+			}},
+			{ "bonus_roll", "group", {
+				{ "bonus_skin", "toggle" },
 			}},
 			{ "alerts", "group", {
 				{ "alert_direction", "select", directions, key = "alert_anchor", subkey = "direction", name = L.growth_direction },
