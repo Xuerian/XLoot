@@ -8,7 +8,7 @@
 ## X-Name: XLoot
 
 ## SavedVariables: XLootADB
-## OptionalDeps: Ace3, LibStub, ButtonFacade, Masque
+## OptionalDeps: Ace3, LibStub, ButtonFacade, Masque, Pawn
 
 #@no-lib-strip@
 Libs\Embeds.xml

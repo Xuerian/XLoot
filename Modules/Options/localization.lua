@@ -65,6 +65,7 @@ local locales = {
 			bonus_roll = "Bonus roll",
 			roll_tracking = "Loot roll tracking",
 			alerts = "Loot alerts",
+			extra_info = "Extra information",
 
 			-- Header labels
 			expiration = "Expiration (in seconds)",
@@ -88,7 +89,11 @@ local locales = {
 			track_by_threshold = "Track items by minimum quality",
 			expire_won = "Won rolls",
 			expire_lost = "Lost/Passed rolls",
-			preview_show = "Show Preview"
+			preview_show = "Show Preview",
+			equip_prefix = "Show equippable prefix",
+			equip_prefix_desc = "Show a configurable prefix before item names indicating if a item can be equipped or is a upgrade. (Upgrade requires the Pawn addon)",
+			prefix_equippable = "Equippable prefix",
+			prefix_upgrade = "Upgrade prefix"
 		},
 		Monitor = {
 			panel_title = "Loot Monitor",

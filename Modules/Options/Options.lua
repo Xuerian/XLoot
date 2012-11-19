@@ -420,6 +420,11 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "expire_won", "range", 5, 30, 1 },
 				{ "expire_lost", "range", 5, 30, 1 },
 			}},
+			{ "extra_info", "group", {
+				{ "equip_prefix", "toggle" },
+				{ "prefix_equippable", "input" },
+				{ "prefix_upgrade", "input" }
+			}},
 			{ "roll_tracking", "group", {
 				{ "track_all", "toggle", width = "double" },
 				{ "track_player_roll", "toggle", requires_inverse = "track_all" },

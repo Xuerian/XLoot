@@ -41,6 +41,31 @@ function XLoot.GetItemBindType(link)
 	end
 end
 
+function XLoot.CanEquipItem(link)
+	if not IsEquippableItem(link) then
+		return false
+	end
+	tooltip:ClearLines()
+	tooltip:SetHyperlink(link)
+	for i=2, 5 do
+		local line = _G["XLootTooltipTextRight"..i]
+		if line and line:GetText() then
+			r, g, b = line:GetTextColor()
+			lr, lg, lb = _G["XLootTooltipTextLeft"..i]:GetTextColor()
+			return (r > .8 and b > .8 and g > .8 and lr > .8 and lg > .8 and lb > .8) and true or false
+		end
+	end	
+end
+function XLoot.IsItemUpgrade(link)
+	if not XLoot.CanEquipItem(link) then
+		return false
+	end
+	local id = string.match(link, "item:(%d+)")
+	if PawnIsItemIDAnUpgrade and id and PawnIsItemIDAnUpgrade(id) then
+		return true
+	end
+	return false
+end
 --@do-not-package@
 -- Debug
 local AC = LibStub('AceConsole-2.0', true)

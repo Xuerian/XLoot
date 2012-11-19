@@ -10,6 +10,7 @@ local GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot,
 	= GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string.format
 local HistoryGetItem, HistoryGetPlayerInfo, HistoryGetNumItems
 	= C_LootHistory.GetItem, C_LootHistory.GetPlayerInfo, C_LootHistory.GetNumItems
+local CanEquipItem, IsItemUpgrade = XLoot.CanEquipItem, XLoot.IsItemUpgrade
 
 
 -------------------------------------------------------------------------------
@@ -23,6 +24,10 @@ local defaults = {
 		win_icon = false,
 		show_decided = true,
 		show_undecided = false,
+
+		equip_prefix = true,
+		prefix_equippable = "*",
+		prefix_upgrade = "+",
 
 		alert_skin = true,
 		alert_alpha = 1,
@@ -223,6 +228,12 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 		frame.text_time:Hide()
 	end
 
+	if opt.equip_prefix then
+		local canequip, isupgrade = CanEquipItem(link), IsItemUpgrade(link)
+		if canequip or isupgrade then
+			name = string_format("|cFF%s%s|r%s", isupgrade and "FF4422" or "BBBBBB", is_upgrade and opt.prefix_upgrade or opt.prefix_equippable, name)
+		end
+	end
 	frame.need:Toggle(need)
 	frame.greed:Toggle(greed)
 	frame.disenchant:Toggle(de)
