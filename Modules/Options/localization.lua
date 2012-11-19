@@ -18,6 +18,8 @@ local locales = {
 			link_button = "Link all button",
 			autolooting = "Auto-looting",
 			colors = "Colors",
+			fonts = "Fonts",
+			font_sizes = "Sizes",
 
 			-- Option labels
 			autoloot_coin = "Auto loot coin",
@@ -43,8 +45,10 @@ local locales = {
 			quality_color_slot = "Color loot border by quality",
 			loot_texts_info = "Show detailed information",
 			loot_texts_bind = "Show loot bind type",
-			font_size_loot = "Loot font size",
-			font_size_info = "Information font size",
+			font = "Font",
+			font_size_loot = "Loot",
+			font_size_info = "Loot information",
+			font_size_quantity = "Quantity",
 			frame_snap = "Snap frame to mouse",
 			frame_snap_offset_x = "Horizontal snap offset",
 			frame_snap_offset_y = "Vertical snap offset",

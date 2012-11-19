@@ -363,8 +363,14 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_highlight", "toggle", width = "double", },
 				{ "loot_collapse", "toggle" },
 				{ "loot_alpha", "alpha" },
+			}},
+			{ "fonts", "group", {
+				{ "font", "input" },
+				{ "font_sizes", "header" },
 				{ "font_size_loot", "range", 4, 26, 1 },
-				{ "font_size_info", "range", 4, 26, 1 }
+				{ "font_size_info", "range", 4, 26, 1 },
+				{ "font_size_quantity", "range", 4, 26, 1 },
+				{ "font_size_bottombuttons", "range", 4, 26, 1 },
 			}},
 			{ "link_button", "group", {
 				{ "linkall_show", "select", when_group },

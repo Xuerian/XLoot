@@ -42,8 +42,11 @@ local defaults = {
 		loot_texts_info = true,
 		loot_texts_bind  = true,
 
+		font = STANDARD_TEXT_FONT,
 		font_size_loot = 12,
 		font_size_info = 10,
+		font_size_quantity = 10,
+		font_size_bottombuttons = 10,
 
 		loot_highlight = true,
 		
@@ -250,7 +253,7 @@ local BuildRow
 do
 	-- Text helpers
 	local function smalltext(text, size, ext)
-		text:SetFont(STANDARD_TEXT_FONT, size or 10, ext or '')
+		text:SetFont(opt.font, size or 10, ext or '')
 		text:SetDrawLayer'OVERLAY'
 		text:SetHeight(10)
 		text:SetJustifyH'LEFT'
@@ -361,8 +364,8 @@ do
 		self:SetAlpha(opt.loot_alpha)
 		
 		-- Text
-		self.text_name:SetFont(STANDARD_TEXT_FONT, opt.font_size_loot)
-		self.text_info:SetFont(STANDARD_TEXT_FONT, opt.font_size_info)
+		self.text_name:SetFont(opt.font, opt.font_size_loot)
+		self.text_info:SetFont(opt.font, opt.font_size_info)
 		
 		-- Calculated row height
 		owner.row_height = self:GetHeight() + owner.skin.row_spacing
@@ -510,7 +513,7 @@ do
 		smalltext(info, opt.font_size_info)
 		smalltext(bind, 8, 'outline')
 		smalltext(locked, 9, 'outline')
-		smalltext(quantity, 10, 'outline')
+		smalltext(quantity, opt.font_size_quantity, 'outline')
 		textpoints(name, item, row, 2)
 		textpoints(info, item, row, 8)
 		bind:SetPoint('BOTTOMLEFT', 2, 2)
@@ -638,7 +641,8 @@ do
 	-- Bottom buttons
 	local function BottomButton(frame, name, text, justify)
 		local b = CreateFrame('Button', name, frame)
-		b.text = b:CreateFontString(name..'Text', 'DIALOG', 'GameFontNormalSmall')
+		b.text = b:CreateFontString(name..'Text', 'DIALOG')--, 'GameFontNormalSmall')
+		b.text:SetFont(opt.font, opt.font_size_bottombuttons)
 		b.text:SetText('|c22AAAAAA'..text)
 		b.text:SetJustifyH(justify)
 		b.text:SetAllPoints(b)
