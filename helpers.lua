@@ -1,5 +1,5 @@
 local XLoot = select(2, ...)
-local buffer, print = {}
+local buffer, print = {}, print
 
 local table_insert, table_concat, string_format = table.insert, table.concat, string.format
 
@@ -25,6 +25,20 @@ function XLoot.CopperToString(copper)
 	end
 
 	return table_concat(buffer, ", ")
+end
+
+local tooltip = CreateFrame('GameTooltip', 'XLootTooltip', UIParent, 'GameTooltipTemplate')
+tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+
+function XLoot.GetItemBindType(link)
+	local value = (GetCVar('colorblindMode') == '1' and XLootTooltipTextLeft3 or XLootTooltipTextLeft2):GetText()
+	if value == ITEM_BIND_ON_PICKUP then
+		return 'pickup'
+	elseif value == ITEM_BIND_ON_EQUIP then
+		return 'equip'
+	elseif value == ITEM_BIND_ON_USE then
+		return 'use'
+	end
 end
 
 --@do-not-package@

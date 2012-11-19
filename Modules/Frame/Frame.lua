@@ -27,6 +27,7 @@ local XLootFrame = CreateFrame("Frame", "XLootFrame", UIParent)
 XLootFrame.addon = addon
 -- Grab locals
 local print, mouse_focus, opt = print
+local GetItemBindType = XLoot.GetItemBindType
 
 -------------------------------------------------------------------------------
 -- Settings
@@ -385,9 +386,12 @@ do
 	end
 
 	-- Bind texts
-	local bop = ('|cffff4422%s|r '):format(L.bind_on_pickup_short)
-	local boe = ('|cff44ff44%s|r '):format(L.bind_on_equip_short)
-	local bou = ('|cff2244ff%s|r '):format(L.bind_on_use_short)
+	local binds = {
+		pickup = ('|cffff4422%s|r '):format(L.bind_on_pickup_short),
+		equip = ('|cff44ff44%s|r '):format(L.bind_on_equip_short),
+		use = ('|cff2244ff%s|r '):format(L.bind_on_use_short),
+		account = 'BoA'
+	}
 
 	-- Update slot with loot
 	local function Update(self, is_item, icon, name, link, quantity, quality, locked, isQuestItem, questId, isActive)
@@ -412,23 +416,7 @@ do
 			end
 			
 			if opt.loot_texts_bind then
-				local bind
-				if not XLootTooltip then CreateFrame('GameTooltip', 'XLootTooltip', UIParent, 'GameTooltipTemplate') end
-				local tt = XLootTooltip
-				tt:SetOwner(UIParent, 'ANCHOR_NONE')
-				tt:SetHyperlink(link)
-				local t = (GetCVar('colorblindMode') == '1' and XLootTooltipTextLeft3 or XLootTooltipTextLeft2):GetText()
-				if XLootTooltip:NumLines() > 1 and t then
-					tt:Hide()
-					if t == ITEM_BIND_ON_PICKUP then
-						text_bind = bop
-					elseif t == ITEM_BIND_ON_EQUIP then
-						text_bind = boe
-					elseif t == ITEM_BIND_ON_USE then
-						text_bind = bou
-					end
-				end
-				tt:Hide()
+				text_bind = binds[GetItemBindType(link)] or ''
 			end
 			
 		-- Currency
