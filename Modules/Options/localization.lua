@@ -87,7 +87,12 @@ local locales = {
 			preview_show = "Show Preview"
 		},
 		Monitor = {
-			panel_title = "Loot Monitor"
+			panel_title = "Loot Monitor",
+			-- Group labels
+			anchor = "Anchor",
+			thresholds = "Quality thresholds",
+			fading = "Row fade times (in seconds)",
+			-- Option labels
 		},
 		Master = {
 			panel_title = "Loot Master",
@@ -109,6 +114,9 @@ local locales = {
 		scale = "Scale",
 		width = "Width",
 		alpha = "Alpha",
+		visible = "Visible",
+		items_others = "Others' items",
+		items_own = "Own items",
 		up = "Up",
 		down = "Down",
 		minimum_quality = "Minimum quality",
