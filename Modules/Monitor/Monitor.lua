@@ -23,8 +23,8 @@ local defaults = {
 		},
 		name_width = 50,
 
-		threshold_own = 3,
-		threshold_other = 4,
+		threshold_own = 2,
+		threshold_other = 3,
 		show_coin = true,
 
 		fade_own = 10,
