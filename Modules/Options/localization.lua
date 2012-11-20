@@ -91,7 +91,7 @@ local locales = {
 			expire_lost = "Lost/Passed rolls",
 			preview_show = "Show Preview",
 			equip_prefix = "Show equippable prefix",
-			equip_prefix_desc = "Show a configurable prefix before item names indicating if a item can be equipped or is a upgrade. (Upgrade requires the Pawn addon)",
+			equip_prefix_desc = "Prefixes item names to indicate if a item can be equipped or is a upgrade. (Upgrade prefix requires the Pawn addon)",
 			prefix_equippable = "Equippable prefix",
 			prefix_upgrade = "Upgrade prefix"
 		},
