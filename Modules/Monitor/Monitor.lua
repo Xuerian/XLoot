@@ -108,6 +108,7 @@ function addon:MODIFIER_STATE_CHANGED(self, modifier, state)
 end
 
 local pool, stack, active = {}, {}, false
+stack[0] = anchor
 
 local timer = 0
 function addon.EframeUpdate(self, elapsed)
