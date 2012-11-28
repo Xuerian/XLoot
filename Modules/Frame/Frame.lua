@@ -929,9 +929,9 @@ local function clear(slot)
 end
 
 function addon:LOOT_CLOSED()
-	if type(XLootFrame.slots) == 'table' then
-		for i, slot in pairs(XLootFrame.slots) do
-			clear(slot)
+	if type(XLootFrame.rows) == 'table' then
+		for i, row in pairs(XLootFrame.rows) do
+			clear(row)
 		end
 		wipe(XLootFrame.slots)
 	end
