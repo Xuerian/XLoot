@@ -1,13 +1,50 @@
 ﻿--[=[ This addon provides options for all modules.
 Options are preferrably defined as "BetterOptions" tables, which functionally resemble AceOptionsTables but are much more concise.
 
-Start by defining your module options here in addon:OnEnable below other module options with the call addon:RegisterModuleBetterOptions("ModuleName", table), inside a if XLoot:GetModule(ModuleName, true) block.
+The point of this abstraction layer is that I (Xuerian) wanted to use AceDB/AceConfig to present a more standard configuration dialog to users. I am, however, not satisfied with the conventions and limitations of it, so this is a attempt to provide both a more concise format (BetterOptions), and a more featureful intermediate options format (Finalize(...)) to support it. 
 
-The resulting BetterOptions -> AceOptionsTable is, just like passing a normal/partial AceOptionsTable, is "Finalized" (via Finalize(t)). This pass automatically inserts localizations based on key, handles .items -> .values, applies group {defaults = {k = v}} to group children, and implements requires*.
 
-Please note that inline and non-inline groups do not mix well for AceConfigDialog.
+Methods:
+Finalize(module_data, option_table)
+- Compiles a AceOptionTable with extra features to a validating AceOptionTable by migrating extra data/metadata into option_metadata[current_option_table] so AceConfig doesn't brit a shick.
+> module_data expects a table where t.name == "ModuleName" and t.addon = AddonTable
+> option_table expects a "BetterOptions" option table
 
-Option localization entries should be added under Options/ModuleName namespace -]=] 
+BetterOptions:Compile(better_option_table)
+- Compiles BetterOptions tables to intermediate option tables which must be provided
+to either a supporting option system or Finalize() for use as a validating AceOptionsTable
+> better_option_table expects a "BetterOptions" option table
+Start by defining your module options here in addon:OnEnable below other module options with the call XLootOptions:RegisterOptions("ModuleName", table), inside a if XLoot:GetModule(ModuleName, true) block.
+
+XLootOptions:RegisterOptions(module_data, better_option_table)
+- Registers a BetterOptions table with XLootOptions
+> module_data and better_option_table follow BetterOptions:Compile and Finalize()
+
+XLootOptions:RegisterAceOptionTable("ModuleName", ace_option_table)
+- Registers a "normal" ace option table with no additional steps.
+- Must provide get and set methods at least in the root group(s), as default get and set rely on Finalize()
+
+
+Features/Finalize:
+- Fill missing localization from XLootOptions.L[module_data.name][key|key_desc]
+- Generate .values from {{ "key", "value" }} .item tables and set them appropriately
+- Get/Set from db key/subkey instead of key via .key[, .subkey]
+- Propagate .defaults to child nodes
+- Default type "toggle"
+- "alpha" and "scale" types with automatic localization
+- .requires = key and .requires_inverse = key 
+
+Features/BetterOptions:
+- Nested tables with implied ordering and table values:
+-- Basic structure: { "key", "type"[, arg1[, ...]] [, key = value[, ...]] }
+-- Examples: 
+-- { "key", "group", inline } -> key = { type = "group", inline = true }
+-- { "key", "execute", func } -> key = { type = "execute", func = func }
+-- { "key", "select", items }
+-- { "key", "color", hasAlpha }
+-- { "key", "range", min, max, step, softMin, softMax, bigStep }
+
+Please note that inline and non-inline groups do not mix well for AceConfigDialog. -]=] 
 
 -- Create module
 local addon, L = XLoot:NewModule("Options")
@@ -114,14 +151,6 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	local BetterOptions = {}
 	local table_remove = table.remove
-	-- { "key", "type", [arg1[, ...]] [, key = value[, ...]] }
-	-- Examples:
-	-- { "key", "group", inline }
-	-- { "key", "execute", func }
-	-- { "key", "select", items }
-	-- { "key", "color", hasAlpha }
-	-- { "key", "range", min, max, step, softMin, softMax, bigStep }
-	
 	function BetterOptions:CompileToAceOptions(t)
 		self:Iterate(t)
 		return t
