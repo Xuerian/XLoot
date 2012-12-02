@@ -31,7 +31,7 @@ local tooltip = CreateFrame('GameTooltip', 'XLootTooltip', UIParent, 'GameToolti
 tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 
 function XLoot.GetItemBindType(link)
-	local value = (GetCVar('colorblindMode') == '1' and XLootTooltipTextLeft3 or XLootTooltipTextLeft2):GetText()
+	local value = (GetCVar('colorblindMode') == '1' and XLootTooltipTextLeft4 or XLootTooltipTextLeft3):GetText()
 	if value == ITEM_BIND_ON_PICKUP then
 		return 'pickup'
 	elseif value == ITEM_BIND_ON_EQUIP then
