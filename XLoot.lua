@@ -102,8 +102,7 @@ end
 
 function XLoot:OnEnable()
 	-- Check for old addons
-	local old = { "XLoot1.0", "XLootGroup", "XLootMaster" }
-	for _,name in ipairs(old) do
+	for _,name in ipairs({ "XLoot1.0", "XLootGroup", "XLootMaster", "XLootMonitor" }) do
 		if IsAddOnLoaded(name) then
 			DisableAddOn("XLootGroup")
 			wprint(("|c2244dd22XLoot|r now includes |c2244dd22%s|r - the old version will be disabled on next load, and no longer needs to be installed."):format(name))
