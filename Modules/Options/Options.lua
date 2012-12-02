@@ -79,8 +79,8 @@ function addon:OnEnable() -- Construct addon option tables here
 	-- Also return meta table for option
 	function path(info)
 		local key = info[#info]
-		local meta = option_metadata[info.appName][key]
-		local db = module_index[info.appName].db.profile
+		local meta = option_metadata[info.option]
+		local db = meta.module_data.addon.db.profile
 		return meta.key and db[meta.key] or db, meta.subkey or key, meta
 	end
 
@@ -151,12 +151,8 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	local BetterOptions = {}
 	local table_remove = table.remove
-	function BetterOptions:CompileToAceOptions(t)
-		self:Iterate(t)
-		return t
-	end
 
-	function BetterOptions:Iterate(set)
+	function BetterOptions:Compile(set)
 		for i,v in ipairs(set) do
 			v.order = i
 			local t, key = self:any(v)
@@ -186,9 +182,13 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	function BetterOptions:group(t)
 		t.args = t.args or t[1]
-		t.inline = t.inline ~= nil and t.inline or (t[2] ~= nil and t[2] or true)
+		if t.inline == nil then
+			t.inline = (t[2] ~= nil and t[2] or true)
+		end
 
-		self:Iterate(t.args)
+		if t.args then
+			self:Compile(t.args)
+		end
 	end
 
 	function BetterOptions:select(t)
@@ -235,29 +235,28 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	-- Flesh out AceOptionsTables for a given module
 	-- Add features not directly supported
-	function Finalize(module_name, key, opts)
-		local meta_name = "XLoot"..module_name
+	function Finalize(module_data, opts, key)
+		local meta = option_metadata[opts]
+		if not meta then
+			meta = { module_data = module_data }
+			option_metadata[opts] = meta
+		end
 		-- First call
 		if not key then
-			if not option_metadata[meta_name] then
-				option_metadata[meta_name] = {}
-			end
 			for k,v in pairs(opts) do
-				Finalize(module_name, k, v)
+				Finalize(module_data, v, k)
 			end
 		-- Recursion
 		else
-			local meta = {}
-
 			-- Automatically localized selects
 			if opts.type == "alpha" or opts.type == "scale" then
-				opts.name = opts.name or L[module_name][key] or L[opts.type]
+				opts.name = opts.name or L[module_data.name][key] or L[opts.type]
 				opts.type = "range" 
 			end
 
 			-- Fill in localized name/description
-			opts.name = opts.name or L[module_name][key] or key
-			opts.desc = opts.desc or L[module_name][key.."_desc"]
+			opts.name = opts.name or L[module_data.name][key] or key
+			opts.desc = opts.desc or L[module_data.name][key.."_desc"]
 
 			meta.key, meta.subkey = opts.key, opts.subkey
 			opts.key, opts.subkey = nil, nil
@@ -278,8 +277,6 @@ function addon:OnEnable() -- Construct addon option tables here
 				opts.items = nil
 			end
 
-			option_metadata[meta_name][key] = meta
-
 			-- Traverse subgroup
 			if opts.args then
 				-- Apply subgroup defaults
@@ -295,7 +292,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				end
 				-- Finalize subgroups
 				for k,v in pairs(opts.args) do
-					Finalize(module_name, k, v)
+					Finalize(module_data, v, k)
 				end
 
 			-- Default type "toggle"
@@ -303,6 +300,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				opts.type = "toggle"
 			end
 		end
+		return opts
 	end
 
 	-------------------------------------------------------------------------------
@@ -312,25 +310,54 @@ function addon:OnEnable() -- Construct addon option tables here
 	self.module_list = {} -- Maintains list of modules which need options generated
 
 	-- Compose a module's option table
-	function addon:RegisterModuleOptions(module_name, args)
-		-- Initialize metadata
-		option_metadata[module_name] = {}
-		-- Compile nonstandard options
-		Finalize(module_name, nil, args)
-		self.configs[module_name] = {
-			get = get,
-			set = set,
-			name = L[module_name].panel_title,
-			desc = L[module_name].panel_desc,
-			type = "group",
-			args = args
-		}
-		module_index["XLoot"..module_name] = XLoot:GetModule(module_name)
-		table.insert(self.module_list, module_name)
+	self.config = {
+		type = "group",
+		name = "XLoot",
+		get = get,
+		set = set,
+		childGroups = "tab"
+	}
+
+	local function sizeof(t)
+		local i = 0
+		for k,v in pairs(t) do
+			i=i+1
+		end
+		return i
 	end
 
-	function addon:RegisterModuleBetterOptions(module_name, t)
-		self:RegisterModuleOptions(module_name, BetterOptions:CompileToAceOptions(t))
+	local modules, skins = {}, {}
+	local options = Finalize({ name = "Core", addon =  XLoot }, BetterOptions:Compile({
+		{ "skin", "select", values = function()
+			wipe(skins)
+			for k,v in pairs(XLoot.Skin.skins) do
+				skins[k] = v.name
+			end
+			return skins
+		end},
+		{ "skin_anchors", "toggle" },
+		{ "module_header", "header" },
+		-- { "modules", "group", modules }
+	}))
+	self.config.args = options
+
+	function addon:RegisterAceOptionTable(module_name, option_table)
+		-- Insert into options
+		options[module_name] = {
+			type = "group",
+			name = L[module_name].panel_title,
+			desc = L[module_name].panel_desc,
+			args = option_table,
+			order = sizeof(options) + 1,
+			inline = false
+		}
+	end
+
+	function addon:RegisterOptions(module_data, option_table)
+		-- Have to finalize here because Finalize needs to know what module we're in
+		-- There's probably a better way to do this.
+		Finalize(module_data, BetterOptions:Compile(option_table))
+		self:RegisterAceOptionTable(module_data.name, option_table)
 	end
 
 	-------------------------------------------------------------------------------
@@ -352,19 +379,6 @@ function addon:OnEnable() -- Construct addon option tables here
 	-------------------------------------------------------------------------------
 	-- Module configs
 
-	-- XLoot Core
-	local skins = {}
-	addon:RegisterModuleBetterOptions("Core", {
-		{ "skin", "select", values = function()
-			wipe(skins)
-			for k,v in pairs(XLoot.Skin.skins) do
-				skins[k] = v.name
-			end
-			return skins
-		end},
-		{ "skin_anchors", "toggle" }
-	})
-
 	-- XLoot Frame
 	if XLoot:GetModule("Frame", true) then
 		local when_group = {
@@ -374,7 +388,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "grouped", L.when_grouped }
 		}
 
- 		addon:RegisterModuleBetterOptions("Frame", {
+ 		addon:RegisterOptions({ name = "Frame", addon =  XLootFrame.addon }, {
 			{ "frame_options", "group", {
 				{ "frame_width_automatic", "toggle", width = "double" },
 				{ "old_close_button", "toggle" },
@@ -433,7 +447,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	-- XLoot Group
 	if XLoot:GetModule("Group", true) then
-		addon:RegisterModuleBetterOptions("Group", {
+		addon:RegisterOptions({ name = "Group", addon =  XLootGroup }, {
 			{ "anchors", "group", {
 				{ "anchor_toggle", "execute", function() XLootGroup:ToggleAnchors() end },
 				{ "reload_ui", "execute", ReloadUI },
@@ -475,7 +489,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	-- XLoot Monitor
 	if XLoot:GetModule("Monitor", true) then
-		addon:RegisterModuleBetterOptions("Monitor", {
+		addon:RegisterOptions({ name = "Monitor", addon =  XLootMonitor.addon }, {
 			{ "anchor", "group", {
 				{ "direction", "select", directions, name = L.growth_direction },
 				{ "visible", "toggle", name = L.visible },
@@ -515,7 +529,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ 'OFFICER', CHAT_MSG_OFFICER },
 				{ 'NONE', NONE },
 		}
-		addon:RegisterModuleBetterOptions("Master", {
+		addon:RegisterOptions({ name = "Master", addon =  XLootMaster }, {
 			{ "specialrecipients", "group", {
 				{ "menu_disenchant", "toggle" },
 				{ "menu_bank", "toggle" },
@@ -557,7 +571,6 @@ end
 
 local function PanelDefault(self)
 	StaticPopup_Show("XLOOT_RESETPROFILE")
-	trigger(self.owner, "ProfileChanged")
 	popup_panel = self
 end
 
@@ -575,30 +588,36 @@ function addon:ResetProfile()
 end
 
 local init
+local AceConfigDialog, AceConfigRegistry = LibStub("AceConfigDialog-3.0"), LibStub("AceConfigRegistry-3.0")
 function addon:OpenPanel(module)
 	-- One-time init
 	if not init then
 		init = true
-		-- Create module subpanels
-		for i,this_name in ipairs(self.module_list) do
-			local module, key = XLoot:GetModule(this_name), "XLoot"..this_name
-			LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(key, self.configs[this_name])
-			local panel = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(key, L[this_name].panel_title or "XLoot "..this_name, "XLoot")
-			-- Supply panel methods
-			panel.default = PanelDefault
-			panel.okay = PanelOkay
-			panel.cancel = PanelCancel
-			panel.owner = module
-			panel.key = key
-			module.option_panel = panel
+		-- Remove bootstrap
+		for i,frame in ipairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
+			if frame.name == "XLoot" then
+				table.remove(INTERFACEOPTIONS_ADDONCATEGORIES, i)
+				InterfaceAddOnsList_Update()
+			end
 		end
-		-- Create profile panel
-		LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("XLootProfile", LibStub("AceDBOptions-3.0"):GetOptionsTable(XLoot.db))
-		XLoot.profile_panel = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("XLootProfile", L.profile, "XLoot")
+
+		-- Generate new panel
+		AceConfigRegistry:RegisterOptionsTable("XLoot", self.config)
+		local panel = AceConfigDialog:AddToBlizOptions("XLoot")
+		XLoot.option_panel = panel
+		-- panel.default = PanelDefault
+		-- panel.okay = PanelOkay
+		-- panel.cancel = PanelCancel
+
+ 		-- Create profile panel
+		AceConfigRegistry:RegisterOptionsTable("XLootProfile", LibStub("AceDBOptions-3.0"):GetOptionsTable(XLoot.db))
+		XLoot.profile_panel = AceConfigDialog:AddToBlizOptions("XLootProfile", L.profile, "XLoot")
 		XLoot.profile_panel.default = PanelDefault
+		-- Force list to expand
+		InterfaceOptionsFrame_OpenToCategory(XLoot.profile_panel)
 	end
 	-- Open panel
-	InterfaceOptionsFrame_OpenToCategory(module.option_panel)
+	InterfaceOptionsFrame_OpenToCategory(XLoot.option_panel)
 end
 
 --@do-not-package@
