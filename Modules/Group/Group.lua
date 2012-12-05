@@ -537,6 +537,19 @@ function addon.SlashHandler(msg)
 	end
 end
 
+function addon:UpdateAnchors()
+	if opt.roll_anchor.visible then
+		anchor:Show()
+	else
+		anchor:Hide()
+	end
+	if opt.alert_anchor.visible then
+		alert_anchor:Show()
+	else
+		alert_anchor:Hide()
+	end
+end
+
 function addon.ToggleAnchors() 
 	if anchor:IsShown() then
 		anchor:Hide()

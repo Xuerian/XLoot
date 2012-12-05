@@ -28,7 +28,7 @@ XLootOptions:RegisterAceOptionTable("ModuleName", ace_option_table)
 Features/Finalize:
 - Fill missing localization from XLootOptions.L[module_data.name][key|key_desc]
 - Generate .values from {{ "key", "value" }} .item tables and set them appropriately
-- Get/Set from db key/subkey instead of key via .key[, .subkey]
+- Get/Set from db key/subkey instead of key via .subtable[, .subkey]
 - Propagate .defaults to child nodes
 - Default type "toggle"
 - "alpha" and "scale" types with automatic localization
@@ -63,6 +63,14 @@ local function trigger(target, method, ...)
 	end
 end
 
+local function sizeof(t)
+	local i = 0
+	for k,v in pairs(t) do
+		i=i+1
+	end
+	return i
+end
+
 -------------------------------------------------------------------------------
 -- Module init
 
@@ -70,7 +78,6 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	local option_metadata = {} -- Stores metadata for option entries outside of library-specific compiled option structure
 	addon.option_metadata = option_metadata -- Until resulting AceOptionsTable can have .values upated, this is the only way to store a new .items table
-	local module_index = {}
 
 	-------------------------------------------------------------------------------
 	-- General config methods
@@ -78,10 +85,9 @@ function addon:OnEnable() -- Construct addon option tables here
 	-- Find module options and requested key from AceConfigDialog info table
 	-- Also return meta table for option
 	function path(info)
-		local key = info[#info]
 		local meta = option_metadata[info.option]
 		local db = meta.module_data.addon.db.profile
-		return meta.key and db[meta.key] or db, meta.subkey or key, meta
+		return meta.subtable and db[meta.subtable] or db, meta.subkey or info[#info], meta
 	end
 
 	-- Generic option getter
@@ -115,6 +121,13 @@ function addon:OnEnable() -- Construct addon option tables here
 		end
 	end
 
+	-- Anchor toggles
+	local function set_anchor(...)
+		set(...)
+		local db, k, meta = path(...)
+		trigger(meta.module_data.addon, "UpdateAnchors")
+	end
+
 	-- Select value generator
 	local function values_from_items(info)
 		local db, k, meta = path(info)
@@ -124,18 +137,6 @@ function addon:OnEnable() -- Construct addon option tables here
 			values[i] = v[2]
 		end
 		return values
-	end
-
-	-- Sorted select getter
-	local function sorted_get(map, info)
-		local db, k = path(info)
-		return map[db[k]]
-	end
-
-	-- Sorted select setter
-	local function sorted_set(map, info, v)
-		local db, k = path(info)
-		db[k] = map[v]
 	end
 
 	-- Dependencies
@@ -199,7 +200,7 @@ function addon:OnEnable() -- Construct addon option tables here
 		t.min = 0.0
 		t.max = 1.0
 		t.step = 0.1
-		t.key = t.key or t[1]
+		t.subtable = t.subtable or t[1]
 		t.subkey = t.subkey or t[2]
 	end
 
@@ -207,7 +208,7 @@ function addon:OnEnable() -- Construct addon option tables here
 		t.min = 0.1
 		t.max = 2.0
 		t.step = 0.1
-		t.key = t.key or t[1]
+		t.subtable = t.subtable or t[1]
 		t.subkey = t.subkey or t[2]
 	end
 
@@ -258,8 +259,8 @@ function addon:OnEnable() -- Construct addon option tables here
 			opts.name = opts.name or L[module_data.name][key] or key
 			opts.desc = opts.desc or L[module_data.name][key.."_desc"]
 
-			meta.key, meta.subkey = opts.key, opts.subkey
-			opts.key, opts.subkey = nil, nil
+			meta.subtable, meta.subkey = opts.subtable, opts.subkey
+			opts.subtable, opts.subkey = nil, nil
 
 			-- Dependencies
 			if opts.requires or opts.requires_inverse then
@@ -306,10 +307,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	-------------------------------------------------------------------------------
 	-- Module config registration
 
-	self.configs = {} -- AceOptionTables for modules
-	self.module_list = {} -- Maintains list of modules which need options generated
-
-	-- Compose a module's option table
+	-- Global config header
 	self.config = {
 		type = "group",
 		name = "XLoot",
@@ -317,14 +315,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		set = set,
 		childGroups = "tab"
 	}
-
-	local function sizeof(t)
-		local i = 0
-		for k,v in pairs(t) do
-			i=i+1
-		end
-		return i
-	end
 
 	local modules, skins = {}, {}
 	local options = Finalize({ name = "Core", addon =  XLoot }, BetterOptions:Compile({
@@ -336,8 +326,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			return skins
 		end},
 		{ "skin_anchors", "toggle" },
-		{ "module_header", "header" },
-		-- { "modules", "group", modules }
+		-- { "module_header", "header" },
 	}))
 	self.config.args = options
 
@@ -407,14 +396,6 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_collapse", "toggle" },
 				{ "loot_alpha", "alpha" },
 			}},
-			{ "fonts", "group", {
-				{ "font", "input" },
-				{ "font_sizes", "header" },
-				{ "font_size_loot", "range", 4, 26, 1 },
-				{ "font_size_info", "range", 4, 26, 1 },
-				{ "font_size_quantity", "range", 4, 26, 1 },
-				{ "font_size_bottombuttons", "range", 4, 26, 1 },
-			}},
 			{ "link_button", "group", {
 				{ "linkall_show", "select", when_group },
 				{ "linkall_threshold", "select", item_qualities },
@@ -428,8 +409,17 @@ function addon:OnEnable() -- Construct addon option tables here
 				}}
 			}},
 			{ "autolooting", "group", {
+				{ "autolooting_text", "description", fontSize = "medium", width = "full" },
 				{ "autoloot_coin", "select", when_group },
 				{ "autoloot_quest", "select", when_group }
+			}},
+			{ "fonts", "group", {
+				{ "font", "input" },
+				{ "font_sizes", "header" },
+				{ "font_size_loot", "range", 4, 26, 1 },
+				{ "font_size_info", "range", 4, 26, 1 },
+				{ "font_size_quantity", "range", 4, 26, 1 },
+				{ "font_size_bottombuttons", "range", 4, 26, 1 },
 			}},
 			{ "colors", "group", {
 				{ "quality_color_frame", "toggle", width = "full" },
@@ -449,40 +439,43 @@ function addon:OnEnable() -- Construct addon option tables here
 	if XLoot:GetModule("Group", true) then
 		addon:RegisterOptions({ name = "Group", addon =  XLootGroup }, {
 			{ "anchors", "group", {
-				{ "anchor_toggle", "execute", function() XLootGroup:ToggleAnchors() end },
-				{ "reload_ui", "execute", ReloadUI },
+				{ "roll_anchor_visible", "toggle", subtable = "roll_anchor", subkey = "visible", set = set_anchor },
+				{ "alert_anchor_visible", "toggle", subtable = "alert_anchor", subkey = "visible", set = set_anchor, width = "double" },
+			}},
+			{ "other_frames", "group", {
+				{ "bonus_skin", "toggle" },
+				{ "alert_skin", "toggle" },
 			}},
 			{ "rolls", "group", {
-				{ "roll_direction", "select", directions, name = L.growth_direction, key = "roll_anchor", subkey = "direction" },
+				{ "roll_direction", "select", directions, name = L.growth_direction, subtable = "roll_anchor", subkey = "direction" },
 				{ "text_outline", "toggle" },
 				{ "text_time", "toggle" },
 				{ "roll_scale", "scale", "roll_anchor", "scale" },
 				{ "roll_width", "range", 150, 700, 1, 150, 400, 10, name = L.width },
 				{ "roll_button_size", "range", 16, 48, 1 },
-				{ "expiration", "header" },
-				{ "expire_won", "range", 5, 30, 1 },
-				{ "expire_lost", "range", 5, 30, 1 },
 			}},
 			{ "extra_info", "group", {
 				{ "equip_prefix", "toggle" },
 				{ "prefix_equippable", "input" },
-				{ "prefix_upgrade", "input" }
+				{ "prefix_upgrade", "input" },
+				{ "show_undecided", "toggle" },
+				{ "role_icon", "toggle" },
+				{ "win_icon", "toggle" },
 			}},
 			{ "roll_tracking", "group", {
 				{ "track_all", "toggle", width = "double" },
 				{ "track_player_roll", "toggle", requires_inverse = "track_all" },
 				{ "track_by_threshold", "toggle", requires_inverse = "track_all", width = "double" },
 				{ "track_threshold", "select", item_qualities, requires = "track_by_threshold", name = L.minimum_quality },
-			}},
-			{ "bonus_roll", "group", {
-				{ "bonus_skin", "toggle" },
+				{ "expiration", "header" },
+				{ "expire_won", "range", 5, 30, 1 },
+				{ "expire_lost", "range", 5, 30, 1 },
 			}},
 			{ "alerts", "group", {
-				{ "alert_direction", "select", directions, key = "alert_anchor", subkey = "direction", name = L.growth_direction },
-				{ "alert_skin", "toggle", width = "double" },
 				{ "alert_scale", "scale" },
 				{ "alert_offset", "range", 0.1, 10.0, 0.1 },
 				{ "alert_alpha", "alpha" },
+				{ "alert_direction", "select", directions, subtable = "alert_anchor", subkey = "direction", name = L.growth_direction },
 			}},
 		})
 	end
@@ -491,10 +484,10 @@ function addon:OnEnable() -- Construct addon option tables here
 	if XLoot:GetModule("Monitor", true) then
 		addon:RegisterOptions({ name = "Monitor", addon =  XLootMonitor.addon }, {
 			{ "anchor", "group", {
+				{ "visible", "toggle", set = set_anchor },
 				{ "direction", "select", directions, name = L.growth_direction },
-				{ "visible", "toggle", name = L.visible },
 				{ "scale", "scale" }
-			}, defaults = { key = "anchor" } },
+			}, defaults = { subtable = "anchor" } },
 			{ "thresholds", "group", {
 				{ "threshold_own", "select", item_qualities, name = L.items_own },
 				{ "threshold_other", "select", item_qualities, name = L.items_others },
@@ -545,7 +538,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 		})
 	end
-	
+
 	-- Generate reset staticpopup
 	if not StaticPopupDialogs['XLOOT_RESETPROFILE'] then
 		StaticPopupDialogs['XLOOT_RESETPROFILE'] = {
@@ -584,7 +577,7 @@ end
 
 function addon:ResetProfile()
 	XLoot.db:ResetProfile()
-	LibStub("AceConfigRegistry-3.0"):NotifyChange(popup_panel.key)
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("XLoot")
 end
 
 local init
@@ -605,7 +598,7 @@ function addon:OpenPanel(module)
 		AceConfigRegistry:RegisterOptionsTable("XLoot", self.config)
 		local panel = AceConfigDialog:AddToBlizOptions("XLoot")
 		XLoot.option_panel = panel
-		-- panel.default = PanelDefault
+		panel.default = PanelDefault
 		-- panel.okay = PanelOkay
 		-- panel.cancel = PanelCancel
 

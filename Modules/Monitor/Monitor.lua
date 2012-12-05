@@ -288,6 +288,14 @@ do
 	end
 end
 
+function addon:UpdateAnchors(...)
+	if opt.anchor.visible then
+		anchor:Show()
+	else
+		anchor:Hide()
+	end
+end
+
 function addon.SlashHandler(msg)
 	if anchor:IsShown() then
 		anchor:Hide()

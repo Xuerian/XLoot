@@ -50,6 +50,7 @@ local locales = {
 			font_size_loot = "Loot",
 			font_size_info = "Loot information",
 			font_size_quantity = "Quantity",
+			font_size_bottombuttons = "Linkall/Close",
 			frame_snap = "Snap frame to mouse",
 			frame_snap_offset_x = "Horizontal snap offset",
 			frame_snap_offset_y = "Vertical snap offset",
@@ -57,34 +58,41 @@ local locales = {
 			linkall_threshold = "Minimum chat link quality",
 			linkall_channel = "Default chat link channel",
 			linkall_show = "Link button visibility",
+
+			autolooting_text = "XLoot's autolooting features act separately from the default UI. As such, if both are enabled, you may recieve warnings like 'that object is busy'. They are safe to ignore, but can be resolved by picking one autoloot method to use exclusively."
 		},
 		Group = {
 			panel_title = "Group Loot",
 			-- Group labels
 			anchors = "Anchors",
-			rolls = "Loot rolls",
-			bonus_roll = "Bonus roll",
-			roll_tracking = "Loot roll tracking",
+			rolls = "Roll frames",
+			other_frames = "Other frames",
+			roll_tracking = "What rolls to show",
 			alerts = "Loot alerts",
-			extra_info = "Extra information",
+			extra_info = "Details",
 
 			-- Header labels
 			expiration = "Expiration (in seconds)",
 
 			-- Option labels
 			text_outline = "Outline text",
+			text_outline_desc = "Draws a dark outline around text on roll frames",
 			text_time = "Show time remaining",
-			anchor_toggle = "Show/Hide anchors",
+			text_time_desc = "Displays seconds remaining to roll over item icon",
 			role_icon = "Show role icons",
 			win_icon = "Show winning type icon",
 			show_decided = "Show decided",
-			show_undecided = "Show undecided",
-			alert_skin = "Skin popups",
+			show_undecided = "List waiting players",
+			show_undecided_desc = "List players who have not chosen how to roll",
+			alert_skin = "Skin loot popup frames",
+			alert_skin_desc = "Refers to 'You won..' frames, or 'alerts'",
 			alert_offset = "Vertical spacing",
 			bonus_skin = "Skin bonus roll frame",
-			reload_ui = "Reload UI",
 			roll_width = "Roll frame width",
 			roll_button_size = "Roll button size",
+			roll_anchor_visible = "Roll anchor visible",
+			alert_anchor_visible = "Loot popups anchor visible",
+			alert_anchor_visible_desc = "Refers to 'You won..' frames, or 'alerts'",
 			track_all = "Track all rolls",
 			track_player_roll = "Track items you roll on",
 			track_by_threshold = "Track items by minimum quality",
@@ -103,6 +111,7 @@ local locales = {
 			thresholds = "Quality thresholds",
 			fading = "Row fade times (in seconds)",
 			-- Option labels
+			visible = "Anchor visible"
 		},
 		Master = {
 			panel_title = "Loot Master",
