@@ -23,6 +23,13 @@ local print = print
 -- following the same rules as custom skins
 -- Skinning
 
+local function subtable_insert(t, k, v)
+	if not t[k] then
+		t[k] = {}
+	end
+	table.insert(t[k], v)
+end
+
 do 
 	local base = {
 		padding = 2,
@@ -62,7 +69,7 @@ do
 		return setmetatable(t, mt)
 	end
 	
-	local function update_borders(frame, options, borders)
+	local function update_borders(frame, options, borders, r, g, b, a)
 		local padding = options.padding
 		for pos, tex in ipairs(borders) do
 			-- Set texture options
@@ -71,7 +78,7 @@ do
 			tex:SetBlendMode(options.mode)
 			tex:SetWidth(options.size)
 			tex:SetHeight(options.size)
-			tex:SetVertexColor(options.r, options.b, options.g, options.a)
+			tex:SetVertexColor(r or options.r, g or options.g, b or options.b, a or options.a)
 
 			-- Position texture
 			tex:ClearAllPoints()
@@ -135,6 +142,10 @@ do
 			x:SetVertexColor(r, g, b, 1)
 		end
 	end
+
+	local function GetBorderColor(self)
+		return self._skin_borders[1]:GetVertexColor()
+	end
 	
 	local function SetGradientColor(self, r, g, b, a)
 		self.gradient:SetGradientAlpha('VERTICAL', .1, .1, .1, 0, r, g, b, a)
@@ -175,15 +186,16 @@ do
 		-- Borders
 		frame._skin_borders = create_borders(frame, options)
 		frame.SetBorderColor = SetBorderColor
+		frame.GetBorderColor = GetBorderColor
 	end
 	
 	function lib:SkinRaw(frame, options)
 		return create_borders(frame, meta(options)), SetBorderColor
 	end
 	
-	function lib:UpdateSkin(frame, options)
+	function lib:UpdateSkin(frame, options, r, g, b, a)
 		frame._skin_options = meta(options)
-		update_borders(frame, options, frame._skin_borders)
+		update_borders(frame, options, frame._skin_borders, r, g, b, a)
 	end
 	
 	-- Highlights
@@ -204,6 +216,10 @@ do
 			tex:SetVertexColor(r, g, b, a)
 		end
 	end
+
+	local function GetHighlightColor(self)
+		return self._highlights[1]:GetVertexColor()
+	end
 	
 	local highlight = { type = 'highlight' }
 	
@@ -218,14 +234,15 @@ do
 		frame.ShowHighlight = ShowHighlight
 		frame.HideHighlight = HideHighlight
 		frame.SetHighlightColor = SetHighlightColor
+		frame.GetHighlightColor = GetHighlightColor
 		if options.layer ~= 'HIGHLIGHT' then
 			frame:HideHighlight()
 		end
 	end
 	
-	function lib:UpdateHighlight(frame, options)
+	function lib:UpdateHighlight(frame, options, r, g, b, a)
 		frame._higlight_options = meta(options)
-		update_borders(frame, options, frame._highlights)
+		update_borders(frame, options, frame._highlights, r, g, b, a)
 	end
 end
 
@@ -283,29 +300,36 @@ do
 			wipe(v)
 		end
 		-- Update skins
-		for frame, set_name in pairs(data.skinned) do
-			lib:UpdateSkin(frame, compile(data, set_name))
+		for set_name,frames in pairs(data.skinned) do
+			for i,frame in ipairs(frames) do
+				lib:UpdateSkin(frame, compile(data, set_name), frame:GetBorderColor())
+			end
 		end
 		-- Update highlights
-		for frame,set_name in pairs(data.highlighted) do
-			lib:UpdateHighlight(frame, compile(data, set_name))
+		for set_name,frames in pairs(data.highlighted) do
+			for i,frame in ipairs(frames) do
+				lib:UpdateHighlight(frame, compile(data, set_name), frame:GetHighlightColor())
+			end
 		end
 		return compile(data, data.default or next(data.sets))
 	end
 	
 	local function Skin(self, frame, set_name)
 		local data = self._skin_data
-		lib:Skin(frame, compile(data, set_name or data.default))
-		data.skinned[frame] = set_name
+		set_name = set_name or data.default
+		lib:Skin(frame, compile(data, set_name))
+		subtable_insert(data.skinned, set_name, frame)
 	end
 	
 	local function Highlight(self, frame, set_name)
 		local data = self._skin_data
-		lib:Highlight(frame, compile(data, set_name or data.default))
-		data.highlighted[frame] = set_name
+		set_name = set_name or data.default
+		lib:Highlight(frame, compile(data, set_name))
+		subtable_insert(data.highlighted, set_name, frame)
 	end
 
 	-- Embed required functions and create data set to skin multiple similar frames
+	XLoot.skinners = {}
 	function XLoot:MakeSkinner(target, sets, default_set)
 		if not default_set and not sets.default then
 			sets.default = {}
@@ -320,6 +344,7 @@ do
 		target.Reskin = Reskin
 		target.Skin = Skin
 		target.Highlight = Highlight
+		table.insert(XLoot.skinners, target)
 		return target
 	end
 end

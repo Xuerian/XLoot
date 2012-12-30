@@ -119,6 +119,9 @@ function addon:OnEnable() -- Construct addon option tables here
 		else
 			db[k] = v
 		end
+		if meta.module_data.OnChanged then
+			meta.module_data.OnChanged(k, v, v2, v3, v4)
+		end
 	end
 
 	-- Anchor toggles
@@ -316,8 +319,17 @@ function addon:OnEnable() -- Construct addon option tables here
 		childGroups = "tab"
 	}
 
+	local function OnCoreChanged(k, v)
+		if k == 'skin' then
+			XLoot:SetSkin(v)
+			for _,v in ipairs(XLoot.skinners) do
+				v:Reskin()
+			end
+		end
+	end
+
 	local modules, skins = {}, {}
-	local options = Finalize({ name = "Core", addon =  XLoot }, BetterOptions:Compile({
+	local options = Finalize({ name = "Core", addon =  XLoot, OnChanged = OnCoreChanged }, BetterOptions:Compile({
 		{ "skin", "select", values = function()
 			wipe(skins)
 			for k,v in pairs(XLoot.Skin.skins) do
@@ -377,7 +389,11 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "grouped", L.when_grouped }
 		}
 
- 		addon:RegisterOptions({ name = "Frame", addon =  XLootFrame.addon }, {
+		local function OnChanged(k, v)
+			XLootFrame:UpdateAppearance()
+		end
+
+ 		addon:RegisterOptions({ name = "Frame", addon =  XLootFrame.addon, OnChanged = OnChanged }, {
 			{ "frame_options", "group", {
 				{ "frame_width_automatic", "toggle", width = "double" },
 				{ "old_close_button", "toggle" },
