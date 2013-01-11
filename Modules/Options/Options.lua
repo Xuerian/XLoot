@@ -330,6 +330,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	local modules, skins = {}, {}
 	local options = Finalize({ name = "Core", addon =  XLoot, OnChanged = OnCoreChanged }, BetterOptions:Compile({
+		{ "details", "description", fontSize = "medium", width = "full" },
 		{ "skin", "select", values = function()
 			wipe(skins)
 			for k,v in pairs(XLoot.Skin.skins) do

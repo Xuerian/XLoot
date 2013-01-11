@@ -3,7 +3,7 @@ local locales = {
 	enUS = {
 		Core = {
 			panel_title = "Global options",
-			panel_desc = "These settings are applied to all applicable XLoot modules",
+			details = "Skin is applied to all XLoot modules. Most other settings currently require a /reload to be applied. Please open a ticket with any issues.",
 			skin = "Skin",
 			skin_desc = "Select skin to use. Includes Masque skins",
 			skin_anchors = "Apply to anchors",
@@ -112,7 +112,8 @@ local locales = {
 			fading = "Row fade times (in seconds)",
 			details = "Details",
 			-- Option labels
-			visible = "Anchor visible"
+			visible = "Anchor visible",
+			show_coin = "Show coin drops",
 			show_totals = "Show total items in inventory"
 		},
 		Master = {
