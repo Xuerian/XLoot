@@ -512,6 +512,9 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "fading", "group", {
 				{ "fade_own", "range", 1, 30, 1, name = L.items_own },
 				{ "fade_other", "range", 1, 30, 1, name = L.items_others }
+			}},
+			{ "details", "group", {
+				{ "show_totals", "toggle", width = "double" }
 			}}
 		})
 	end

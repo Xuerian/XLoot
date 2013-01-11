@@ -110,8 +110,10 @@ local locales = {
 			anchor = "Anchor",
 			thresholds = "Quality thresholds",
 			fading = "Row fade times (in seconds)",
+			details = "Details",
 			-- Option labels
 			visible = "Anchor visible"
+			show_totals = "Show total items in inventory"
 		},
 		Master = {
 			panel_title = "Loot Master",

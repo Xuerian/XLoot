@@ -27,6 +27,8 @@ local defaults = {
 		threshold_other = 3,
 		show_coin = true,
 
+		show_totals = false,
+
 		fade_own = 10,
 		fade_other = 5,
 	}
@@ -92,9 +94,9 @@ function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
 			player = nil
 		end
 		local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
-		row:SetTexts(player, link, nr, ng, nb)
+		local total = opt.show_totals and GetItemCount(link) + num or 0
+		row:SetTexts(player, link, total > 1 and total or '', nr, ng, nb)
 		row.item = link
-
 	elseif event == 'coin' and opt.show_coin then
 		local copper, coin_string = arg1, arg2
 		addon:AddRow(GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
@@ -224,9 +226,10 @@ do
 		self:SetWidth(self.name:GetWidth() + self.text:GetWidth() + 8 + self.icon_frame:GetWidth())
 	end
 
-	local function SetTexts(self, name, text, nr, ng, nb, tr, tg, tb)
+	local function SetTexts(self, name, text, total, nr, ng, nb, tr, tg, tb)
 		self.name:SetText(name and name.." " or nil)
 		self.text:SetText(text)
+		self.total:SetText(total)
 		self.name:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		self.text:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		if name then
@@ -276,10 +279,16 @@ do
 		text:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
 		text:SetJustifyH("LEFT")
 
+		local total = icon_frame:CreateFontString(nil, "OVERLAY")
+		total:SetPoint("CENTER", icon_frame, "CENTER", 0, 0)
+		total:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
+		total:SetJustifyH("CENTER")
+
 		frame.icon = icon
 		frame.icon_frame = icon_frame
 		frame.name = name
 		frame.text = text
+		frame.total = total
 		frame.FitToText = FitToText
 		frame.SetTexts = SetTexts
 		frame.ShowTooltip = ShowTooltip
@@ -313,7 +322,8 @@ local items = {
 	{ 31304 },
 	{ 37254 },
 	{ 13262 },
-	{ 15487 }
+	{ 15487 },
+	{ 2589 }
 }
 for i,v in ipairs(items) do
 	GetItemInfo(v[1])
