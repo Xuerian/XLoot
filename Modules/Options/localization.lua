@@ -46,6 +46,7 @@ local locales = {
 			quality_color_slot = "Color loot border by quality",
 			loot_texts_info = "Show detailed information",
 			loot_texts_bind = "Show loot bind type",
+			loot_texts_lock = "Show locked status",
 			font = "Font",
 			font_size_loot = "Loot",
 			font_size_info = "Loot information",

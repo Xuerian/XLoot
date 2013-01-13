@@ -411,6 +411,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_texts_bind", "toggle" },
 				{ "loot_highlight", "toggle", width = "double", },
 				{ "loot_collapse", "toggle" },
+				{ "loot_texts_lock", "toggle", width = "double" },
 				{ "loot_alpha", "alpha" },
 			}},
 			{ "link_button", "group", {

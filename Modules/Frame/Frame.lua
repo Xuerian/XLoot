@@ -42,6 +42,7 @@ local defaults = {
 
 		loot_texts_info = true,
 		loot_texts_bind  = true,
+		loot_texts_lock = true,
 
 		font = STANDARD_TEXT_FONT,
 		font_size_loot = 12,
@@ -438,7 +439,7 @@ do
 
 		-- Icon
 		self.texture_item:SetTexture(icon)
-		if locked then
+		if locked and opt.loot_texts_lock then
 			self.text_locked:Show()
 		else
 			self.text_locked:Hide()
