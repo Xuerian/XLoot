@@ -101,7 +101,7 @@ local function extract(str, pattern)
 end
 
 -- Catch latent rolls
-if IsInGroup()then
+if IsInGroup() then
 	for i=1,200 do
 		local time = GetLootRollTimeLeft(i)
 		if time > 0 then
@@ -223,7 +223,21 @@ do
 	handler('LOOT_ITEM_MULTIPLE', loot)
 	handler('LOOT_ITEM_PUSHED_SELF', function(what) loot(player, what) end)
 	handler('LOOT_ITEM_PUSHED_SELF_MULTIPLE', function(what, num) loot(player, what, num) end)
-	handler('LOOT_ITEM_SELF', function(what) loot(player, what) end)
+
+	-- Account for Russian locale using the same string for LOOT_MONEY as LOOT_ITEM_SELF
+	if GetLocale() == "ruRU" then
+		handler('LOOT_ITEM_SELF', function(what)
+			local c = ParseCoinString(what)
+			if c > 0 then
+				trigger_loot('coin', player, c, what)
+			else
+				loot(player, what)
+			end
+		end)
+	else
+		handler('LOOT_ITEM_SELF', function(what) loot(player, what) end)
+	end
+
 	handler('LOOT_ITEM_SELF_MULTIPLE', function(what, num) loot(player, what, num) end)
 
 	-- Add coin patterns
