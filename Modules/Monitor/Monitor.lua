@@ -94,7 +94,8 @@ function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
 			player = nil
 		end
 		local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
-		row:SetTexts(player, link, opt.show_totals and GetItemCount(link) + (tonumber(num) or 1) or '', nr, ng, nb)
+		local total = GetItemCount(link) + (tonumber(num) or 1)
+		row:SetTexts(player, link, opt.show_totals and (total and total > 1) and total or '', nr, ng, nb)
 		row.item = link
 	elseif event == 'coin' and opt.show_coin then
 		local copper, coin_string = arg1, arg2
