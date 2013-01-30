@@ -396,6 +396,9 @@ function addon:OnEnable() -- Construct addon option tables here
 		}
 
 		local function OnChanged(k, v)
+			if not XLootFrame.built then
+				XLootFrame:BuildFrame()
+			end
 			XLootFrame:UpdateAppearance()
 		end
 

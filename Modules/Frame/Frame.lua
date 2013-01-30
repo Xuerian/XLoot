@@ -579,7 +579,6 @@ do
 end
 
 -- Build frame
-local BuildFrame
 do
 	-- Frame snapping
 	local function SnapToCursor(self)
@@ -719,7 +718,7 @@ do
 	end
 
 	-- Factory
-	function BuildFrame(f)
+	function XLootFrame.BuildFrame(f)
 		local name = f:GetName()
 		-- Setup frame
 		f:SetFrameStrata('DIALOG')
@@ -821,7 +820,7 @@ function XLootFrame:Update()
 
 	-- Construct frame
 	if not self.built then
-		BuildFrame(self)
+		self:BuildFrame()
 	end
 
 	-- References
