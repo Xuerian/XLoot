@@ -400,6 +400,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				XLootFrame:BuildFrame()
 			end
 			XLootFrame:UpdateAppearance()
+			XLootFrame:ParseAutolootList()
 		end
 
  		addon:RegisterOptions({ name = "Frame", addon =  XLootFrame.addon, OnChanged = OnChanged }, {
@@ -435,9 +436,12 @@ function addon:OnEnable() -- Construct addon option tables here
 				}}
 			}},
 			{ "autolooting", "group", {
-				{ "autolooting_text", "description", fontSize = "medium", width = "full" },
-				{ "autoloot_coin", "select", when_group },
-				{ "autoloot_quest", "select", when_group }
+				{ "autolooting_text", "description" },
+				{ "autoloot_coin", "select", when_group, subtable = "autoloots", subkey = "coin" },
+				{ "autoloot_quest", "select", when_group, subtable = "autoloots", subkey = "quest" },
+				{ "autolooting_list", "description" },
+				{ "autoloot_list", "select", when_group, subtable = "autoloots", subkey = "list" },
+				{ "autoloot_item_list", "input", width = "double" }
 			}},
 			{ "fonts", "group", {
 				{ "font", "input" },

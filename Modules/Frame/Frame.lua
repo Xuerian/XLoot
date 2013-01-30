@@ -65,8 +65,13 @@ local defaults = {
 		frame_position_x = GetScreenWidth()/2,
 		frame_position_y = GetScreenHeight()/2,
 
-		autoloot_coin = 'never',
-		autoloot_quest = 'never',
+		autoloots = {
+			coin = 'never',
+			quest = 'never',
+			list = 'never'
+		},
+
+		autoloot_item_list = '',
 		
 		frame_draggable = true,
 
@@ -813,6 +818,14 @@ do
 end
 
 -- Main loot handler
+local auto, auto_items = {}, {}
+function XLootFrame:ParseAutolootList()
+	wipe(auto_items)
+	for item in opt.autoloot_item_list:gmatch("(%s-[^,]+%s-)") do
+		auto_items[item] = true
+	end
+end
+
 function XLootFrame:Update()
 	local numloot = GetNumLootItems()
 	if numloot == 0 then return nil end
@@ -821,6 +834,7 @@ function XLootFrame:Update()
 	-- Construct frame
 	if not self.built then
 		self:BuildFrame()
+		XLootFrame:ParseAutolootList()
 	end
 
 	-- References
@@ -828,12 +842,13 @@ function XLootFrame:Update()
 	
 	-- Autolooting options
 	local party = IsInGroup()
-	local auto_coin, auto_quest, auto_space = self.opt.autoloot_coin, self.opt.autoloot_quest
-	auto_coin = auto_coin == 'always' or (auto_coin == 'solo' and not party)
-	auto_quest = auto_quest == 'always' or (auto_quest == 'solo' and not party)
+	local auto, auto_items, auto_space = auto, auto_items
+	for k,v in pairs(opt.autoloots) do
+		auto[k] = v == 'always' or (v == 'solo' and not party)
+	end
 	
 	-- Update rows
-	local max_quality, max_width, our_slot, slot = 0, 0, 0
+	local max_quality, max_width, our_slot, slot, auto_space = 0, 0, 0
 	for slot = 1, numloot do
 		local _, icon, name, quantity, quality, locked, isQuestItem, questId, isActive = pcall(GetLootSlotInfo, slot)
 		-- local texture, item, quantity, quality, locked, isQuestItem, questId, isActive = GetLootSlotInfo(slot)
@@ -841,12 +856,12 @@ function XLootFrame:Update()
 			local looted = false
 			
 			-- Autolooting coin
-			if auto_coin and GetLootSlotType(slot) == LOOT_SLOT_MONEY then
+			if auto.coin and GetLootSlotType(slot) == LOOT_SLOT_MONEY then
 				LootSlot(slot)
 				looted = true
 				
 			-- Autolooting quest items
-			elseif auto_quest and isQuestItem then
+			elseif (auto.quest and isQuestItem) or (auto.list and auto_items[name]) then
 				-- Cache available space
 				if auto_space == nil then
 					local open = 0

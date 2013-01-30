@@ -27,6 +27,9 @@ local locales = {
 			autoloot_coin_desc = "When to automatically loot coin",
 			autoloot_quest = "Auto loot quest items",
 			autoloot_quest_desc = "When to automatically loot quest items",
+			autoloot_list = "Auto loot listed items",
+			autoloot_list_desc = "When to automatically loot listed items",
+			autoloot_item_list = "Items to loot",
 			-- frame_scale = "Frame scale",
 			-- frame_alpha = "Frame alpha",
 			frame_color_border = "Frame border color",
@@ -60,7 +63,9 @@ local locales = {
 			linkall_channel = "Default chat link channel",
 			linkall_show = "Link button visibility",
 
-			autolooting_text = "XLoot's autolooting features act separately from the default UI. As such, if both are enabled, you may recieve warnings like 'that object is busy'. They are safe to ignore, but can be resolved by picking one autoloot method to use exclusively."
+			autolooting_text = "XLoot's autolooting features act separately from the default UI. As such, if both are enabled, you may recieve warnings like 'that object is busy'. They are safe to ignore, but can be resolved by picking one autoloot method to use exclusively.",
+
+			autolooting_list = "To automatically loot specific items, list them below.\n  Example: Linen Cloth,Ashbringer,Copper Ore",
 		},
 		Group = {
 			panel_title = "Group Loot",
