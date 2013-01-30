@@ -372,9 +372,9 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	local item_qualities = {}
 	do
-		for k, v in ipairs(ITEM_QUALITY_COLORS) do
-			local hex = select(4, GetItemQualityColor(k))
-			item_qualities[k] = { k, ("|c%s%s"):format(hex, _G["ITEM_QUALITY"..tostring(k).."_DESC"]) }
+		for i=0, #ITEM_QUALITY_COLORS do
+			local hex = select(4, GetItemQualityColor(i))
+			table.insert(item_qualities, { i, ("|c%s%s"):format(hex, _G["ITEM_QUALITY"..tostring(i).."_DESC"]) })
 		end
 	end 
 
