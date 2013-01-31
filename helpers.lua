@@ -31,6 +31,8 @@ local tooltip = CreateFrame('GameTooltip', 'XLootTooltip', UIParent, 'GameToolti
 tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 
 function XLoot.GetItemBindType(link)
+	tooltip:ClearLines()
+	tooltip:SetHyperlink(link)
 	local value = (GetCVar('colorblindMode') == '1' and XLootTooltipTextLeft4 or XLootTooltipTextLeft3):GetText()
 	if value == ITEM_BIND_ON_PICKUP then
 		return 'pickup'
