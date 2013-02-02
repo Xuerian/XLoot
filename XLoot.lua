@@ -41,15 +41,6 @@ local function SetEventHandler(addon, frame)
 	end)
 end
 
--- Load and call Options
--- local function StubInit(self)
--- 	if not XLootOptions then
--- 		EnableAddOn("XLoot_Options")
--- 		LoadAddOn("XLoot_Options")
--- 	end
--- 	XLootOptions:StubInit(self)
--- end
-
 XLoot.slash_commands = {}
 function XLoot:SetSlashCommand(slash, func)
 	local key = "XLOOT_"..slash
@@ -65,8 +56,23 @@ function XLoot:ShowOptionPanel(module)
 	XLootOptions:OpenPanel(module)
 end
 
-function XLoot.ProfileChanged(self)
+function XLoot:ApplyOptions()
+	print('applied')
 	self.opt = self.db.profile
+	-- Update skin
+	XLoot:SetSkin(self.opt.skin)
+	for _,v in ipairs(XLoot.skinners) do
+		v:Reskin()
+	end
+	-- Update all modules
+	for k,v in pairs(XLoot.modules) do
+		if v.db then
+			v.opt = v.db.profile
+		end
+		if v.ApplyOptions then
+			v:ApplyOptions()
+		end
+	end
 end
 
 -- Add shortcuts for modules
@@ -86,7 +92,7 @@ XLoot:SetDefaultModulePrototype({
 		self:SetEventHandler(frame)
 	end,
 	SetEventHandler = SetEventHandler,
-	ProfileChanged = XLoot.ProfileChanged,
+	OnProfileChanged = XLoot.OnProfileChanged,
 })
 
 -------------------------------------------------------------------------------
@@ -96,6 +102,9 @@ function XLoot:OnInitialize()
 	-- Init DB
 	self.db = LibStub("AceDB-3.0"):New("XLootADB", defaults, true)
 	self.opt = self.db.profile
+	self.db.RegisterCallback(self, "OnProfileChanged", "ApplyOptions")
+	self.db.RegisterCallback(self, "OnProfileCopied", "ApplyOptions")
+	self.db.RegisterCallback(self, "OnProfileReset", "ApplyOptions")
 	-- Load skins, import Masque skins
 	self:SkinsOnInitialize()
 end

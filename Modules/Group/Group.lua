@@ -833,7 +833,7 @@ do
 		local overlay = CreateFrame('frame', nil, frame)
 		overlay:SetFrameLevel(frame:GetFrameLevel())
 		overlay:SetAllPoints()
-		Skinner:Skin(overlay, 'row')
+		local skin = Skinner:Skin(overlay, 'row')
 
 		-- Item icon (For skin border)
 		local icon_frame = CreateFrame('Frame', nil, frame)
@@ -851,12 +851,11 @@ do
 		-- Timer bar
 		local bar = CreateFrame('StatusBar', nil, frame)
 		bar:SetFrameLevel(frame:GetFrameLevel())
-		local skin = XLoot.Skin.current
 		local pad = skin.padding or 2
 		bar:SetPoint('TOPRIGHT', -pad - 3, -pad - 3)
 		bar:SetPoint('BOTTOMRIGHT', -pad - 3, pad + 3)
 		bar:SetPoint('LEFT', icon_frame, 'RIGHT', -pad, 0)
-		bar:SetStatusBarTexture(skin.bar_texture or skin_default.bar_texture)
+		bar:SetStatusBarTexture(skin.bar_texture)
 		bar:SetScript('OnUpdate', BarUpdate)
 		bar.parent = frame
 		-- Reference bar for quick re-skinning when XLoot skin changes
@@ -926,24 +925,18 @@ end
 ---------------------------------------------------------------------------
 -- AddOn setup and events
 ---------------------------------------------------------------------------
-function addon:ProfileChanged()
-	opt = self.db.profile
-	addon.opt = opt
-end
 
 -- Update skins when XLoot skin changes
 function addon:SkinUpdate()
-	CompileSkins()
-	Skinner:Reskin()
-	local pad = skin.padding or skin_default.padding
-	local tex = skin.bar_texture or skin_default.bar_texture
-	local p, n = pad + 3, -pad - 3
+	local skin = Skinner:Reskin()
+	local padding = skin.padding or 1
+	local p, n = padding + 3, -padding - 3
 	for _,bar in pairs(addon.bars) do
 		bar:ClearAllPoints()
 		bar:SetPoint('TOPRIGHT', n, n)
 		bar:SetPoint('BOTTOMRIGHT', n, p)
-		bar:SetPoint('LEFT', bar.parent.icon_frame, 'RIGHT', -pad, 0)
-		bar:SetStatusBarTexture(tex)
+		bar:SetPoint('LEFT', bar.parent.icon_frame, 'RIGHT', -padding, 0)
+		bar:SetStatusBarTexture(skin.bar_texture)
 		local link = bar.parent.link
 		if link then
 			local r, g, b = GetItemQualityColor(select(3, GetItemInfo(link)))
@@ -955,12 +948,19 @@ function addon:SkinUpdate()
 end
 
 -- Move anchors when scale changes
-function addon:ConfigSave()
+function addon:ApplyOptions()
+	opt = self.opt
+
+	anchor:UpdateSVData(opt.roll_anchor)
+	alert_anchor:UpdateSVData(opt.alert_anchor)
+
+	self:SkinUpdate()
+
 	local mod = anchor:GetScale() / anchor.data.scale
 	anchor:Scale(anchor.data.scale)
 	anchor.data.x = anchor.data.x * mod
 	anchor.data.y = anchor.data.y * mod
-	anchor:Position()
+
 	anchor:Restack()
 	for _,frame in pairs(anchor.children) do
 		frame:SetWidth(opt.roll_width)

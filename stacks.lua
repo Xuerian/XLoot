@@ -80,6 +80,18 @@ do
 		end
 	end
 
+	function UpdateSVData(self, svdata)
+		if svdata then
+			self.data = svdata
+			self:Position()
+			if not svdata.visible then
+				self:Hide()
+			end
+		else
+			self.data = {}
+		end
+	end
+
 	function lib:CreateAnchor(text, svdata)
 		local anchor = CreateFrame('Button', nil, UIParent)
 		anchor:SetBackdrop(backdrop)
@@ -98,6 +110,7 @@ do
 		anchor.OnMove = OnMove
 		anchor.OnToggle = OnToggle
 		anchor.AnchorChild = AnchorChild
+		anchor.UpdateSVData = UpdateSVData
 		
 		local close = CreateFrame('Button', nil, anchor, 'UIPanelCloseButton')
 		close:SetScript('OnClick', Close_OnClick)
@@ -116,15 +129,7 @@ do
 		anchor:SetHeight(20)
 		anchor:SetWidth(label:GetStringWidth() + 100)
 
-		if svdata then
-			anchor.data = svdata
-			anchor:Position()
-			if not svdata.visible then
-				anchor:Hide()
-			end
-		else
-			anchor.data = svdata or {}
-		end
+		anchor:UpdateSVData(svdata)
 		
 		return anchor
 	end

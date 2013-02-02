@@ -317,8 +317,10 @@ do
 	local function Skin(self, frame, set_name)
 		local data = self._skin_data
 		set_name = set_name or data.default
-		lib:Skin(frame, compile(data, set_name))
+		local skin = compile(data, set_name)
+		lib:Skin(frame, skin)
 		subtable_insert(data.skinned, set_name, frame)
+		return skin
 	end
 	
 	local function Highlight(self, frame, set_name)

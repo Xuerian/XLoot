@@ -78,6 +78,12 @@ function addon:OnEnable()
 	self:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
 end
 
+function addon:ApplyOptions()
+	opt = self.opt
+	anchor:UpdateSVData(opt.anchor)
+	-- Apply all options
+end
+
 function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
 	if event == 'item' then
 		local link, num = arg1, arg2

@@ -128,6 +128,16 @@ function addon:OnEnable()
 	end)
 end
 
+function addon:ApplyOptions()
+	opt, XLootFrame.opt = self.opt, self.opt
+	if XLootFrame.built then
+		XLootFrame:UpdateAppearance()
+	end
+	if XLootFrame:IsVisible() then
+		XLootFrame:SnapToCursor()
+	end
+end
+
 -- CLI output
 local print, wprint = print, print
 local function xprint(text) wprint(('%s: %s'):format('|c2244dd22XLoot|r', text)) end
@@ -635,7 +645,7 @@ do
 	local function BottomButton(frame, name, text, justify)
 		local b = CreateFrame('Button', name, frame)
 		b.text = b:CreateFontString(name..'Text', 'DIALOG')--, 'GameFontNormalSmall')
-		b.text:SetFont(opt.font, opt.font_size_bottombuttons)
+		b.text:SetFont(frame.opt.font, frame.opt.font_size_bottombuttons)
 		b.text:SetText('|c22AAAAAA'..text)
 		b.text:SetJustifyH(justify)
 		b.text:SetAllPoints(b)

@@ -326,10 +326,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	local function OnCoreChanged(k, v)
 		if k == 'skin' then
-			XLoot:SetSkin(v)
-			for _,v in ipairs(XLoot.skinners) do
-				v:Reskin()
-			end
+			XLoot:ApplyOptions()
 		end
 	end
 
@@ -601,16 +598,15 @@ local function PanelDefault(self)
 end
 
 local function PanelOkay(self)
-	trigger(self.owner, "ConfigSave")
+	-- Apply new options
 end
 
 local function PanelCancel(self)
-	trigger(self.owner, "ConfigCancel")
+	-- Restore old options?
 end
 
 function addon:ResetProfile()
 	XLoot.db:ResetProfile()
-	LibStub("AceConfigRegistry-3.0"):NotifyChange("XLoot")
 end
 
 local init
