@@ -57,7 +57,6 @@ function XLoot:ShowOptionPanel(module)
 end
 
 function XLoot:ApplyOptions()
-	print('applied')
 	self.opt = self.db.profile
 	-- Update skin
 	XLoot:SetSkin(self.opt.skin)
