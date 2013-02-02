@@ -683,7 +683,7 @@ do
 			then
 				now = true
 			end
-		elseif show == 'always' then
+		elseif show == 'always' or (show == 'solo' and not IsInGroup()) then
 			now = true
 		end
 		if now then
