@@ -50,6 +50,7 @@ local defaults = {
 		alert_anchor = {
 			visible = true,
 			direction = 'up',
+			scale = 1.0,
 			x = AlertFrame:GetLeft(),
 			y = AlertFrame:GetTop()
 		},
@@ -184,6 +185,11 @@ local function FancyPlayerName(name, class)
 		name = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], name)
 	end
 	return name, c.r, c.g, c.b
+end
+
+local function SetOutline(fontstring)
+	local f, s = fontstring:GetFont()
+	fontstring:SetFont(f, s, opt.text_outline and 'OUTLINE' or nil)
 end
 
 -------------------------------------------------------------------------------
@@ -569,6 +575,7 @@ do
 	local function RollLines(list, hid)
 		for _,pid in pairs(list) do
 			local name, class, rtype, roll, is_winner, is_me = HistoryGetPlayerInfo(hid, pid)
+			if not name then return nil end
 			local text, r, g, b, color = FancyPlayerName(name, class)
 			if roll ~= nil then
 				if is_winner then
@@ -820,7 +827,7 @@ do
 		local frame = CreateFrame('Button', nil, UIParent)
 		frame:SetFrameLevel(anchor:GetFrameLevel())
 		frame:SetHeight(24)
-		frame:SetWidth(addon.opt.roll_width)
+		frame:SetWidth(opt.roll_width)
 		frame:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 		frame:SetScript('OnEnter', OnEnter)
 		frame:SetScript('OnLeave', OnLeave)
@@ -888,10 +895,7 @@ do
 		local status = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
 		status:SetHeight(16)
 		status:SetJustifyH('LEFT')
-		if opt.text_outline then
-			local f, s = status:GetFont()
-			status:SetFont(f, s, 'OUTLINE')
-		end
+		SetOutline(status)
 		status:SetPoint('LEFT', icon_frame, 'RIGHT', 1, 0)
 		status:SetPoint('RIGHT', p, 'RIGHT', 2, 0)
 
@@ -899,10 +903,7 @@ do
 		local loot = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
 		loot:SetHeight(16)
 		loot:SetJustifyH('LEFT')
-		if addon.opt.text_outline then
-			local f, s = loot:GetFont()
-			loot:SetFont(f, s, 'OUTLINE')
-		end
+		SetOutline(loot)
 		loot:SetPoint('LEFT', p, 'RIGHT', 3, -1)
 		loot:SetPoint('RIGHT', frame, 'RIGHT', -5, 0)
 
@@ -929,7 +930,7 @@ end
 -- Update skins when XLoot skin changes
 function addon:SkinUpdate()
 	local skin = Skinner:Reskin()
-	local padding = skin.padding or 1
+	local padding = skin.padding or 2
 	local p, n = padding + 3, -padding - 3
 	for _,bar in pairs(addon.bars) do
 		bar:ClearAllPoints()
@@ -956,11 +957,6 @@ function addon:ApplyOptions()
 
 	self:SkinUpdate()
 
-	local mod = anchor:GetScale() / anchor.data.scale
-	anchor:Scale(anchor.data.scale)
-	anchor.data.x = anchor.data.x * mod
-	anchor.data.y = anchor.data.y * mod
-
 	anchor:Restack()
 	for _,frame in pairs(anchor.children) do
 		frame:SetWidth(opt.roll_width)
@@ -972,6 +968,11 @@ function addon:ApplyOptions()
 		frame.disenchant:SetHeight(opt.roll_button_size)
 		frame.pass:SetWidth(opt.roll_button_size)
 		frame.pass:SetHeight(opt.roll_button_size)
+		SetOutline(frame.text_status)
+		SetOutline(frame.text_loot)
+		if not opt.text_time then
+			frame.text_time:SetText()
+		end
 	end
 end
 

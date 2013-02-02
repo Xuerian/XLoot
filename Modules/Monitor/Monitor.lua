@@ -81,7 +81,7 @@ end
 function addon:ApplyOptions()
 	opt = self.opt
 	anchor:UpdateSVData(opt.anchor)
-	-- Apply all options
+	anchor:Restack()
 end
 
 function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)

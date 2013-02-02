@@ -49,7 +49,11 @@ do
 	end
 
 	local function Position(self, x, y)
+		self:ClearAllPoints()
 		self:SetPoint('TOPLEFT', UIParent, 'BOTTOMLEFT', x or self.data.x, y or self.data.y)
+		self:SetHeight(20)
+		-- self:SetWidth(self.label:GetStringWidth() + 100)
+		self:SetWidth(175)
 	end
 
 	local function AnchorChild(self, child, to)
@@ -82,7 +86,13 @@ do
 
 	function UpdateSVData(self, svdata)
 		if svdata then
+			if self.data == svdata then
+				local mod = self:GetScale() / svdata.scale
+				svdata.x = svdata.x * mod
+				svdata.y = svdata.y * mod
+			end
 			self.data = svdata
+			self:SetScale(svdata.scale)
 			self:Position()
 			if not svdata.visible then
 				self:Hide()

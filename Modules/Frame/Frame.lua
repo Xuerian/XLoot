@@ -19,7 +19,6 @@ function XLootButtonOnClick(row, button, handled)
 	return handled
 end
 
-
 -- Create module
 local addon, L = XLoot:NewModule("Frame")
 -- Prepare frame/global
@@ -132,10 +131,9 @@ function addon:ApplyOptions()
 	opt, XLootFrame.opt = self.opt, self.opt
 	if XLootFrame.built then
 		XLootFrame:UpdateAppearance()
+		XLootFrame:Update(true)
 	end
-	if XLootFrame:IsVisible() then
-		XLootFrame:SnapToCursor()
-	end
+	XLootFrame:ParseAutolootList()
 end
 
 -- CLI output
@@ -383,6 +381,9 @@ do
 		-- Text
 		self.text_name:SetFont(opt.font, opt.font_size_loot)
 		self.text_info:SetFont(opt.font, opt.font_size_info)
+		self.text_quantity:SetFont(opt.font, opt.font_size_quantity)
+		self.text_bind:SetFont(opt.font, 8, 'outline')
+		self.text_locked:SetFont(opt.font, 9, 'outline')
 		
 		-- Calculated row height
 		owner.row_height = self:GetHeight() + owner.skin.row_spacing
@@ -683,7 +684,7 @@ do
 			then
 				now = true
 			end
-		elseif show == 'always' then
+		elseif show == 'always' or (show == 'solo' and not IsInGroup()) then
 			now = true
 		end
 		if now then
@@ -730,6 +731,19 @@ do
 			end
 			self:UpdateWidth(max_width)
 		end
+
+		-- Show close buttons
+		if opt.old_close_button then
+			self.close:Hide()
+			self.old_close:Show()
+		else
+			self.close:Show()
+			self.old_close:Hide()
+		end
+
+		-- Text
+		self.close.text:SetFont(opt.font, opt.font_size_bottombuttons)
+		self.link.text:SetFont(opt.font, opt.font_size_bottombuttons)
 	end
 
 	-- Factory
@@ -788,11 +802,6 @@ do
 		-- f:Skin(x)
 		-- x:SetBorderColor(.7, .7, .7)
 
-		if opt.old_close_button then
-			cb:Hide()
-		else
-			x:Hide()
-		end
 
 		-- Events
 		if not f.fake then
@@ -807,6 +816,7 @@ do
 
 		f.overlay = overlay
 		f.close = cb
+		f.old_close = x
 		f.link = lb
 		f.SetAlpha, f._SetAlpha = function(self, alpha) backdrop:SetAlpha(alpha) end, f.SetAlpha
 		f.UpdateHeight = UpdateHeight
@@ -836,7 +846,7 @@ function XLootFrame:ParseAutolootList()
 	end
 end
 
-function XLootFrame:Update()
+function XLootFrame:Update(in_options)
 	local numloot = GetNumLootItems()
 	if numloot == 0 then return nil end
 	local max = math.max
@@ -941,7 +951,9 @@ function XLootFrame:Update()
 	self:SizeAndColor(max_width, max_quality)
 
 	-- Show
-	self:SnapToCursor()
+	if not in_options then
+		self:SnapToCursor()
+	end
 	self:Show()
 end
 
