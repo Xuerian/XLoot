@@ -54,7 +54,6 @@ _G.XLootOptions = addon
 
 -- Locals
 local print = print
-local popup_panel -- Last panel to open profile reset popup
 
 local function trigger(target, method, ...)
 	local func = target[method]
@@ -70,6 +69,19 @@ local function sizeof(t)
 	end
 	return i
 end
+
+-- Provide throttled updates
+local update_throttle, elapsed = CreateFrame("Frame"), 0
+update_throttle:Hide()
+update_throttle:SetScript("OnUpdate", function(self, delta)
+	if elapsed > .1 then
+		XLoot:ApplyOptions()
+		elapsed = 0
+		self:Hide()
+	else
+		elapsed = elapsed + delta
+	end
+end)
 
 -------------------------------------------------------------------------------
 -- Module init
@@ -108,6 +120,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	-- Generic option setter
 	local function set(info, v, v2, v3, v4)
+		update_throttle:Show()
 		local db, k, meta = path(info)
 		if info.option.type == "color" then
 			db[k][1] = v
@@ -594,11 +607,9 @@ end
 
 local function PanelDefault(self)
 	StaticPopup_Show("XLOOT_RESETPROFILE")
-	popup_panel = self
 end
 
 local function PanelOkay(self)
-	-- Apply new options
 end
 
 local function PanelCancel(self)
