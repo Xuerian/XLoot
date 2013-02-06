@@ -2,7 +2,7 @@
 	Loot button click hook
 	- row: Loot row
 	- button: Mouse button
-	- handled: True if previous caller acted on event
+	- handled: True if any previous caller acted on event
 
 	Hook like this:
 	local XLootButtonOnClick_Orig = XLootButtonOnClick
