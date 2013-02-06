@@ -3,7 +3,7 @@ Copyright (c) 2012 Xuerian (sky.shell@gmail.com)
 
 All Rights Reserved unless otherwise explicitly stated.
 
-Redistribution of sofware or sourcecode in any form is strictly prohibited without prior permission from author.
+Redistribution of sofware or sourcecode in any form is strictly prohibited without prior permission from authors.
 
 Go ahead and ask me (Xuerian), I'm usually a friendly person =)
 
