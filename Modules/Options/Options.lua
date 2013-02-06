@@ -618,6 +618,7 @@ end
 
 function addon:ResetProfile()
 	XLoot.db:ResetProfile()
+	LibStub("AceConfigRegistry-3.0"):NotifyChange("XLoot")
 end
 
 local init
