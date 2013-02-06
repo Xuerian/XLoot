@@ -675,16 +675,18 @@ do
 	end
 
 	local function UpdateLinkButton(self)
-		local default, show, now = self.opt.linkall_channel, self.opt.linkall_show, false
+		local target, show, now = self.opt.linkall_channel, self.opt.linkall_show, false
 		if show == 'auto' then
-			if default == 'SAY' or
-				((default == 'GUILD' or default == 'OFFICER') and IsInGuild()) or
-				((default == 'RAID' or default == 'RAID_WARNING') and IsInRaid()) or
-				(default == 'PARTY' and IsInGroup())
+			if target == 'SAY' or
+				((target == 'GUILD' or target == 'OFFICER') and IsInGuild()) or
+				((target == 'RAID' or target == 'RAID_WARNING') and IsInRaid()) or
+				(target == 'PARTY' and IsInGroup())
 			then
 				now = true
 			end
-		elseif show == 'always' or (show == 'solo' and not IsInGroup()) then
+		elseif show == 'always' 
+				or (show == 'solo' and not IsInGroup()) 
+				or (show == 'grouped' and IsInGroup()) then
 			now = true
 		end
 		if now then
