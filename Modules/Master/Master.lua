@@ -9,7 +9,6 @@ local classesInRaid, class_players, classes_english = {}, {}, {}
 local player_indices, index_name = {}, {}
 local randoms = {}
 local me = UnitName('player')
-local banker_name, disenchanter_name
 local my_index, banker_index, disenchanter_index
 local candidate, color, lclass, className, slot, info, opt, eframe
 -- Libraries
@@ -21,7 +20,9 @@ local defaults = {
 	profile = {
 		menu_roll = true,
 		menu_disenchant = true,
+		menu_disenchanters = "",
 		menu_bank = true,
+		menu_bankers = "",
 		menu_self = true,
 		award_qualitythreshold = 2,
 		award_channel = 'AUTO',
@@ -239,29 +240,29 @@ function addon.BuildRaidMenuRecipients(level)
 					UIDropDownMenu_AddButton(info,level)
 				end
 			end
-			if banker_index then
+			if banker_index and opt.menu_bank then
 				candidate,lclass,className = GetMasterLootCandidate(slot,banker_index)
-				if candidate and candidate == banker_name then
+				if candidate and addon.listPriority(candidate, opt.menu_bankers) then
 					info.colorCode = "|cffffffff"
 					info.isTitle = nil
 					info.textHeight = 12
 					info.value = banker_index
 					info.notCheckable = 1
-					info.text = L.ML_BANKER
+					info.text = L.ML_BANKER.." ("..candidate..")"
 					info.func = addon.GiveLoot
 					info.icon = "Interface\\Minimap\\Tracking\\Banker"
 					UIDropDownMenu_AddButton(info,level)
 				end
 			end
-			if disenchanter_index then
+			if disenchanter_index and opt.menu_disenchant then
 				candidate,lclass,className = GetMasterLootCandidate(slot,disenchanter_index)
-				if candidate and candidate == disenchanter_name then
+				if candidate and addon.listPriority(candidate, opt.menu_disenchanters) then
 					info.colorCode = "|cffffffff"
 					info.isTitle = nil
 					info.textHeight = 12
 					info.value = disenchanter_index
 					info.notCheckable = 1
-					info.text = L.ML_DISENCHANTER
+					info.text = L.ML_DISENCHANTER.." ("..candidate..")"
 					info.func = addon.GiveLoot
 					info.icon = "Interface\\Buttons\\UI-GroupLoot-DE-Up"
 					UIDropDownMenu_AddButton(info,level)
@@ -312,6 +313,18 @@ function addon.BuildMenuSpecialRolls(level)
 	end
 end
 
+function addon.normalize_toon_list(str)
+	str = str:gsub("%s+",",")
+	str = str:gsub("%p+",",")
+	str = str:lower()
+	return ","..str..","
+end
+
+function addon.listPriority(name, list)
+	list = addon.normalize_toon_list(list)
+	return select(1,list:find(addon.normalize_toon_list(name)))
+end
+
 function addon.BuildRaidMenu(level)
 	-- In a raid
 	if level == 1 then
@@ -320,6 +333,7 @@ function addon.BuildRaidMenu(level)
 		wipe(classesInRaid)
 		wipe(class_players)
 		wipe(randoms)
+		local disenchant_rank, bank_rank = 10000, 10000
 		my_index, banker_index, disenchanter_index = nil,nil,nil
 		for i = 1, MAX_RAID_MEMBERS do
 			candidate,lclass,className = GetMasterLootCandidate(slot,i)
@@ -329,11 +343,15 @@ function addon.BuildRaidMenu(level)
 				if candidate == me then
 					my_index = i
 				end
-				if candidate == banker_name then
+				local br = addon.listPriority(candidate, opt.menu_bankers)
+				if br and br < bank_rank then
 					banker_index = i
+					bank_rank = br
 				end
-				if candidate == disenchanter_name then
+				local dr = addon.listPriority(candidate, opt.menu_disenchanters)
+				if dr and dr < disenchant_rank then
 					disenchanter_index = i
+					disenchant_rank = dr
 				end
 				player_indices[candidate] = i
 				index_name[i] = candidate
@@ -407,25 +425,8 @@ function addon.DropdownInit()
 end
 UIDropDownMenu_Initialize(GroupLootDropDown, addon.DropdownInit, "MENU")
 
-function addon.SetBanker(name)
-	if not IsInRaid() then return end
-	local name = name or UnitExists("target") and (UnitName("target"))
-	if UnitInRaid(name) and UnitIsPlayer(name) then
-		banker_name = name
-	end
-end
-
-function addon.SetDisenchanter(name)
-	if not IsInRaid() then return end
-	local name = name or UnitExists("target") and (UnitName("target"))
-	if UnitInRaid(name) and UnitIsPlayer(name) then
-		disenchanter_name = name
-	end
-end
 
 BINDING_HEADER_XLOOTMASTER = "XLootMaster"
-BINDING_NAME_XLM_SETBANKER = L.BINDING_BANKER
-BINDING_NAME_XLM_SETDE = L.BINDING_DISENCHANTER
 
 StaticPopupDialogs["CONFIRM_XLOOT_DISTRIBUTION"] = {
 	text = TEXT(CONFIRM_LOOT_DISTRIBUTION),

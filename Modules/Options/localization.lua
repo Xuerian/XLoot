@@ -131,7 +131,9 @@ local locales = {
 			-- Option labels
 			menu_roll = "Show raid roll",
 			menu_disenchant = "Show disenchanter",
+ 			menu_disenchanters = "Disenchant character names",
 			menu_bank = "Show banker",
+			menu_bankers = "Banker character names",
 			menu_self = "Show self",
 			award_qualitythreshold = "Minimum announce quality",
 			award_channel = "Default chat announce channel",

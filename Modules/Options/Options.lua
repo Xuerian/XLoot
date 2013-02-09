@@ -567,9 +567,11 @@ function addon:OnEnable() -- Construct addon option tables here
 		}
 		addon:RegisterOptions({ name = "Master", addon =  XLootMaster }, {
 			{ "specialrecipients", "group", {
-				{ "menu_disenchant", "toggle" },
-				{ "menu_bank", "toggle" },
 				{ "menu_self", "toggle" },
+				{ "menu_disenchant", "toggle" },
+				{ "menu_disenchanters", "input", requires="menu_disenchant" },
+				{ "menu_bank", "toggle" },
+				{ "menu_bankers", "input", requires="menu_bank" },
 			}},
 			{ "raidroll", "group", {
 				{ "menu_roll", "toggle" },
