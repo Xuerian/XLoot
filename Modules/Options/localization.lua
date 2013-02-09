@@ -129,6 +129,7 @@ local locales = {
 			raidroll = "Special Rolls Menu",
 			awardannounce = "Announce Item Distribution",
 			-- Option labels
+			confirm_qualitythreshold = "Minimum confirm quality",
 			menu_roll = "Show raid roll",
 			menu_disenchant = "Show disenchanter",
  			menu_disenchanters = "Disenchant character names",

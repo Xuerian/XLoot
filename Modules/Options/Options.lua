@@ -556,6 +556,8 @@ function addon:OnEnable() -- Construct addon option tables here
 				end
 			end
 		end
+		table.insert(item_qualities, 1, { -1, ALWAYS })
+		table.insert(item_qualities, { 10, NEVER })
 		local channels = {
 				{ 'AUTO', L.desc_channel_auto },
 				{ 'SAY', CHAT_MSG_SAY },
@@ -566,6 +568,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ 'NONE', NONE },
 		}
 		addon:RegisterOptions({ name = "Master", addon =  XLootMaster }, {
+			{ "confirm_qualitythreshold", "select", item_qualities },
 			{ "specialrecipients", "group", {
 				{ "menu_self", "toggle" },
 				{ "menu_disenchant", "toggle" },

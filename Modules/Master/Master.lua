@@ -24,6 +24,7 @@ local defaults = {
 		menu_bank = true,
 		menu_bankers = "",
 		menu_self = true,
+		confirm_qualitythreshold = MASTER_LOOT_THREHOLD,
 		award_qualitythreshold = 2,
 		award_channel = 'AUTO',
 		award_guildannounce = false,
@@ -124,7 +125,7 @@ function addon.GiveLoot(frame, special)
 	local data = { slot = slot, link = link, special = special, quality = quality, pname = pname, id = id  }
 	local dialog
 	
- 	if ( quality >= MASTER_LOOT_THREHOLD ) then
+ 	if ( quality >= opt.confirm_qualitythreshold ) then
  		dialog = StaticPopup_Show("CONFIRM_XLOOT_DISTRIBUTION", ITEM_QUALITY_COLORS[quality].hex..itemname..FONT_COLOR_CODE_CLOSE, pname)
 		if dialog then
 			dialog.data = data
@@ -454,7 +455,4 @@ function addon.SlashHandler(msg)
 end
 
 
---@do-not-package@
-local AC = LibStub('AceConsole-2.0', true)
-if AC then print = function(...) AC:PrintLiteral(...) end end
---@end-do-not-package@
+
