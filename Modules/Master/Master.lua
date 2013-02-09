@@ -27,6 +27,7 @@ local defaults = {
 		award_qualitythreshold = 2,
 		award_channel = 'AUTO',
 		award_guildannounce = false,
+		award_special = true,
 	}
 }
 
@@ -97,8 +98,12 @@ end
 -- Addon functions
 function addon.AnnounceAward(data)
 	if data.quality >= opt.award_qualitythreshold then
+		if data.special and not opt.award_special then return end
 		local out = OutChannel(opt.award_channel)
 		local text = (L.ITEM_AWARDED):format(data.pname,data.link)
+		if data.special then
+			text = text .. " ("..data.special..")"
+		end
 		if out then
 			SendChatMessage(text, out)
 		end
@@ -108,7 +113,7 @@ function addon.AnnounceAward(data)
 	end
 end
 
-function addon.GiveLoot(frame)
+function addon.GiveLoot(frame, special)
 	local slot = LootFrame.selectedSlot
 	local quality = LootFrame.selectedQuality
 	local itemname = LootFrame.selectedItemName
@@ -116,7 +121,7 @@ function addon.GiveLoot(frame)
 	local link = GetLootSlotLink(slot)	
 	local pname = index_name[id]
 	
-	local data = { slot = slot, link = link, quality = quality, pname = pname, id = id  }
+	local data = { slot = slot, link = link, special = special, quality = quality, pname = pname, id = id  }
 	local dialog
 	
  	if ( quality >= MASTER_LOOT_THREHOLD ) then
@@ -236,6 +241,7 @@ function addon.BuildRaidMenuRecipients(level)
 					info.notCheckable = 1
 					info.text = L.ML_SELF
 					info.func = addon.GiveLoot
+					info.arg1 = L.ML_SELF
 					info.icon = "Interface\\GossipFrame\\VendorGossipIcon"
 					UIDropDownMenu_AddButton(info,level)
 				end
@@ -250,6 +256,7 @@ function addon.BuildRaidMenuRecipients(level)
 					info.notCheckable = 1
 					info.text = L.ML_BANKER.." ("..candidate..")"
 					info.func = addon.GiveLoot
+					info.arg1 = L.ML_BANKER
 					info.icon = "Interface\\Minimap\\Tracking\\Banker"
 					UIDropDownMenu_AddButton(info,level)
 				end
@@ -264,6 +271,7 @@ function addon.BuildRaidMenuRecipients(level)
 					info.notCheckable = 1
 					info.text = L.ML_DISENCHANTER.." ("..candidate..")"
 					info.func = addon.GiveLoot
+					info.arg1 = L.ML_DISENCHANTER
 					info.icon = "Interface\\Buttons\\UI-GroupLoot-DE-Up"
 					UIDropDownMenu_AddButton(info,level)
 				end

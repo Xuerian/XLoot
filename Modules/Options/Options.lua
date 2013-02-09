@@ -580,6 +580,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "award_qualitythreshold", "select", item_qualities },
 				{ "award_channel", "select", channels },
 				{ "award_guildannounce", "toggle" },
+				{ "award_special", "toggle" },
 			}},
 		})
 	end

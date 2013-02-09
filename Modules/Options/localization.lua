@@ -138,6 +138,7 @@ local locales = {
 			award_qualitythreshold = "Minimum announce quality",
 			award_channel = "Default chat announce channel",
 			award_guildannounce = "Echo in guild chat",
+			award_special = "Announce special recipients",
 		},
 		desc_channel_auto = "Highest available",
 		growth_direction = "Growth direction",
