@@ -432,6 +432,9 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_collapse", "toggle" },
 				{ "loot_texts_lock", "toggle", width = "double" },
 				{ "loot_alpha", "alpha" },
+				{ "loot_icon_size", "range", 16, 64, 1, name = L.icon_size },
+				{ "loot_row_height", "range", 14, 64, 1 },
+				--{ "loot_slot_padding", "range", }
 			}},
 			{ "link_button", "group", {
 				{ "linkall_show", "select", when_group },
