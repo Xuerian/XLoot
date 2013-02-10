@@ -84,7 +84,7 @@ local defaults = {
 		autoloots = {
 			coin = 'never',
 			quest = 'never',
-			list = 'never'
+			list = 'solo'
 		},
 
 		autoloot_item_list = '',
