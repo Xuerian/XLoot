@@ -820,7 +820,6 @@ do
 
 		-- Legacy close button
 		local x = CreateFrame("Button", nil, f)
-		x:SetScript('OnClick', CloseLoot)
 		x:SetWidth(30)
 		x:SetHeight(30)
 		local xtex = [[Interface\Buttons\UI-Panel-MinimizeButton-]]
@@ -843,6 +842,7 @@ do
 			f:SetScript('OnHide', OnHide)
 			lb:SetScript('OnClick', LinkClick)
 			cb:SetScript('OnClick', CloseLoot)
+			x:SetScript('OnClick', CloseLoot)
 			f.SnapToCursor = SnapToCursor
 		end
 
