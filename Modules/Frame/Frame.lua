@@ -258,8 +258,7 @@ local function Darken(mult, ...)
 end
 
 local function GetColor(self, key, mult)
-	local opt, skin, t = self.opt, self.skin
-	local raw, default = rawget(opt, key), defaults.profile[key]
+	local skin, raw, default = self.skin, rawget(self.opt, key), defaults.profile[key]
 	-- Use options if different from defaults
 	if raw and (raw[1] ~= default[1] or raw[2] ~= default[2] or raw[3] ~= default[3] or raw[4] ~= default[4]) then
 		t = raw
@@ -268,7 +267,7 @@ local function GetColor(self, key, mult)
 		t = skin[key]
 	-- Use defaults
 	else
-		t = defaults.profile[key]
+		t = default
 	end
 	-- Darken
 	if mult then
