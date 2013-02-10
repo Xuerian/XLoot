@@ -15,7 +15,24 @@
 	end
 --]]---------------------------------------
 
+-- Include QDKP2 compatibility by request
 function XLootButtonOnClick(row, button, handled)
+	if not handled 
+		and QDKP2_IsManagingSession
+		and IsAltKeyDown()
+		and button == 'LeftButton'
+		and GetLootSlotLink(row.slot)
+		and QDKP2_IsManagingSession()
+		and row.quality > GetLootThreshold()
+		and (not QDKP2_BidM_isBidding())
+	then
+		pcall(QDKP2_BidM_StartBid, row.item)
+		if QDKP2GUI_Roster then
+			QDKP2GUI_Roster:ChangeList('bid')
+			QDKP2GUI_Roster:Show()
+		end
+		return true
+	end
 	return handled
 end
 
@@ -345,21 +362,7 @@ do
 
 	local function OnClick(self, button)
 		if not XLootButtonOnClick(self, button) then
-			if
-				QDKP2_IsManagingSession
-				and IsAltKeyDown()
-				and button == 'LeftButton'
-				and GetLootSlotLink(self.slot)
-				and QDKP2_IsManagingSession()
-				and self.quality > GetLootThreshold()
-				and (not QDKP2_BidM_isBidding())
-			then
-				pcall(QDKP2_BidM_StartBid, self.item)
-				if QDKP2GUI_Roster then
-					QDKP2GUI_Roster:ChangeList('bid')
-					QDKP2GUI_Roster:Show()
-				end
-			elseif IsModifiedClick() then
+			if IsModifiedClick() then
 				HandleModifiedItemClick(GetLootSlotLink(self.slot))
 			else
 	 			LootButton_OnClick(self, button)
