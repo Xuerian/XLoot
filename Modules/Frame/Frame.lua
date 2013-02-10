@@ -66,6 +66,9 @@ local defaults = {
 		font_size_quantity = 10,
 		font_size_bottombuttons = 10,
 
+		loot_icon_size = 34,
+		loot_row_height = 30,
+
 		loot_highlight = true,
 		
 		loot_alpha = 1.0,
@@ -248,6 +251,13 @@ local function OnDragStop()
 	opt.frame_position_y = XLootFrame:GetTop()
 end
 
+-- Fontstring sizes
+local function AdjustFontstringSize(self)
+	local text = self:GetText()
+	self:SetHeight(self:GetStringHeight())
+	self:SetText(text)
+end
+
 -- Colors
 local function Darken(mult, ...)
 	local r, g, b, a = ...
@@ -381,9 +391,18 @@ do
 		-- Text
 		self.text_name:SetFont(opt.font, opt.font_size_loot)
 		self.text_info:SetFont(opt.font, opt.font_size_info)
-		self.text_quantity:SetFont(opt.font, opt.font_size_quantity)
+		self.text_quantity:SetFont(opt.font, opt.font_size_quantity, 'outline')
 		self.text_bind:SetFont(opt.font, 8, 'outline')
 		self.text_locked:SetFont(opt.font, 9, 'outline')
+
+		-- Resize fontstrings
+		AdjustFontstringSize(self.text_name)
+		AdjustFontstringSize(self.text_info)
+
+		-- Dimensions
+		self.frame_item:SetWidth(opt.loot_icon_size)
+		self.frame_item:SetHeight(opt.loot_icon_size)
+		self:SetHeight(opt.loot_row_height)
 		
 		-- Calculated row height
 		owner.row_height = self:GetHeight() + owner.skin.row_spacing
@@ -465,10 +484,9 @@ do
 		if self.layout ~= layout then
 			self.layout = layout
 			if layout == 'simple' then
-				self:OffsetText(self.text_name, -9)
+				self.text_name:SetPoint('LEFT', self.frame_item, 'RIGHT', 2, 0)
 			else
-				self:OffsetText(self.text_name, -5)
-				self:OffsetText(self.text_info, -15)
+				self.text_name:SetPoint('LEFT', self.frame_item, 'RIGHT', 2, (self.text_info:GetHeight()/2))
 			end
 		end
 
@@ -498,8 +516,7 @@ do
 
 	-- Factory
 	function BuildRow(frame, i)
-		local frame_name = frame:GetName()..'Button'..i
-		local fake = frame.fake
+		local frame_name, opt, fake = frame:GetName()..'Button'..i, frame.opt, frame.fake
 		-- Create frames
 		local row = CreateFrame('Button', fake and nil or frame_name, frame)
 		local item = CreateFrame('Frame', nil, row)
@@ -519,8 +536,12 @@ do
 		smalltext(bind, 8, 'outline')
 		smalltext(locked, 9, 'outline')
 		smalltext(quantity, opt.font_size_quantity, 'outline')
+		name:SetPoint('RIGHT', row, 'RIGHT', -4, 0)
+		info:SetPoint('TOPLEFT', name, 'BOTTOMLEFT', 8, 0)
+		info:SetPoint('TOPRIGHT', name, 'BOTTOMRIGHT')
 		textpoints(name, item, row, 2)
 		textpoints(info, item, row, 8)
+		info:SetPoint('TOP', name, 'BOTTOM')
 		bind:SetPoint('BOTTOMLEFT', 2, 2)
 		quantity:SetPoint('BOTTOMRIGHT', -2, 2)
 		quantity:SetJustifyH('RIGHT')
@@ -528,14 +549,11 @@ do
 		locked:SetText(LOCKED)
 		locked:SetTextColor(1, .2, .1)
 
-		-- Align frames
-		row:SetHeight(30)
+		-- Align frames (Dimensions set in UpdateAppearance)
 		row:SetPoint('LEFT', 10, 0)
 		row:SetPoint('RIGHT', -10, 0)
 
 		item:SetPoint('LEFT', 0, 0)
-		item:SetHeight(34)
-		item:SetWidth(34)
 		tex:SetPoint('TOPLEFT', 3, -3)
 		tex:SetPoint('BOTTOMRIGHT', -3, 3)
 		tex:SetTexCoord(.07,.93,.07,.93)
