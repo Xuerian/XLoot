@@ -419,6 +419,9 @@ do
 			self:SetHighlightColor(0, 0, 0, 0)
 			self.frame_item:SetHighlightColor(0, 0, 0, 0)
 		end
+
+		-- Clear layout cache
+		self.layout = nil
 	end
 
 	-- Bind texts
