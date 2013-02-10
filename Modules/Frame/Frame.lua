@@ -130,8 +130,6 @@ function addon:OnEnable()
 
 	-- Register for escape close
 	table.insert(UISpecialFrames, "XLootFrame")
-
-	XLootFrame:SetScript('OnHide', function(self) pcall(LootFrame_OnHide) end)
 	
 	-- Reattach master looter frame
 	MasterLooterFrame:SetScript('OnShow', 
@@ -644,6 +642,14 @@ do
 			LinkLoot(self:GetParent().opt.linkall_channel)
 		end
 	end
+
+	local function OnHide(self)
+		pcall(LootFrame_OnHide)
+		for i,v in ipairs(self.rows) do
+			v:Hide()
+		end
+		CloseLoot()
+	end
 	
 	-- Bottom buttons
 	local function BottomButton(frame, name, text, justify)
@@ -814,6 +820,7 @@ do
 			f:RegisterForDrag('LeftButton')
 			f:SetScript('OnDragStart', OnDragStart)
 			f:SetScript('OnDragStop', OnDragStop)
+			f:SetScript('OnHide', OnHide)
 			lb:SetScript('OnClick', LinkClick)
 			cb:SetScript('OnClick', CloseLoot)
 			f.SnapToCursor = SnapToCursor
