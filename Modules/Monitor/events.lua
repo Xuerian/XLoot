@@ -89,7 +89,7 @@ local function extract(str, pattern)
 			args = table.concat(list, ", ")
 		-- Simple patterns
 		else
-			inverted = gsub(inverted, "%%d", "(.-)")
+			inverted = gsub(inverted, "%%d", "(%d+)")
 			inverted = gsub(inverted, "%%s", "(.-)")
 			args = "m1, m2, m3, m4, m5"
 		end
