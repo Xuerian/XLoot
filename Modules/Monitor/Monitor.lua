@@ -84,28 +84,38 @@ function addon:ApplyOptions()
 	anchor:Restack()
 end
 
-function addon.LOOT_EVENT(event, pattern, player, arg1, arg2)
-	if event == 'item' then
-		local link, num = arg1, arg2
-		local name, _, quality, _, _, _, _, _, _, icon = GetItemInfo(link)
-		if (player == me and opt.threshold_own or opt.threshold_other) > quality then
-			return -- Doesn't meet threshold requirements
-		end
-		--print(event, pattern, player, name, num)
-		local r, g, b = GetItemQualityColor(quality)
-		local nr, ng, nb
-		if player ~= me then
-			player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)))
-		else
-			player = nil
-		end
-		local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
-		local total = GetItemCount(link) + (tonumber(num) or 1)
-		row:SetTexts(player, link, opt.show_totals and (total and total > 1) and total or '', nr, ng, nb)
-		row.item = link
-	elseif event == 'coin' and opt.show_coin then
-		local copper, coin_string = arg1, arg2
+local events = {}
+function events.item(player, link, num)
+	local name, _, quality, _, _, _, _, _, _, icon = GetItemInfo(link)
+	if not name or type(quality) ~= "number" then
+		print(name and "Quality is not a number" or "Name is nil")
+		return false
+	end
+	if (player == me and opt.threshold_own or opt.threshold_other) > quality then
+		return -- Doesn't meet threshold requirements
+	end
+	local r, g, b = GetItemQualityColor(quality)
+	local nr, ng, nb
+	if player ~= me then
+		player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)))
+	else
+		player = nil
+	end
+	local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
+	local total = GetItemCount(link) + (tonumber(num) or 1)
+	row:SetTexts(player, link, total, nr, ng, nb)
+	row.item = link
+end
+
+function events.coin(coin_string, copper)
+	if opt.show_coin then
 		addon:AddRow(GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
+	end
+end
+
+function addon.LOOT_EVENT(event, pattern, ...)
+	if events[event] and events[event](...) == false then
+		print("Error handling event", event, pattern, ...)
 	end
 end
 
@@ -235,6 +245,9 @@ do
 	local function SetTexts(self, name, text, total, nr, ng, nb, tr, tg, tb)
 		self.name:SetText(name and name.." " or nil)
 		self.text:SetText(text)
+		if not opt.show_totals or not total or total <= 1 then
+			total = ''
+		end
 		self.total:SetText(total)
 		self.name:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		self.text:SetVertexColor(nr or 1, ng or 1, nb or 1)
@@ -329,6 +342,7 @@ local items = {
 	{ 37254 },
 	{ 13262 },
 	{ 15487 },
+	{ 72120 },
 	{ 2589 }
 }
 for i,v in ipairs(items) do
