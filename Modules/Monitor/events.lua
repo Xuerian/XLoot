@@ -8,6 +8,10 @@ if not lib then return nil end
 			player_name, item_link, num_items
 		event: 'coin'
 			player_name, total_copper, coin_string
+		event: 'currency'
+			currency, num_currency
+		event: 'crafted'
+			item_link, num_items
 
 	LootEvents:RegisterGroupCallback(func)
 		Triggers func when "Group" loot mode events are recieved
@@ -241,9 +245,23 @@ do
 	handler('LOOT_ITEM_SELF_MULTIPLE', function(what, num) loot(player, what, num) end)
 
 	-- Add coin patterns
-	handler('LOOT_MONEY', function(who, str) coin(who, str) end)
+	handler('LOOT_MONEY', coin)
 	handler('LOOT_MONEY_SPLIT', function(str) coin(player, str) end)
 	handler('YOU_LOOT_MONEY', function(str) coin(player, str) end)
+
+	-- Currency patterns
+	function currency(link, num)
+		trigger_loot('currency', link:match('currency:(%d+)'), num or 1)
+	end
+	handler('CURRENCY_GAINED', currency)
+	handler('CURRENCY_GAINED_MULTIPLE', currency)
+
+	-- Self crafting
+	function crafted(what, num)
+		trigger_loot('crafted', what, num or 1)
+	end
+	handler('LOOT_ITEM_CREATED_SELF', crafted)
+	handler('LOOT_ITEM_CREATED_SELF_MULTIPLE', crafted)
 end
 
 

@@ -26,6 +26,8 @@ local defaults = {
 		threshold_own = 1,
 		threshold_other = 2,
 		show_coin = true,
+		show_currency = true,
+		show_crafted = true,
 
 		show_totals = false,
 
@@ -110,6 +112,19 @@ end
 function events.coin(coin_string, copper)
 	if opt.show_coin then
 		addon:AddRow(GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
+	end
+end
+
+function events.currency(id, num)
+	if opt.show_currency then
+		local name, total, icon = GetCurrencyInfo(id)
+		addon:AddRow('Interface/Icons/'..icon, opt.fade_own, 1, 1, 1, 1, 1, 1):SetTexts(nil, name, total)
+	end
+end
+
+function events.crafted(link, num)
+	if opt.show_crafted then
+		events.item(me, link, num)
 	end
 end
 

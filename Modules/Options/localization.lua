@@ -121,7 +121,7 @@ local locales = {
 			details = "Details",
 			-- Option labels
 			visible = "Anchor visible",
-			show_coin = "Show coin drops",
+			show_crafted = "Crafted",
 			show_totals = "Show total items in inventory"
 		},
 		Master = {

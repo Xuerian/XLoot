@@ -541,8 +541,12 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "thresholds", "group", {
 				{ "threshold_own", "select", item_qualities, name = L.items_own },
 				{ "threshold_other", "select", item_qualities, name = L.items_others },
-				{ "show_coin", "toggle" }
 			}},
+			{ "filters", "group", {
+				{ "show_coin", name = MONEY },
+				{ "show_currency", name = CURRENCY },
+				"show_crafted"
+			}, name = FILTERS },
 			{ "fading", "group", {
 				{ "fade_own", "range", 1, 30, 1, name = L.items_own },
 				{ "fade_other", "range", 1, 30, 1, name = L.items_others }
