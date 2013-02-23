@@ -27,6 +27,7 @@ local locales = {
 			autoloot_coin_desc = "When to automatically loot coin",
 			autoloot_quest = "Auto loot quest items",
 			autoloot_quest_desc = "When to automatically loot quest items",
+			autoloot_all = "Auto loot everything",
 			autoloot_list = "Auto loot listed items",
 			autoloot_list_desc = "When to automatically loot listed items",
 			autoloot_item_list = "Items to loot",
@@ -68,6 +69,8 @@ local locales = {
 			autolooting_text = "XLoot's autolooting features act separately from the default UI. As such, if both are enabled, you may recieve warnings like 'that object is busy'. They are safe to ignore, but can be resolved by picking one autoloot method to use exclusively.",
 
 			autolooting_list = "To automatically loot specific items, list them below.\n  Example: Linen Cloth,Ashbringer,Copper Ore",
+
+			autolooting_details = "XLoot will choose the highest setting when deciding to loot a slot. This allows, for example, auto looting everything while solo yet only quest items and money while in a group.",
 		},
 		Group = {
 			panel_title = "Group Loot",

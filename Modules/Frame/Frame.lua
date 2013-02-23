@@ -87,7 +87,8 @@ local defaults = {
 		autoloots = {
 			coin = 'never',
 			quest = 'never',
-			list = 'solo'
+			list = 'solo',
+			all = 'never',
 		},
 
 		autoloot_item_list = '',
@@ -908,12 +909,12 @@ function XLootFrame:Update(in_options)
 			local looted = false
 			
 			-- Autolooting coin
-			if auto.coin and GetLootSlotType(slot) == LOOT_SLOT_MONEY then
+			if (auto.all or auto.coin) and GetLootSlotType(slot) == LOOT_SLOT_MONEY then
 				LootSlot(slot)
 				looted = true
 				
 			-- Autolooting quest items
-			elseif (auto.quest and isQuestItem) or (auto.list and auto_items[name]) then
+			elseif auto.all or (auto.quest and isQuestItem) or (auto.list and auto_items[name]) then
 				-- Cache available space
 				if auto_space == nil then
 					local open = 0

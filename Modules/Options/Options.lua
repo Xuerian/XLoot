@@ -459,9 +459,11 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "autolooting_text", "description" },
 				{ "autoloot_coin", "select", when_group, subtable = "autoloots", subkey = "coin" },
 				{ "autoloot_quest", "select", when_group, subtable = "autoloots", subkey = "quest" },
+				{ "autoloot_all", "select", when_group, subtable = "autoloots", subkey = "all" },
 				{ "autolooting_list", "description" },
 				{ "autoloot_list", "select", when_group, subtable = "autoloots", subkey = "list" },
-				{ "autoloot_item_list", "input", width = "double" }
+				{ "autoloot_item_list", "input", width = "double" },
+				{ "autolooting_details", "description" },
 			}},
 			{ "fonts", "group", {
 				{ "font", "input" },
