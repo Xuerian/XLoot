@@ -27,7 +27,7 @@ XLootOptions:RegisterAceOptionTable("ModuleName", ace_option_table)
 
 Features/Finalize:
 - Fill missing localization from XLootOptions.L[module_data.name][key|key_desc]
-- Generate .values from {{ "key", "value" }} .item tables and set them appropriately
+- Generate .values from {{ "key", "value" }, ...} .item tables and set them appropriately
 - Get/Set from db key/subkey instead of key via .subtable[, .subkey]
 - Propagate .defaults to child nodes
 - Default type "toggle"
@@ -38,6 +38,8 @@ Features/BetterOptions:
 - Nested tables with implied ordering and table values:
 -- Basic structure: { "key", "type"[, arg1[, ...]] [, key = value[, ...]] }
 -- Examples: 
+-- "key" -> { "key", "toggle" }
+-- { "key", option = "blah" } -> { "key", "toggle", option = "blah" }
 -- { "key", "group", inline } -> key = { type = "group", inline = true }
 -- { "key", "execute", func } -> key = { type = "execute", func = func }
 -- { "key", "select", items }
@@ -171,8 +173,8 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	function BetterOptions:Compile(set)
 		for i,v in ipairs(set) do
-			v.order = i
 			local t, key = self:any(v)
+			t.order = i
 			set[key] = t
 			set[i] = nil
 		end
@@ -180,9 +182,14 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	function BetterOptions:any(t)
+		-- Simple
+		if type(t) == 'string' then
+			t = { t }
+		end
+
 		-- Shift required elements
 		local key = table_remove(t, 1)
-		t.type = table_remove(t, 1)
+		t.type = table_remove(t, 1) or "toggle"
 
 		-- Handle specific option types
 		if self[t.type] then
