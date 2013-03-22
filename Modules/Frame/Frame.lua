@@ -77,6 +77,7 @@ local defaults = {
 		frame_snap = true,
 		frame_snap_offset_x = 0,
 		frame_snap_offset_y = 0,
+		frame_grow_upwards = false, -- Actually means "Snap to bottom item"
 		
 		frame_width_automatic = true,
 		frame_width = 150,
@@ -249,7 +250,7 @@ end
 local function OnDragStop()
 	XLootFrame:StopMovingOrSizing()
 	opt.frame_position_x = XLootFrame:GetLeft()
-	opt.frame_position_y = XLootFrame:GetTop()
+	opt.frame_position_y = opt.frame_grow_upwards and XLootFrame:GetBottom() or XLootFrame:GetTop()
 end
 
 -- Fontstring sizes
@@ -627,7 +628,7 @@ do
 		if opt.frame_snap then
 			-- Horizontal position
 			if not f:IsShown() then
-				x = (x / s) - 30
+				x = (x / s) - 25
 				local sWidth, fWidth, uWidth = GetScreenWidth(), f:GetWidth(), UIParent:GetWidth()
 				if uWidth > sWidth then sWidth = uWidth end
 				if x + fWidth > sWidth then x = sWidth - fWidth end
@@ -638,7 +639,7 @@ do
 			end
    
 			-- Vertical position
-			y = (y / s) + 30
+			y = (y / s) + 25 * (opt.frame_grow_upwards and -1 or 1)
 			local sHeight, fHeight, uHeight = GetScreenHeight(), f:GetHeight(), UIParent:GetHeight()
 			if uHeight > sHeight then sHeight = uHeight end
 			if y > sHeight then y = sHeight end
@@ -651,7 +652,7 @@ do
    
 		-- Apply
 		f:ClearAllPoints()
-		f:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x, y)
+		f:SetPoint((opt.frame_grow_upwards and "BOTTOMLEFT" or "TOPLEFT"), UIParent, "BOTTOMLEFT", x, y)
 	end
 
 	

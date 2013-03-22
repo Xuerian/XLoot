@@ -61,6 +61,7 @@ local locales = {
 			frame_snap = "Snap frame to mouse",
 			frame_snap_offset_x = "Horizontal snap offset",
 			frame_snap_offset_y = "Vertical snap offset",
+			frame_grow_upwards = "Expand frame upwards",
 			frame_draggable = "Loot frame draggable",
 			linkall_threshold = "Minimum chat link quality",
 			linkall_channel = "Default chat link channel",
