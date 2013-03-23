@@ -875,7 +875,7 @@ end
 local auto, auto_items = {}, {}
 function XLootFrame:ParseAutolootList()
 	wipe(auto_items)
-	for item in opt.autoloot_item_list:gmatch("(%s+[^,]+%s+)") do
+	for item in opt.autoloot_item_list:gmatch("%s*([^,]+)%s*") do
 		auto_items[item] = true
 	end
 end
