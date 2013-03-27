@@ -231,15 +231,15 @@ do
 	-- Account for Russian locale using the same string for LOOT_MONEY as LOOT_ITEM_SELF
 	if GetLocale() == "ruRU" then
 		handler('LOOT_ITEM_SELF', function(what)
-			local c = ParseCoinString(what)
-			if c > 0 then
-				trigger_loot('coin', player, c, what)
+			if not what:match("|H") then -- No link, match coins
+				trigger_loot('coin', player, ParseCoinString(what), what)
 			else
 				loot(player, what)
 			end
 		end)
 	else
 		handler('LOOT_ITEM_SELF', function(what) loot(player, what) end)
+		handler('YOU_LOOT_MONEY', function(str) coin(player, str) end)
 	end
 
 	handler('LOOT_ITEM_SELF_MULTIPLE', function(what, num) loot(player, what, num) end)
@@ -247,7 +247,6 @@ do
 	-- Add coin patterns
 	handler('LOOT_MONEY', coin)
 	handler('LOOT_MONEY_SPLIT', function(str) coin(player, str) end)
-	handler('YOU_LOOT_MONEY', function(str) coin(player, str) end)
 
 	-- Currency patterns
 	function currency(link, num)
