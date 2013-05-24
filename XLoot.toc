@@ -1,4 +1,4 @@
-﻿## Interface: 50200
+﻿## Interface: 50300
 ## Title: XLoot
 ## Notes: Core module for Loot and Looting-related UI improvements
 ## Version: @project-version@
