@@ -70,34 +70,41 @@ return function(message)
 	return %s
 end]]
 
-local invert_cache, match, gsub, insert = {}, string.match, string.gsub, table.insert
+-- Return a inverted match string and corresponding list of ordered match slots (m1-m5)
+local match, gsub, insert = string.match, string.gsub, table.insert
+local function invert(pattern)
+	local inverted, arglist = pattern
+	-- Escape magic characters
+	inverted = gsub(inverted, "%(", "%%(")
+	inverted = gsub(inverted, "%)", "%%)")
+	inverted = gsub(inverted, "%-", "%%-")
+	inverted = gsub(inverted, "%+", "%%+")
+	inverted = gsub(inverted, "%.", "%%.")
+	-- Account for reordered replacements
+	local k = match(inverted, '%%(%d)%$')
+	if k then
+		local i, list = 1, wipe(temp_list)
+		while k ~= nil do
+			inverted = gsub(inverted, "(%%%d%$.)", "(.-)", 1)
+			list[i] = 'm'..tostring(k)
+			k, i = match(inverted, "%%(%d)%$"), i + 1
+		end
+		arglist = table.concat(list, ", ")
+	-- Simple patterns
+	else
+		inverted = gsub(inverted, "%%d", "(%%d+)")
+		inverted = gsub(inverted, "%%s", "(.-)")
+		arglist = "m1, m2, m3, m4, m5"
+	end
+	return inverted, arglist
+end
+
+-- Match string against a pattern, caching the inverted pattern
+local invert_cache = {}
 local function extract(str, pattern)
 	local func = invert_cache[pattern]
 	if not func then
-		local inverted, args = pattern
-		-- Escape magic characters
-		inverted = gsub(inverted, "%(", "%%(")
-		inverted = gsub(inverted, "%)", "%%)")
-		inverted = gsub(inverted, "%-", "%%-")
-		inverted = gsub(inverted, "%+", "%%+")
-		inverted = gsub(inverted, "%.", "%%.")
-		-- Account for reordered replacements
-		local k = match(inverted, '%%(%d)%$')
-		if k then
-			local i, list = 1, wipe(temp_list)
-			while k ~= nil do
-				inverted = gsub(inverted, "(%%%d%$.)", "(.-)", 1)
-				list[i] = 'm'..tostring(k)
-				k, i = match(inverted, "%%(%d)%$"), i + 1
-			end
-			args = table.concat(list, ", ")
-		-- Simple patterns
-		else
-			inverted = gsub(inverted, "%%d", "(%%d+)")
-			inverted = gsub(inverted, "%%s", "(.-)")
-			args = "m1, m2, m3, m4, m5"
-		end
-		func = loadstring(template:format(inverted, args))()
+		func = loadstring(template:format(invert(pattern)))()
 		invert_cache[pattern] = func
 	end
 	return func(str)
