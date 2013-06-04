@@ -312,3 +312,144 @@ do
 	handler('LOOT_ROLL_YOU_WON', function(item) trigger_group('won', item, player) end)
 	handler('LOOT_ROLL_WON', function(who, item) trigger_group('won', item, who == YOU and player or who) end)
 end
+
+--@do-not-package@
+local test = false
+local test_verbose = false
+local AC = LibStub('AceConsole-2.0', true)
+
+if AC then print = function(...) AC:PrintLiteral(...) end end
+
+local items = {
+	-- { 52722 },
+	-- { 31304 },
+	-- { 37254 },
+	-- { 13262 },
+	-- { 15487 },
+	{ 72120 },
+	{ 76137 },
+	-- { 2589 }
+}
+
+for i,v in ipairs(items) do
+	GetItemInfo(v[1])
+end
+
+XLoot:SetSlashCommand("xe", function(msg)
+	for i=1,4 do
+		Handler((LOOT_ITEM_SELF):format(select(2, GetItemInfo(items[random(1, #items)][1]))))
+	end
+	Handler((YOU_LOOT_MONEY):format("1 Gold, 2 Silver, 3 Copper"))
+end)
+
+local locales = {
+	zhTW = {
+		-- item = "[崑萊碎肉塊]",
+		strings = {
+			LOOT_ITEM = "%s獲得戰利品:%s。",
+			LOOT_ITEM_CREATED_SELF = "你製造了:%s。",
+			LOOT_ITEM_CREATED_SELF_MULTIPLE = "你製造了:%sx%d。",
+			LOOT_ITEM_MULTIPLE = "%s獲得戰利品:%sx%d。",
+			LOOT_ITEM_PUSHED_SELF = "你獲得了物品:%s。",
+			LOOT_ITEM_PUSHED_SELF_MULTIPLE = "你獲得物品:%sx%d。",
+			LOOT_ITEM_REFUND = "退回給你的費用為:%s。",
+			LOOT_ITEM_REFUND_MULTIPLE = "退回給你的費用為:%sx%d。",
+			LOOT_ITEM_SELF = "你拾取了物品:%s。",
+			LOOT_ITEM_SELF_MULTIPLE = "你獲得戰利品:%sx%d。",
+			LOOT_ITEM_WHILE_PLAYER_INELIGIBLE = "%s獲得戰利品:|TInterface\\Common\\Icon-NoLoot:13:13:0:0|t%s",
+			LOOT_MONEY = "%s拾取了%s。",
+			LOOT_MONEY_REFUND = "退回給你的費用為%s。",
+			LOOT_MONEY_SPLIT = "你分到%s。",
+			LOOT_MONEY_SPLIT_GUILD = "你分到%s。(%s存放在公會銀行)",
+			YOU_LOOT_MONEY = "你拾取了%s",
+			YOU_LOOT_MONEY_GUILD = "你拾取了%s(%s存放在公會銀行)",
+		}
+	}
+}
+local locale_mt = {
+	__index = {
+		item = "[Linen Cloth]",
+		player = "Xuerian",
+		money = "1 Gold",
+		guild = "Some guild",
+		number = 5
+	}
+}
+
+local function test_table_from_locale(t)
+	return {
+		LOOT_ITEM_CREATED_SELF = {t.item},
+		LOOT_ITEM_CREATED_SELF_MULTIPLE = {t.item, t.number},
+		LOOT_ITEM = {t.player, t.item},
+		LOOT_ITEM_MULTIPLE = {t.player, t.item, t.number},
+		LOOT_ITEM_PUSHED_SELF = {t.item},
+		LOOT_ITEM_PUSHED_SELF_MULTIPLE = {t.item, t.number},
+		LOOT_ITEM_REFUND = {t.item},
+		LOOT_ITEM_REFUND_MULTIPLE = {t.item, t.number},
+		LOOT_ITEM_SELF = {t.item},
+		LOOT_ITEM_SELF_MULTIPLE = {t.item, t.number},
+		LOOT_ITEM_WHILE_PLAYER_INELIGIBLE = {t.player, t.item},
+		LOOT_MONEY = {t.player, t.money},
+		LOOT_MONEY_REFUND = {t.money},
+		LOOT_MONEY_SPLIT = {t.money},
+		LOOT_MONEY_SPLIT_GUILD = {t.money, t.guild},
+		YOU_LOOT_MONEY = {t.money},
+		YOU_LOOT_MONEY_GUILD = {t.money, t.guild}
+	}
+end
+
+local function tprint(...)
+	if test_verbose then
+		print(...)
+	end
+end
+
+-- Test each locale
+local function inv(pat) return select(1, invert(pat)) end
+local fmt = string.format
+for locale, t in pairs(locales) do
+	setmetatable(t, locale_mt)
+	-- setmetatable(t.strings, string_mt)
+	local test_table = test_table_from_locale(t)
+	local pass, fail = 0, 0
+	-- Test each string
+	for k, p in pairs(t.strings) do
+		-- Fake string
+		local test = p:format(unpack(test_table[k]))
+		-- Emulate Handle(text)
+		local m1, m2, m3, m4, matched
+		for i, v in ipairs(loot_patterns) do
+			if t.strings[v[3]] then
+				m1, m2, m3, m4 = extract(test, t.strings[v[3]])
+				if m1 then
+					matched = v[3]
+					break
+				end
+			else
+				-- cprint("[INCOMPLETE] string missing", v[3], locale)
+			end
+		end
+		-- String results
+		if matched == k then
+			tprint(fmt("[PASS] matched %s (%s) against %s", matched, inv(t.strings[k]), test), m1, m2, m3, m4)
+			pass = pass + 1
+		else
+			if matched then
+				tprint(fmt("[FAIL] expected %s, matched %s (%s vs %s) against %s", k, matched, inv(t.strings[matched]), inv(t.strings[k]), test), m1, m2, m3)
+			else
+				tprint(fmt("[FAIL] no match for %s (%s) against %s", k, inv(t.strings[k]), test))
+			end
+			fail = fail + 1
+		end
+	end
+	-- Locale results
+	if pass == 0 then
+		print("[FAIL ALL]", locale)
+	elseif fail ~= 0 then
+		print(("[FAIL %s/%s]"):format(fail, fail+pass), locale)
+	else
+		print("[PASS]", localse)
+	end
+end
+
+--@end-do-not-package@
