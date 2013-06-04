@@ -143,25 +143,13 @@ local function Handler(text)
 	end
 
 	if need_loot then
-		-- Optimize by grouped/not and weight patterns by usage
-		-- Check group mode (1 corresponds to ungrouped, 2 to grouped)
-		group = IsInGroup() and 2 or 1
-		-- If we're not currently sorting for our current mode, or it's been too long since last sort, sort ourpatterns for efficiency
-		if not currentsort or currentsort ~= group or unsortedloot > 100 then
-			unsortedloot, currentsort = 0, group
-			sort(loot_patterns, sort_func)
-		else
-			unsortedloot = unsortedloot + 1
-		end
-
 		-- Match string against our patterns
 		for i, v in ipairs(loot_patterns) do
-			local m1, m2, m3, m4 = extract(text, v[3])
+			local m1, m2, m3, m4 = extract(text, v[1])
 			-- Match found, add to counter and call pattern's handler
 			if m1 then
-				v[group] = v[group] + 1
-				current_pattern = v[3]
-				return v[4](m1, m2, m3, m4)
+				current_pattern = v[1]
+				return v[2](m1, m2, m3, m4)
 			end
 		end
 	end
@@ -216,7 +204,7 @@ local player = UnitName('player')
 loot_patterns = { }
 do
 	local function handler(str, func)
-		table.insert(loot_patterns, { 0, 0, _G[str], func, str })
+		table.insert(loot_patterns, { _G[str], func, str })
 	end
 
 	-- Loot triggers
