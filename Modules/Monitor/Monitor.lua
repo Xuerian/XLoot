@@ -347,10 +347,6 @@ function addon.SlashHandler(msg)
 	end
 end
 
---@do-not-package@
-local AC = LibStub('AceConsole-2.0', true)
-if AC then print = function(...) AC:PrintLiteral(...) end end
-
 local items = {
 	{ 52722 },
 	{ 31304 },
@@ -377,12 +373,28 @@ local function random_player(is_me)
 	return is_me and players[1][1] or players[random(2, 5)][1]
 end
 
+local function random_item_num(max)
+	return random(1, 2) == 2 and random(1, max or 20) or 1
+end
+
+local function random_item_link()
+	return select(2, GetItemInfo(items[random(1, #items)][1]))
+end
+
 local function test_item(event, is_me)
-	addon.LOOT_EVENT('item', event, random_player(is_me), select(2, GetItemInfo(items[random(1, #items)][1])), random(1, 2) == 2 and random(1, 20) or 1)
+	addon.LOOT_EVENT('item', event, random_player(is_me), random_item_link(), random_item_num())
 end
 
 local function test_coin(event, is_me)
 	addon.LOOT_EVENT('coin', event, random_player(is_me), random(1, 500000), "TODO")
+end
+
+local function test_currency(event)
+	addon.LOOT_EVENT('currency', event, 81, random_item_num(5))
+end
+
+local function test_crafted(event)
+	addon.LOOT_EVENT('crafted', event, random_item_link(), random_item_num())
 end
 
 local tests = {
@@ -395,10 +407,16 @@ local tests = {
 	{ test_coin, "LOOT_MONEY" },
 	{ test_coin, "LOOT_MONEY_SPLIT", true },
 	{ test_coin, "YOU_LOOT_MONEY", true },
+	{ test_currency, "CURRENCY_GAINED" },
+	{ test_currency, "CURRENCY_GAINED_MULTIPLE" },
+	{ test_crafted, "LOOT_ITEM_CREATED_SELF" },
+	{ test_crafted, "CURRENCY_GAINED_MULTIPLE" },
+
 }
 
 local queue, queueframe, tick = {}, CreateFrame("Frame"), 0
-queueframe:SetScript("OnUpdate", function(self, elapsed)
+
+local function queue_update(self, elapsed)
 	tick = tick + elapsed
 	if tick > 0.5 then
 		tick = 0
@@ -410,12 +428,19 @@ queueframe:SetScript("OnUpdate", function(self, elapsed)
 			end
 		end
 	end
-end)
+end
 
+local qactive = false
 XLoot:SetSlashCommand("xlmd", function(msg)
 	local now = GetTime()
-	for i=1,15 do
-		table.insert(queue, { now + i, unpack(tests[random(1, #tests)]) })
+	-- for i=1,15 do
+	-- 	table.insert(queue, { now + i, unpack(tests[random(1, #tests)]) })
+	-- end
+	if not qactive then
+		queueframe:SetScript("OnUpdate", queue_update)
+		qactive = true
+	end
+	for i,v in ipairs(tests) do
+		table.insert(queue, { now + i * .5, unpack(v) })
 	end
 end)
---@end-do-not-package@
