@@ -204,6 +204,7 @@ local player = UnitName('player')
 loot_patterns = { }
 do
 	local function handler(str, func)
+		assert(_G[str], "String does not exist", str)
 		table.insert(loot_patterns, { _G[str], func, str })
 	end
 
@@ -240,7 +241,6 @@ do
 
 
 	-- Add coin patterns
-	handler('LOOT_MONEY_GUILD', coin)
 	handler('LOOT_MONEY', coin)
 	handler('LOOT_MONEY_SPLIT_GUILD', function(str) coin(player, str) end)
 	handler('LOOT_MONEY_SPLIT', function(str) coin(player, str) end)
