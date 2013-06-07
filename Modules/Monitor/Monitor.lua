@@ -104,8 +104,8 @@ function events.item(player, link, num)
 		player = nil
 	end
 	local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
-	local total = GetItemCount(link) + (tonumber(num) or 1)
-	row:SetTexts(player, link, total, nr, ng, nb)
+	local num = tonumber(num) or 1
+	row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, GetItemCount(link) + num, nr, ng, nb)
 	row.item = link
 end
 
