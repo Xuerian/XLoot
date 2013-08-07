@@ -108,11 +108,11 @@ function events.item(player, link, num)
 		local num = tonumber(num) or 1
 		row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, GetItemCount(link) + num, nr, ng, nb)
 		row.item = link
-	elseif link and link:match("|Hbattlepet:") -- Battlepets. Really?
+	elseif link and link:match("|Hbattlepet:") then -- Battlepets. Really?
 		-- local _, speciesID, level, breedQuality, maxHealth, power, speed, battlePetID = strsplit(":", link)
 	else
-		print("Unknown or invalid link type")
-		return false
+		-- print("Unknown or invalid link type")
+		-- return false
 	end
 end
 
@@ -404,6 +404,11 @@ local function test_crafted(event)
 	addon.LOOT_EVENT('crafted', event, random_item_link(), random_item_num())
 end
 
+local function test_battlepet(event)
+	print("Testing battlepet event")
+	addon.LOOT_EVENT('item', "LOOT_ITEM_PUSHED_SELF", random_player(true), "|cff0070dd|Hbattlepet:868:1:3:158:10:12:0x0000000000000000|h[Pandaren Water Spirit]|h|r", 1)
+end
+
 local tests = {
 	{ test_item, "LOOT_ITEM" },
 	{ test_item, "LOOT_ITEM_SELF", true },
@@ -418,6 +423,7 @@ local tests = {
 	{ test_currency, "CURRENCY_GAINED_MULTIPLE" },
 	{ test_crafted, "LOOT_ITEM_CREATED_SELF" },
 	{ test_crafted, "CURRENCY_GAINED_MULTIPLE" },
+	{ test_battlepet }
 
 }
 
