@@ -88,25 +88,32 @@ end
 
 local events = {}
 function events.item(player, link, num)
-	local name, _, quality, _, _, _, _, _, _, icon = GetItemInfo(link)
-	if not name or type(quality) ~= "number" then
-		print(name and "Quality is not a number" or "Name is nil")
+	if link and link:match("|Hitem:") then -- Proper items	
+		local name, _, quality, _, _, _, _, _, _, icon = GetItemInfo(link)
+		if not name or type(quality) ~= "number" then
+			print(name and "Quality is not a number" or "Name is nil")
+			return false
+		end
+		if (player == me and opt.threshold_own or opt.threshold_other) > quality then
+			return -- Doesn't meet threshold requirements
+		end
+		local r, g, b = GetItemQualityColor(quality)
+		local nr, ng, nb
+		if player ~= me then
+			player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)))
+		else
+			player = nil
+		end
+		local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
+		local num = tonumber(num) or 1
+		row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, GetItemCount(link) + num, nr, ng, nb)
+		row.item = link
+	elseif link and link:match("|Hbattlepet:") -- Battlepets. Really?
+		-- local _, speciesID, level, breedQuality, maxHealth, power, speed, battlePetID = strsplit(":", link)
+	else
+		print("Unknown or invalid link type")
 		return false
 	end
-	if (player == me and opt.threshold_own or opt.threshold_other) > quality then
-		return -- Doesn't meet threshold requirements
-	end
-	local r, g, b = GetItemQualityColor(quality)
-	local nr, ng, nb
-	if player ~= me then
-		player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)))
-	else
-		player = nil
-	end
-	local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
-	local num = tonumber(num) or 1
-	row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, GetItemCount(link) + num, nr, ng, nb)
-	row.item = link
 end
 
 function events.coin(coin_string, copper)

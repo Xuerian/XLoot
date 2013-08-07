@@ -1,4 +1,4 @@
-﻿## Interface: 50300
+﻿## Interface: 50400
 ## Title: XLoot Master
 ## Notes: Configurable Master Looter interface
 ## Version: @project-version@
