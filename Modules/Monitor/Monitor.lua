@@ -137,7 +137,7 @@ end
 
 function addon.LOOT_EVENT(event, pattern, ...)
 	if events[event] and events[event](...) == false then
-		print("Error handling event", event, pattern, ...)
+		print("XLoot Monitor: Error handling event", event, pattern, ...)
 	end
 end
 
