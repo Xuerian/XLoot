@@ -654,10 +654,8 @@ function addon:OpenPanel(module)
 		for i,frame in ipairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
 			if frame.name == "XLoot" then
 				table.remove(INTERFACEOPTIONS_ADDONCATEGORIES, i)
-				InterfaceAddOnsList_Update()
 			end
 		end
-
 		-- Generate new panel
 		AceConfigRegistry:RegisterOptionsTable("XLoot", self.config)
 		local panel = AceConfigDialog:AddToBlizOptions("XLoot")
@@ -671,7 +669,7 @@ function addon:OpenPanel(module)
 		XLoot.profile_panel = AceConfigDialog:AddToBlizOptions("XLootProfile", L.profile, "XLoot")
 		XLoot.profile_panel.default = PanelDefault
 		-- Force list to expand
-		InterfaceOptionsFrame_OpenToCategory(XLoot.profile_panel)
+		InterfaceAddOnsList_Update()
 	end
 	-- Open panel
 	InterfaceOptionsFrame_OpenToCategory(XLoot.option_panel)
