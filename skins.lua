@@ -23,6 +23,27 @@ local print = print
 -- following the same rules as custom skins
 -- Skinning
 
+do -- Public methods
+	-- Skin registration
+	local mt = { __index = lib.base }
+	function XLoot:RegisterSkin(skin_name, skin_table)
+		setmetatable(skin_table, mt)
+		skin_table.key = skin_name
+		lib.skins[skin_name] = skin_table
+	end
+
+	-- Masque tweaks
+	function XLoot:RegisterMasqueTweak(masque_name, tweak_table)
+		lib.masque_tweaks[masque_name] = tweak_table
+		-- Apply to existing skins
+		if lib.skins[masque_name] then
+			for k, v in pairs(tweak_table) do
+				lib.skins[masque_name][k] = v
+			end
+		end
+	end
+end
+
 local function subtable_insert(t, k, v)
 	if not t[k] then
 		t[k] = {}
@@ -386,15 +407,6 @@ do
 		color_mod = .9,
 	}
 
-	-- Skin registration
-	local mt = { __index = lib.base }
-	function XLoot:RegisterSkin(skin_name, skin_table)
-		setmetatable(skin_table, mt)
-		skin_table.key = skin_name
-		lib.skins[skin_name] = skin_table
-	end
-
-
 	-- Register default skins
 	XLoot:RegisterSkin('svelte', svelte)
 	XLoot:RegisterSkin('legacy', legacy)
@@ -437,20 +449,7 @@ function XLoot:SkinsOnInitialize()
 		end
 	end
 
-	-- Masque tweaks
-	function XLoot:RegisterMasqueTweak(masque_name, tweak_table)
-		lib.masque_tweaks[masque_name] = tweak_table
-		-- Apply to existing skins
-		if lib.skins[masque_name] then
-			for k, v in pairs(tweak_table) do
-				lib.skins[masque_name][k] = v
-			end
-		end
-	end
-	XLoot:RegisterMasqueTweak('simpleSquare', { size = 12, row_spacing = 4 })
-	XLoot:RegisterMasqueTweak('Caith', { size = 12, row_spacing = 4 })
-	XLoot:RegisterMasqueTweak('Svelte Shadow', { size = 14 })
-	XLoot:RegisterMasqueTweak('Square Shadow', { size = 16 })
+	XLoot:ApplySkinTweaks()
 
 	-- Activate current skin
 	self:SetSkin(self.db.profile.skin)
