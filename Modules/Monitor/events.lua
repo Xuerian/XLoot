@@ -186,6 +186,7 @@ end
 
 event("CHAT_MSG_LOOT", Handler)
 event("CHAT_MSG_MONEY", Handler)
+event("CHAT_MSG_CURRENCY", Handler)
 
 -- Incriment and deincement rolls to only match while there is a roll happening
 event("START_LOOT_ROLL", function()
