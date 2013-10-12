@@ -21,9 +21,16 @@ local print = print
 -- Tweaking Masque skins
 -- To keep from having to change this file, call XLoot:RegisterMasqueTweak(skin_name, skin_table)
 -- following the same rules as custom skins
--- Skinning
+-- Quick or temporary tweaks can be added to SKIN_TWEAKS.lua
 
 do -- Public methods
+	-- Base skin template
+	lib.base = {
+		bar_texture = [[Interface\AddOns\XLoot\Textures\bar]],
+		color_mod = .75,
+		row_spacing = 2,
+	}
+
 	-- Skin registration
 	local mt = { __index = lib.base }
 	function XLoot:RegisterSkin(skin_name, skin_table)
@@ -44,6 +51,7 @@ do -- Public methods
 	end
 end
 
+-- Skinning
 local function subtable_insert(t, k, v)
 	if not t[k] then
 		t[k] = {}
@@ -375,11 +383,6 @@ end
 -------------------------------------------------------------------------------
 -- Default skins
 do
-	lib.base = {
-		bar_texture = [[Interface\AddOns\XLoot\Textures\bar]],
-		color_mod = .75,
-		row_spacing = 2,
-	}
 	local svelte = {
 		name = ('|c2244dd22%s|r'):format(L.skin_svelte),
 		texture = [[Interface\AddOns\XLoot\Textures\border_svelte]],
