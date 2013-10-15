@@ -23,30 +23,27 @@ local print = print
 -- following the same rules as custom skins
 -- Quick or temporary tweaks can be added to SKIN_TWEAKS.lua
 
-do -- Public methods
-	-- Base skin template
-	lib.base = {
-		bar_texture = [[Interface\AddOns\XLoot\Textures\bar]],
-		color_mod = .75,
-		row_spacing = 2,
-	}
+-- Base skin template
+lib.base = {
+	bar_texture = [[Interface\AddOns\XLoot\Textures\bar]],
+	color_mod = .75,
+	row_spacing = 2,
+}
 
-	-- Skin registration
-	local mt = { __index = lib.base }
-	function XLoot:RegisterSkin(skin_name, skin_table)
-		setmetatable(skin_table, mt)
-		skin_table.key = skin_name
-		lib.skins[skin_name] = skin_table
-	end
+-- Skin registration
+function XLoot:RegisterSkin(skin_name, skin_table)
+	setmetatable(skin_table, { __index = lib.base })
+	skin_table.key = skin_name
+	lib.skins[skin_name] = skin_table
+end
 
-	-- Masque tweaks
-	function XLoot:RegisterMasqueTweak(masque_name, tweak_table)
-		lib.masque_tweaks[masque_name] = tweak_table
-		-- Apply to existing skins
-		if lib.skins[masque_name] then
-			for k, v in pairs(tweak_table) do
-				lib.skins[masque_name][k] = v
-			end
+-- Masque tweaks
+function XLoot:RegisterMasqueTweak(masque_name, tweak_table)
+	lib.masque_tweaks[masque_name] = tweak_table
+	-- Apply to existing skins
+	if lib.skins[masque_name] then
+		for k, v in pairs(tweak_table) do
+			lib.skins[masque_name][k] = v
 		end
 	end
 end
@@ -382,39 +379,37 @@ end
 
 -------------------------------------------------------------------------------
 -- Default skins
-do
-	local svelte = {
-		name = ('|c2244dd22%s|r'):format(L.skin_svelte),
-		texture = [[Interface\AddOns\XLoot\Textures\border_svelte]],
-	}
-	local legacy = {
-		name = ('|c2244dd22%s|r'):format(L.skin_legacy),
-		row_spacing = 3,	
-		texture = [[Interface\AddOns\XLoot\Textures\border_legacy]],
-		size = 14,
-		highlight = {
-			size = 12
-		},
-		color_mod = .85,
-	}
-	local smooth = {
-		name = ('|c2244dd22%s|r'):format(L.skin_smooth),
-		row_spacing = 3,
-		texture = [[Interface\AddOns\XLoot\Textures\border_smooth]],
-		size = 14,
-		padding = 1,
-		highlight = {
-			size = 6,
-			padding = -1
-		},
-		color_mod = .9,
-	}
+local svelte = {
+	name = ('|c2244dd22%s|r'):format(L.skin_svelte),
+	texture = [[Interface\AddOns\XLoot\Textures\border_svelte]],
+}
+local legacy = {
+	name = ('|c2244dd22%s|r'):format(L.skin_legacy),
+	row_spacing = 3,	
+	texture = [[Interface\AddOns\XLoot\Textures\border_legacy]],
+	size = 14,
+	highlight = {
+		size = 12
+	},
+	color_mod = .85,
+}
+local smooth = {
+	name = ('|c2244dd22%s|r'):format(L.skin_smooth),
+	row_spacing = 3,
+	texture = [[Interface\AddOns\XLoot\Textures\border_smooth]],
+	size = 14,
+	padding = 1,
+	highlight = {
+		size = 6,
+		padding = -1
+	},
+	color_mod = .9,
+}
 
-	-- Register default skins
-	XLoot:RegisterSkin('svelte', svelte)
-	XLoot:RegisterSkin('legacy', legacy)
-	XLoot:RegisterSkin('smooth', smooth)
-end
+-- Register default skins
+XLoot:RegisterSkin('svelte', svelte)
+XLoot:RegisterSkin('legacy', legacy)
+XLoot:RegisterSkin('smooth', smooth)
 
 -------------------------------------------------------------------------------
 -- Index Masque skins later so we definitely catch all of them
