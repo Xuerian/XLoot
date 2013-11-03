@@ -458,9 +458,11 @@ function addon.AlertFrameHook(alert, link)
 	-- Update toast
 	if opt.alert_skin then
 		local _, _, rarity = GetItemInfo(link)
-		local c = ITEM_QUALITY_COLORS[rarity];
-		elements.overlay:SetBorderColor(c.r, c.g, c.b)
-		elements.icon_frame:SetBorderColor(c.r, c.g, c.b)
+		local c = ITEM_QUALITY_COLORS[rarity]
+		if type(c) == "table" then -- Sanity check due to 5.4.1 reported error
+			elements.overlay:SetBorderColor(c.r, c.g, c.b)
+			elements.icon_frame:SetBorderColor(c.r, c.g, c.b)
+		end
 	end
 end
 
