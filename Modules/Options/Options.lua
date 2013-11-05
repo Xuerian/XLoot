@@ -605,7 +605,7 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
-	-- Generate reset staticpopup
+--[=[ 	-- Generate reset staticpopup
 	if not StaticPopupDialogs['XLOOT_RESETPROFILE'] then
 		StaticPopupDialogs['XLOOT_RESETPROFILE'] = {
 			preferredIndex = 3,
@@ -618,7 +618,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			whileDead = true,
 			hideOnEscape = true,
 		}
-	end
+	end--]=] 
 end
 
 function addon:OnInitialize()
@@ -629,7 +629,8 @@ end
 -- Panel methods
 
 local function PanelDefault(self)
-	StaticPopup_Show("XLOOT_RESETPROFILE")
+	-- StaticPopup_Show("XLOOT_RESETPROFILE")
+	addon:ResetProfile()
 end
 
 local function PanelOkay(self)
