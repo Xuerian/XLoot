@@ -91,6 +91,8 @@ local function OutChannel(channel)
 			end
 		elseif IsInGroup() then
 			out = "PARTY"
+		else -- may have left group after drop but before looting
+			out = nil
 		end
 	end
 	return out
