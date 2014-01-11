@@ -84,15 +84,21 @@ local function OutChannel(channel)
 	local out = channel
 	if channel == "AUTO" then
 		if IsInRaid() then
-			if UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or IsEveryoneAssistant() then
-				out = "RAID_WARNING"
-			else
-				out = "RAID"
-			end
+		  if UnitIsGroupLeader("player") or UnitIsGroupAssistant("player") or IsEveryoneAssistant() then
+		    out = "RAID_WARNING"
+		  elseif IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
+		    out = "INSTANCE_CHAT"
+		  else
+		    out = "RAID"
+		  end
 		elseif IsInGroup() then
-			out = "PARTY"
-		else -- may have left group after drop but before looting
-			out = nil
+		  if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) then
+		    out = "INSTANCE_CHAT"
+		  else
+		    out = "PARTY"
+		  end
+		else
+			out = "SAY"
 		end
 	end
 	return out
