@@ -580,6 +580,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ 'SAY', CHAT_MSG_SAY },
 				{ 'PARTY', CHAT_MSG_PARTY },
 				{ 'RAID', CHAT_MSG_RAID },
+				{ 'INSTANCE_CHAT', INSTANCE_CHAT},
 				{ 'RAID_WARNING', RAID_WARNING },
 				{ 'OFFICER', CHAT_MSG_OFFICER },
 				{ 'NONE', NONE },
