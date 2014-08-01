@@ -62,11 +62,9 @@ end
 
 local temp_list, template = {}, 
 [[local string_match = string.match
-local emsg = "Please report this on XLootGroup's addon page"
 return function(message)
-	local inverted = [=[^%s$]=]
-	local pcall_status, m1, m2, m3, m4, m5 = pcall(string_match, message, inverted)
-	assert(pcall_status, emsg, message, inverted, m1)
+	local pcall_status, m1, m2, m3, m4, m5 = pcall(string_match, message, [=[^%s$]=])
+	assert(pcall_status, "Please report this on XLootGroup's addon page", message, [=[^%s$]=], m1)
 	return %s
 end]]
 
@@ -104,7 +102,8 @@ local invert_cache = {}
 local function extract(str, pattern)
 	local func = invert_cache[pattern]
 	if not func then
-		func = loadstring(template:format(invert(pattern)))()
+		local inverted, arglist = invert(pattern)
+		func = loadstring(template:format(inverted, inverted, arglist))()
 		invert_cache[pattern] = func
 	end
 	return func(str)
