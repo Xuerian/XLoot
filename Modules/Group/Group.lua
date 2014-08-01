@@ -595,8 +595,8 @@ do
 	end
 
 	-- Add roll status or summary to tooltip
-	local tneed, tgreed, tpass, trolls, tnone, ti, ts
-		= {}, {}, {}, {}, {}, table.insert, table.sort
+	local tneed, tgreed, tpass, trolls, tnone, table_sort
+		= {}, {}, {}, {}, {}, table.sort
 	local function rsort(a, b)
 		a, b = trolls[a] or 0, trolls[b] or 0
 		return a > b and true or false
@@ -621,23 +621,27 @@ do
 			= wipe(tneed), wipe(tgreed), wipe(tpass), wipe(tnone), wipe(trolls)
 		for pid=1, players do
 			local _, _, rtype = HistoryGetPlayerInfo(hid, pid)
+			local t
 			if rtype then
 				if rtype == 0 then
-					ti(tpass, pid)
+					t = tpass
 				elseif rtype == 1 then
-					ti(tneed, pid)
+					t = tneed
 				elseif rtype == 2 or rtype == 3 then
-					ti(tgreed, pid)
+					t = tgreed
 				end
 				trolls[pid] = roll
 			else
-				ti(tnone, pid)
+				t = tnone
+			end
+			if t then
+				t[#t+1] = pid
 			end
 		end
 
-		ts(tneed, rsort)
-		ts(tgreed, rsort)
-		ts(tpass, rsort)
+		table_sort(tneed, rsort)
+		table_sort(tgreed, rsort)
+		table_sort(tpass, rsort)
 
 		-- Generate tooltip
 		if show_all then
