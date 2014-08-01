@@ -683,7 +683,7 @@ do
 				self:Enable()
 				self:SetAlpha(1)
 			else
-				self:Disable()
+				-- self:Disable()
 				self:SetAlpha(.6)
 			end
 			SetDesaturation(self:GetNormalTexture(), not status)
