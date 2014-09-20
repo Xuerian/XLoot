@@ -498,8 +498,10 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "alert_anchor_visible", "toggle", subtable = "alert_anchor", subkey = "visible", set = set_anchor, width = "double" },
 			}},
 			{ "other_frames", "group", {
-				{ "bonus_skin", "toggle" },
-				{ "alert_skin", "toggle" },
+				"hook_bonus",
+				{ "bonus_skin", requires = "hook_bonus", width = "double" },
+				"hook_alert",
+				{ "alert_skin", requires = "hook_alert", width = "double" },
 			}},
 			{ "rolls", "group", {
 				{ "roll_direction", "select", directions, name = L.growth_direction, subtable = "roll_anchor", subkey = "direction" },
@@ -527,11 +529,13 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "expire_lost", "range", 5, 30, 1 },
 			}},
 			{ "alerts", "group", {
-				{ "alert_scale", "scale" },
-				{ "alert_offset", "range", 0.1, 10.0, 0.1 },
-				{ "alert_alpha", "alpha" },
-				{ "alert_direction", "select", directions, subtable = "alert_anchor", subkey = "direction", name = L.growth_direction },
-			}},
+					{ "alert_scale", "scale" },
+					{ "alert_offset", "range", 0.1, 10.0, 0.1 },
+					{ "alert_alpha", "alpha" },
+					{ "alert_direction", "select", directions, subtable = "alert_anchor", subkey = "direction", name = L.growth_direction },
+				},
+				defaults = { requires = "hook_alert" }
+			}
 		})
 	end
 

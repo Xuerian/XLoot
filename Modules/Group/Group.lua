@@ -29,11 +29,13 @@ local defaults = {
 		prefix_equippable = "*",
 		prefix_upgrade = "+",
 
+		hook_alert = true,
 		alert_skin = true,
 		alert_alpha = 1,
 		alert_scale = 1,
 		alert_offset = 4,
 
+		hook_bonus = true,
 		bonus_skin = true,
 
 		roll_button_size = 28,
@@ -158,14 +160,18 @@ function addon:OnEnable()
 	end
 
 	-- Hook alert actions
-	hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
-	hooksecurefunc('AlertFrame_SetLootWonAnchors', self.AlertFrameAnchorHook)
+	if not opt.compat_alert then
+		hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
+		hooksecurefunc('AlertFrame_SetLootWonAnchors', self.AlertFrameAnchorHook)
+	end
 	-- hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusRollFrame_StartBonusRoll)
 	-- hooksecurefunc('BonusRollFrame_FinishedFading', self.BonusRollFrame_Hide)
 	-- BonusRollFrame._SetPoint, BonusRollFrame.SetPoint = BonusRollFrame.SetPoint, addon.BonusRollFrame_SetPoint
-	hooksecurefunc(BonusRollFrame, 'SetPoint', addon.BonusRollFrame_SetPoint)
-	hooksecurefunc(BonusRollFrame, 'Show', addon.BonusRollFrame_Show)
-	hooksecurefunc(BonusRollFrame, 'Hide', addon.BonusRollFrame_Hide)
+	if not opt.compat_bonus then
+		hooksecurefunc(BonusRollFrame, 'SetPoint', addon.BonusRollFrame_SetPoint)
+		hooksecurefunc(BonusRollFrame, 'Show', addon.BonusRollFrame_Show)
+		hooksecurefunc(BonusRollFrame, 'Hide', addon.BonusRollFrame_Hide)
+	end
 end
 
 -------------------------------------------------------------------------------
