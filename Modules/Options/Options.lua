@@ -10,7 +10,7 @@ Finalize(module_data, option_table)
 > module_data expects a table where t.name == "ModuleName" and t.addon = AddonTable
 > option_table expects a "BetterOptions" option table
 
-BetterOptions:Compile(better_option_table)
+BetterOptions.Compile(better_option_table)
 - Compiles BetterOptions tables to intermediate option tables which must be provided
 to either a supporting option system or Finalize() for use as a validating AceOptionsTable
 > better_option_table expects a "BetterOptions" option table
@@ -18,7 +18,7 @@ Start by defining your module options here in addon:OnEnable below other module 
 
 XLootOptions:RegisterOptions(module_data, better_option_table)
 - Registers a BetterOptions table with XLootOptions
-> module_data and better_option_table follow BetterOptions:Compile and Finalize()
+> module_data and better_option_table follow BetterOptions.Compile and Finalize()
 
 XLootOptions:RegisterAceOptionTable("ModuleName", ace_option_table)
 - Registers a "normal" ace option table with no additional steps.
@@ -121,7 +121,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	-- Generic option setter
-	local function set(info, v, v2, v3, v4)
+	local function set(info, v, v2, v3, v4, ...)
 		update_throttle:Show()
 		local db, k, meta = path(info)
 		if info.option.type == "color" then
@@ -135,7 +135,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			db[k] = v
 		end
 		if meta.module_data.OnChanged then
-			meta.module_data.OnChanged(k, v, v2, v3, v4)
+			meta.module_data.OnChanged(k, v, v2, v3, v4, ...)
 		end
 	end
 
@@ -171,9 +171,9 @@ function addon:OnEnable() -- Construct addon option tables here
 	local BetterOptions = {}
 	local table_remove = table.remove
 
-	function BetterOptions:Compile(set)
+	function BetterOptions.Compile(set)
 		for i,v in ipairs(set) do
-			local t, key = self:any(v)
+			local t, key = BetterOptions.any(v)
 			t.order = i
 			set[key] = t
 			set[i] = nil
@@ -181,7 +181,8 @@ function addon:OnEnable() -- Construct addon option tables here
 		return set
 	end
 
-	function BetterOptions:any(t)
+	local BetterOptionsTypes = {}
+	function BetterOptions.any(t)
 		-- Simple
 		if type(t) == 'string' then
 			t = { t }
@@ -192,8 +193,8 @@ function addon:OnEnable() -- Construct addon option tables here
 		t.type = table_remove(t, 1) or "toggle"
 
 		-- Handle specific option types
-		if self[t.type] then
-			self[t.type](self, t)
+		if BetterOptionsTypes[t.type] then
+			BetterOptionsTypes[t.type](t)
 		end
 
 		-- Cleanup
@@ -204,22 +205,22 @@ function addon:OnEnable() -- Construct addon option tables here
 		return t, key
 	end
 
-	function BetterOptions:group(t)
+	function BetterOptionsTypes.group(t)
 		t.args = t.args or t[1]
 		if t.inline == nil then
 			t.inline = (t[2] ~= nil and t[2] or true)
 		end
 
 		if t.args then
-			self:Compile(t.args)
+			BetterOptions.Compile(t.args)
 		end
 	end
 
-	function BetterOptions:select(t)
+	function BetterOptionsTypes.select(t)
 		t.items = t.items or t[1]
 	end
 
-	function BetterOptions:alpha(t)
+	function BetterOptionsTypes.alpha(t)
 		t.min = 0.0
 		t.max = 1.0
 		t.step = 0.1
@@ -227,7 +228,7 @@ function addon:OnEnable() -- Construct addon option tables here
 		t.subkey = t.subkey or t[2]
 	end
 
-	function BetterOptions:scale(t)
+	function BetterOptionsTypes.scale(t)
 		t.min = 0.1
 		t.max = 2.0
 		t.step = 0.1
@@ -235,11 +236,11 @@ function addon:OnEnable() -- Construct addon option tables here
 		t.subkey = t.subkey or t[2]
 	end
 
-	function BetterOptions:color(t)
+	function BetterOptionsTypes.color(t)
 		t.hasAlpha = t.hasAlpha or t[1]
 	end
 
-	function BetterOptions:range(t)
+	function BetterOptionsTypes.range(t)
 		t.min = t.max or t[1]
 		t.max = t.max or t[2]
 		t.step = t.step or t[3]
@@ -248,16 +249,17 @@ function addon:OnEnable() -- Construct addon option tables here
 		t.bigStep = t.bigStep or t[6]
 	end
 
-	function BetterOptions:execute(t)
+	function BetterOptionsTypes.execute(t)
 		t.func = t.func or t[1]
 	end
 
-	function BetterOptions:description(t)
+	function BetterOptionsTypes.description(t)
 		t.width = t.width or "full"
 		t.fontSize = t.fontSize or "medium"
 	end
 
 	addon.BetterOptions = BetterOptions
+	addon.BetterOptionsTypes = BetterOptionsTypes
 
 	-------------------------------------------------------------------------------
 	-- AceOptionsTable extension
@@ -351,7 +353,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	local modules, skins = {}, {}
-	local options = Finalize({ name = "Core", addon =  XLoot, OnChanged = OnCoreChanged }, BetterOptions:Compile({
+	local options = Finalize({ name = "Core", addon =  XLoot, OnChanged = OnCoreChanged }, BetterOptions.Compile({
 		{ "details", "description" },
 		{ "skin", "select", values = function()
 			wipe(skins)
@@ -380,7 +382,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	function addon:RegisterOptions(module_data, option_table)
 		-- Have to finalize here because Finalize needs to know what module we're in
 		-- There's probably a better way to do this.
-		Finalize(module_data, BetterOptions:Compile(option_table))
+		Finalize(module_data, BetterOptions.Compile(option_table))
 		self:RegisterAceOptionTable(module_data.name, option_table)
 	end
 
