@@ -1,4 +1,4 @@
-﻿## Interface: 50400
+﻿## Interface: 60000
 ## Title: XLoot Options
 ## Notes: Configuration interface for XLoot
 ## Version: @project-version@
