@@ -670,7 +670,7 @@ do
 		for i,v in ipairs(self.rows) do
 			v:Hide()
 		end
-		CloseLoot()
+		-- CloseLoot()
 	end
 	
 	-- Bottom buttons
@@ -843,9 +843,15 @@ do
 			f:SetScript('OnDragStop', OnDragStop)
 			f:SetScript('OnHide', OnHide)
 			lb:SetScript('OnClick', LinkClick)
-			cb:SetScript('OnClick', CloseLoot)
-			x:SetScript('OnClick', CloseLoot)
 			f.SnapToCursor = SnapToCursor
+
+			-- WoW now shows an error if any parameter is passed, and OnClick passes one
+			local function CloseLoot_Nil()
+				CloseLoot()
+			end
+
+			cb:SetScript('OnClick', CloseLoot_Nil)
+			x:SetScript('OnClick', CloseLoot_Nil)
 		end
 
 		f.overlay = overlay
