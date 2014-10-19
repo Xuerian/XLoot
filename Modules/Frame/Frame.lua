@@ -86,7 +86,7 @@ local defaults = {
 		frame_position_y = GetScreenHeight()/2,
 
 		autoloots = {
-			coin = 'never',
+			currency = 'never',
 			quest = 'never',
 			list = 'solo',
 			all = 'never',
@@ -916,8 +916,9 @@ function XLootFrame:Update(in_options)
 		if icon then -- Occasionally WoW will open loot with empty or invalid slots
 			local looted = false
 			
-			-- Autolooting coin
-			if (auto.all or auto.coin) and GetLootSlotType(slot) == LOOT_SLOT_MONEY then
+			-- Autolooting currency
+			local type = GetLootSlotType(slot)
+			if (auto.all or auto.currency) and type == LOOT_SLOT_MONEY or type == LOOT_SLOT_CURRENCY then
 				LootSlot(slot)
 				looted = true
 				

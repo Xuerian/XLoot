@@ -460,7 +460,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "autolooting", "group", {
 				{ "autolooting_text", "description" },
-				{ "autoloot_coin", "select", when_group, subtable = "autoloots", subkey = "coin" },
+				{ "autoloot_currency", "select", when_group, subtable = "autoloots", subkey = "currency" },
 				{ "autoloot_quest", "select", when_group, subtable = "autoloots", subkey = "quest" },
 				{ "autoloot_all", "select", when_group, subtable = "autoloots", subkey = "all" },
 				{ "autolooting_list", "description" },
