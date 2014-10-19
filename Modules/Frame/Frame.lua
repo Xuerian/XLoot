@@ -240,6 +240,20 @@ end
 --  >Rows
 --  >Loot frame
 
+-- Instance prototyping
+local function Instance_New(self, new)
+	local new = new or {}
+	for k,v in pairs(self) do
+		if k ~= "New" then
+			if new[k] ~= nil then
+				new['_'..k] = new[k]
+			end
+			new[k] = v
+		end
+	end
+	return new
+end
+
 -- Universal events
 local function OnDragStart()
 	if opt.frame_draggable then
@@ -292,6 +306,7 @@ end
 local mouse_focus
 local BuildRow
 do
+	local RowPrototype = { New = Instance_New }
 	-- Text helpers
 	local function smalltext(text, size, ext)
 		text:SetFont(opt.font, size or 10, ext or '')
@@ -306,25 +321,24 @@ do
 		text:SetPoint('RIGHT', row, 'RIGHT', -4, 0)
 	end
 
-	local function OffsetText(self, text, y)
+	function RowPrototype:OffsetText(text, y)
 		text:SetPoint('TOP', self, 0, y)
 	end
 	
 	-- Color overrides
-	local function SetBorderColor(self, r, g, b, a)
+	function RowPrototype:SetBorderColor(r, g, b, a)
 		self:_SetBorderColor(r, g, b, a or 1)
 		self.frame_item:SetBorderColor(r, g, b, a or 1)
 	end
 
-	local function SetHighlightColor(self, r, g, b)
+	function RowPrototype:SetHighlightColor(r, g, b)
 		self:SetHighlightColor(r, g, b)
 		self.frame_item:SetHighlightColor(r, g, b)
 	end
 
 	-- Frame events
-	local ShowTooltip
 	do
-		local function show(self)
+		local function Row_ShowTooltip_Inner(self)
 			local f
 			local type = GetLootSlotType(self.slot)
 			if type == LOOT_SLOT_ITEM then
@@ -339,37 +353,37 @@ do
 			CursorUpdate(self)
 		end
 		
-		function ShowTooltip(self)
-			pcall(show, self)
+		function RowPrototype:ShowTooltip()
+			pcall(Row_ShowTooltip_Inner, self)
 		end
 	end		
 	
-	local function HighlightEnter(self)
+	function RowPrototype:HighlightEnter()
 		if self._highlights then
 			self.frame_item:ShowHighlight()
 		end
 	end
 	
-	local function HighlightLeave(self)
+	function RowPrototype:HighlightLeave()
 		if self._highlights then
 			self.frame_item:HideHighlight()
 		end
 	end
 	
-	local function OnEnter(self)
-		HighlightEnter(self)
+	function RowPrototype:OnEnter()
+		self:HighlightEnter(self)
 		mouse_focus = self
 		self:ShowTooltip()
 	end
 
-	local function OnLeave(self)
+	function RowPrototype:OnLeave()
 		mouse_focus = nil
-		HighlightLeave(self)
+		self:HighlightLeave(self)
 		GameTooltip:Hide()
 		ResetCursor()
 	end
 
-	local function OnClick(self, button)
+	function RowPrototype:OnClick(button)
 		if not XLootButtonOnClick(self, button) then
 			if IsModifiedClick() then
 				HandleModifiedItemClick(GetLootSlotLink(self.slot))
@@ -380,7 +394,7 @@ do
 	end
 	
 	-- Appearance/skin updates
-	local function UpdateAppearance(self)
+	function RowPrototype:UpdateAppearance()
 		local owner, opt = self.owner, self.owner.opt
 		-- Colors
 		self:SetBorderColor(owner:GetColor('loot_color_border'))
@@ -435,7 +449,7 @@ do
 	}
 
 	-- Update slot with loot
-	local function Update(self, is_item, icon, name, link, quantity, quality, locked, isQuestItem, questId, isActive)
+	function RowPrototype:Update(is_item, icon, name, link, quantity, quality, locked, isQuestItem, questId, isActive)
 		local r, g, b, hex
 		local owner = self:GetParent()
 		local opt = owner.opt
@@ -523,10 +537,15 @@ do
 	function BuildRow(frame, i)
 		local frame_name, opt, fake = frame:GetName()..'Button'..i, frame.opt, frame.fake
 		-- Create frames
-		local row = CreateFrame('Button', fake and nil or frame_name, frame)
+		local row = RowPrototype:New(CreateFrame('Button', fake and nil or frame_name, frame))
 		local item = CreateFrame('Frame', nil, row)
 		local tex = item:CreateTexture(fake and nil or frame_name..'IconTexture', 'BACKGROUND')
 		local bang = item:CreateTexture(nil, 'OVERLAY')
+		row.owner = frame
+		row.frame_item = item
+		row.texture_item = tex
+		row.texture_bang = bang
+		row.i = i
 
 		-- Create fontstrings
 		local name = row:CreateFontString(fake and nil or frame_name..'Text')
@@ -534,6 +553,12 @@ do
 		local bind = item:CreateFontString()
 		local quantity = item:CreateFontString()
 		local locked = item:CreateFontString()
+		row.text_name = name
+		row.text_info = info
+		row.text_bind = bind
+		row.text_locked = locked
+		row.text_quantity = quantity
+		
 
 		-- Setup fontstrings
 		smalltext(name, opt.font_size_loot)
@@ -572,43 +597,21 @@ do
 		frame:Skin(row)
 		frame:Skin(item, 'item')
 
-		-- Wire row
+		-- Supplimental events for a configuration instance
 		if fake then
 			row:RegisterForClicks()
-			row:SetScript('OnEnter', HighlightEnter)
-			row:SetScript('OnLeave', HighlightLeave)
+			row:SetScript('OnEnter', row.HighlightEnter)
+			row:SetScript('OnLeave', row.HighlightLeave)
+		-- Events for actual loot frame
 		else
 			row:RegisterForDrag('LeftButton')
 			row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 			row:SetScript('OnDragStart', OnDragStart)
 			row:SetScript('OnDragStop', OnDragStop)
-			row:SetScript('OnClick', OnClick)
-			row:SetScript('OnEnter', OnEnter)
-			row:SetScript('OnLeave', OnLeave)
+			row:SetScript('OnClick', row.OnClick)
+			row:SetScript('OnEnter', row.OnEnter)
+			row:SetScript('OnLeave', row.OnLeave)
 		end
-
-		-- Set references
-		row.text_name = name
-		row.text_info = info
-		row.text_bind = bind
-		row.text_locked = locked
-		row.text_quantity = quantity
-		row.frame_item = item
-		row.texture_item = tex
-		row.texture_bang = bang
-		row.owner = frame
-		row.i = i
-
-		-- Helpers
-		row.SetTexts = SetTexts
-		row.SetIcon = SetIcon
-		row.OffsetText = OffsetText
-		row.ShowTooltip = ShowTooltip
-		row.UpdateAppearance = UpdateAppearance
-		row.Update = Update
-		
-		-- Overrides
-		row.SetBorderColor, row._SetBorderColor = SetBorderColor, row.SetBorderColor
 
 		-- Apply appearance
 		row:UpdateAppearance()
@@ -619,8 +622,9 @@ end
 
 -- Build frame
 do
+	local FramePrototype = { New = Instance_New }
 	-- Frame snapping
-	local function SnapToCursor(self)
+	function FramePrototype:SnapToCursor()
 		local x, y = GetCursorPosition()
 		local f = self
 		local s = f:GetEffectiveScale()
@@ -655,9 +659,13 @@ do
 		f:SetPoint((opt.frame_grow_upwards and "BOTTOMLEFT" or "TOPLEFT"), UIParent, "BOTTOMLEFT", x, y)
 	end
 
+	-- function FramePrototype:SetAlpha(alpha)
+	-- 	self.backdrop:SetAlpha(alpha)
+	-- end
+
 	
 	-- Link loot menu
-	local function LinkClick(self, button)
+	function FramePrototype:LinkClick(button)
 		if button == 'RightButton' then
 			ToggleDropDownMenu(1, nil, LinkDropdown, self)--, GetCursorPosition())
 		else
@@ -665,7 +673,7 @@ do
 		end
 	end
 
-	local function OnHide(self)
+	function FramePrototype:OnHide()
 		pcall(LootFrame_OnHide)
 		for i,v in ipairs(self.rows) do
 			v:Hide()
@@ -691,13 +699,13 @@ do
 		return b
 	end
 
-	local function UpdateHeight(self)
+	function FramePrototype:UpdateHeight()
 		if self.row_height then
 			self:SetHeight(((self.link:IsShown() or self.close:IsShown()) and 26 or 20) + #self.slots * self.row_height)
 		end
 	end
 
-	local function UpdateWidth(self, width_max)
+	function FramePrototype:UpdateWidth(width_max)
 		local width = self.opt.frame_width_automatic and (width_max + 70) or (self.opt.frame_width + 50)
 		self:SetWidth(width)
 		width = width * 0.5 - 10
@@ -705,7 +713,7 @@ do
 		self.close:SetWidth(width)
 	end
 
-	local function UpdateLinkButton(self)
+	function FramePrototype:UpdateLinkButton()
 		local target, show, now = self.opt.linkall_channel, self.opt.linkall_show, false
 		if show == 'auto' then
 			if target == 'SAY' or
@@ -727,7 +735,7 @@ do
 		end
 	end
 	
-	local function SizeAndColor(self, max_width, max_quality)
+	function FramePrototype:SizeAndColor(max_width, max_quality)
 		-- Update frame
 		self:UpdateLinkButton()
 		self:UpdateHeight()
@@ -740,7 +748,7 @@ do
 	end
 	
 	-- Update skin/appearance
-	local function UpdateAppearance(self)
+	function FramePrototype:UpdateAppearance()
 		self.skin = self:Reskin()
 		self.skin.row_offset = self.skin.row_spacing * -1
 
@@ -783,12 +791,10 @@ do
 	function XLootFrame.BuildFrame(f)
 		local name = f:GetName()
 		-- Setup frame
+		FramePrototype:New(f)
 		f:SetFrameStrata('DIALOG')
 		f:SetFrameLevel(5)
 		f:EnableMouse(1)
-		
-		-- Skin helpers
-		f.UpdateAppearance = UpdateAppearance
 		
 		-- Set up frame skins
 		XLoot:MakeSkinner(f, {
@@ -810,15 +816,18 @@ do
 		overlay:SetFrameLevel(5)
 		overlay:SetAllPoints()
 		f:Skin(overlay)
+		f.overlay = overlay
 
 		-- Link all button
-		local lb = BottomButton(f, name..'Link', L.button_link, 'MIDDLE')
-		lb:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-		lb:SetPoint('LEFT', 6, 0)
+		local link = BottomButton(f, name..'Link', L.button_link, 'MIDDLE')
+		link:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+		link:SetPoint('LEFT', 6, 0)
+		f.link = link
 
 		-- Close button
-		local cb = BottomButton(f, name..'Close', L.button_close, 'MIDDLE')
-		cb:SetPoint('RIGHT', -6, 0)
+		local close = BottomButton(f, name..'Close', L.button_close, 'MIDDLE')
+		close:SetPoint('RIGHT', -6, 0)
+		f.close = close
 
 		-- Legacy close button
 		local x = CreateFrame("Button", nil, f)
@@ -833,6 +842,7 @@ do
 		x:SetFrameLevel(f:GetFrameLevel()+2)
 		-- f:Skin(x)
 		-- x:SetBorderColor(.7, .7, .7)
+		f.old_close = x
 
 
 		-- Events
@@ -841,36 +851,28 @@ do
 			f:RegisterForDrag('LeftButton')
 			f:SetScript('OnDragStart', OnDragStart)
 			f:SetScript('OnDragStop', OnDragStop)
-			f:SetScript('OnHide', OnHide)
-			lb:SetScript('OnClick', LinkClick)
-			f.SnapToCursor = SnapToCursor
+			f:SetScript('OnHide', f.OnHide)
+			link:SetScript('OnClick', LinkClick)
 
 			-- WoW now shows an error if any parameter is passed, and OnClick passes one
 			local function CloseLoot_Nil()
 				CloseLoot()
 			end
 
-			cb:SetScript('OnClick', CloseLoot_Nil)
+			close:SetScript('OnClick', CloseLoot_Nil)
 			x:SetScript('OnClick', CloseLoot_Nil)
 		end
 
-		f.overlay = overlay
-		f.close = cb
-		f.old_close = x
-		f.link = lb
-		f.SetAlpha, f._SetAlpha = function(self, alpha) backdrop:SetAlpha(alpha) end, f.SetAlpha
-		f.UpdateHeight = UpdateHeight
-		f.UpdateWidth = UpdateWidth
-		f.UpdateLinkButton = UpdateLinkButton
-		f.SizeAndColor = SizeAndColor
 		f.GetColor = GetColor
-		f.rows = setmetatable({ }, { __index = function(t, k)
+
+		f.rows = setmetatable({}, { __index = function(t, k)
 			local row = BuildRow(f, k)
 			t[k] = row
 			return row
 		end })
-		f.slots_index = { }
-		f.slots = { }
+
+		f.slots_index = {}
+		f.slots = {}
 
 		f:UpdateAppearance()
 		f.built = true
@@ -906,7 +908,6 @@ function XLootFrame:Update(in_options)
 	for k,v in pairs(opt.autoloots) do
 		auto[k] = v == 'always' or (v == 'solo' and not party)
 	end
-	
 	-- Update rows
 	local max_quality, max_width, our_slot, slot, auto_space = 0, 0, 0
 	for slot = 1, numloot do
