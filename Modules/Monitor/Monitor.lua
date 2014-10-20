@@ -5,7 +5,7 @@ XLootMonitor.addon = addon
 -- Grab locals
 local print, opt, eframe, anchor = print
 local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
-local CopperToString = XLoot.CopperToString
+local CopperToString, FancyPlayerName = XLoot.CopperToString, XLoot.FancyPlayerName
 local table_insert, table_remove = table.insert, table.remove
 local me = UnitName("player")
 
@@ -36,26 +36,6 @@ local defaults = {
 	}
 }
 
--------------------------------------------------------------------------------
--- Helpers
-local white = { r = 1, g = 1, b = 1 }
-local dimensions = {
-	HEALER = '48:64',
-	DAMAGER = '16:32',
-	TANK = '32:48'
-}
-local function FancyPlayerName(name, class)
-	local c = RAID_CLASS_COLORS[class] or white
-	local role = UnitGroupRolesAssigned(name)
-	local short, realm = UnitName(name)
-	if realm and realm ~= "" then
-		short = short.." *"
-	end
-	if role ~= 'NONE' and opt.role_icon then
-		short = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], short)
-	end
-	return short, c.r, c.g, c.b
-end
 
 -------------------------------------------------------------------------------
 -- Module init

@@ -68,6 +68,29 @@ function XLoot.IsItemUpgrade(link)
 	end
 	return false
 end
+-- Tack role icon on to player name and return class colors
+local white = { r = 1, g = 1, b = 1 }
+local dimensions = {
+	HEALER = '48:64',
+	DAMAGER = '16:32',
+	TANK = '32:48'
+}
+function XLoot.FancyPlayerName(name, class)
+	local c = RAID_CLASS_COLORS[class] or white
+	local role = UnitGroupRolesAssigned(name)
+	local short, realm = UnitName(name)
+	if not short then
+		return name, c.r, c.g, c.b
+	end
+	if realm and realm ~= "" then
+		short = short.." *"
+	end
+	if role ~= 'NONE' and opt.role_icon then
+		short = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], short)
+	end
+	return short, c.r, c.g, c.b
+end
+
 --@do-not-package@
 -- Debug
 local AC = LibStub('AceConsole-2.0', true)

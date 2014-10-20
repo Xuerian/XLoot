@@ -10,7 +10,7 @@ local GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot,
 	= GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string.format
 local HistoryGetItem, HistoryGetPlayerInfo, HistoryGetNumItems
 	= C_LootHistory.GetItem, C_LootHistory.GetPlayerInfo, C_LootHistory.GetNumItems
-local CanEquipItem, IsItemUpgrade = XLoot.CanEquipItem, XLoot.IsItemUpgrade
+local CanEquipItem, IsItemUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.IsItemUpgrade, XLoot.FancyPlayerName
 
 
 -------------------------------------------------------------------------------
@@ -177,25 +177,6 @@ end
 -------------------------------------------------------------------------------
 -- Frame helpers
 
--- Tack role icon on to player name and return class colors
-local white = { r = 1, g = 1, b = 1 }
-local dimensions = {
-	HEALER = '48:64',
-	DAMAGER = '16:32',
-	TANK = '32:48'
-}
-local function FancyPlayerName(name, class)
-	local c = RAID_CLASS_COLORS[class] or white
-	local role = UnitGroupRolesAssigned(name)
-	local short, realm = UnitName(name)
-	if realm and realm ~= "" then
-		short = short.." *"
-	end
-	if role ~= 'NONE' and opt.role_icon then
-		short = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], short)
-	end
-	return short, c.r, c.g, c.b
-end
 local function SetOutline(fontstring)
 	local f, s = fontstring:GetFont()
 	fontstring:SetFont(f, s, opt.text_outline and 'OUTLINE' or nil)
