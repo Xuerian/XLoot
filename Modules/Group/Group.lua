@@ -568,7 +568,7 @@ do
 		for _,pid in pairs(list) do
 			local name, class, rtype, roll, is_winner, is_me = HistoryGetPlayerInfo(hid, pid)
 			if not name then return nil end
-			local text, r, g, b, color = FancyPlayerName(name, class)
+			local text, r, g, b, color = FancyPlayerName(name, class, opt)
 			if roll ~= nil then
 				if is_winner then
 					color = '44ff22'
