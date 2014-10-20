@@ -142,6 +142,7 @@ function addon.LOOT_EVENT(event, pattern, ...)
 	end
 end
 
+local mouse_focus
 function addon:MODIFIER_STATE_CHANGED(self, modifier, state)
 	if mouse_focus and MouseIsOver(mouse_focus) then
 		mouse_focus:ShowTooltip()

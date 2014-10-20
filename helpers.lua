@@ -52,8 +52,8 @@ function XLoot.CanEquipItem(link)
 	for i=2, 5 do
 		local line = _G["XLootTooltipTextRight"..i]
 		if line and line:GetText() then
-			r, g, b = line:GetTextColor()
-			lr, lg, lb = _G["XLootTooltipTextLeft"..i]:GetTextColor()
+			local r, g, b = line:GetTextColor()
+			local lr, lg, lb = _G["XLootTooltipTextLeft"..i]:GetTextColor()
 			return (r > .8 and b > .8 and g > .8 and lr > .8 and lg > .8 and lb > .8) and true or false
 		end
 	end	
