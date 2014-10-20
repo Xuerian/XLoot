@@ -47,10 +47,14 @@ local dimensions = {
 local function FancyPlayerName(name, class)
 	local c = RAID_CLASS_COLORS[class] or white
 	local role = UnitGroupRolesAssigned(name)
-	if role ~= 'NONE' and opt.role_icon then
-		name = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], name)
+	local short, realm = UnitName(name)
+	if realm and realm ~= "" then
+		short = short.." *"
 	end
-	return name, c.r, c.g, c.b
+	if role ~= 'NONE' and opt.role_icon then
+		short = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], short)
+	end
+	return short, c.r, c.g, c.b
 end
 
 -------------------------------------------------------------------------------
