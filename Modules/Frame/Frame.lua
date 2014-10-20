@@ -70,7 +70,7 @@ local defaults = {
 		loot_row_height = 30,
 
 		loot_highlight = true,
-		
+		 
 		loot_alpha = 1.0,
 		loot_collapse = false,
 		
@@ -248,7 +248,7 @@ local function Instance_New(self, new)
 			if new[k] ~= nil then
 				new['_'..k] = new[k]
 			end
-			new[k] = v
+			rawset(new, k, v)
 		end
 	end
 	return new
@@ -537,7 +537,7 @@ do
 	function BuildRow(frame, i)
 		local frame_name, opt, fake = frame:GetName()..'Button'..i, frame.opt, frame.fake
 		-- Create frames
-		local row = RowPrototype:New(CreateFrame('Button', fake and nil or frame_name, frame))
+		local row = CreateFrame('Button', fake and nil or frame_name, frame)
 		local item = CreateFrame('Frame', nil, row)
 		local tex = item:CreateTexture(fake and nil or frame_name..'IconTexture', 'BACKGROUND')
 		local bang = item:CreateTexture(nil, 'OVERLAY')
@@ -546,6 +546,13 @@ do
 		row.texture_item = tex
 		row.texture_bang = bang
 		row.i = i
+
+		-- Skin row
+		frame:Skin(row)
+		frame:Skin(item, 'item')
+
+		-- Apply prototype after skin to override method
+		RowPrototype:New(row)
 
 		-- Create fontstrings
 		local name = row:CreateFontString(fake and nil or frame_name..'Text')
@@ -559,7 +566,6 @@ do
 		row.text_locked = locked
 		row.text_quantity = quantity
 		
-
 		-- Setup fontstrings
 		smalltext(name, opt.font_size_loot)
 		smalltext(info, opt.font_size_info)
@@ -592,10 +598,6 @@ do
 		bang:SetHeight(16)
 		bang:SetTexture([[Interface\Minimap\ObjectIcons.blp]])
 		bang:SetTexCoord(1/8, 2/8, 1/8, 2/8)
-
-		-- Skin row
-		frame:Skin(row)
-		frame:Skin(item, 'item')
 
 		-- Supplimental events for a configuration instance
 		if fake then
