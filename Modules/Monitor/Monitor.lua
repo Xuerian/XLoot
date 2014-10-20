@@ -84,7 +84,7 @@ function events.item(player, link, num)
 		local r, g, b = GetItemQualityColor(quality)
 		local nr, ng, nb
 		if player ~= me then
-			player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)))
+			player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)), opt)
 		else
 			player = nil
 		end

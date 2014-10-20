@@ -302,7 +302,7 @@ function addon:LOOT_HISTORY_ROLL_COMPLETE()
 	-- Winner or lead
 	if top_pid then
 		local name, class = HistoryGetPlayerInfo(hid, top_pid)
-		local player, r, g, b = FancyPlayerName(name, class)
+		local player, r, g, b = FancyPlayerName(name, class, opt)
 		if opt.win_icon then
 			if rtype == 'need' then
 				player = [[|TInterface\Buttons\UI-GroupLoot-Dice-Up:16:16:-1:-1|t]]..player

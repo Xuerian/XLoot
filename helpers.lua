@@ -75,20 +75,20 @@ local dimensions = {
 	DAMAGER = '16:32',
 	TANK = '32:48'
 }
-function XLoot.FancyPlayerName(name, class)
+function XLoot.FancyPlayerName(name, class, opt)
 	local c = RAID_CLASS_COLORS[class] or white
 	local role = UnitGroupRolesAssigned(name)
 	local short, realm = UnitName(name)
-	if not short then
-		return name, c.r, c.g, c.b
+	if short then
+		name = short
 	end
 	if realm and realm ~= "" then
-		short = short.." *"
+		name = name.." *"
 	end
 	if role ~= 'NONE' and opt.role_icon then
-		short = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], short)
+		name = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], name)
 	end
-	return short, c.r, c.g, c.b
+	return name, c.r, c.g, c.b
 end
 
 --@do-not-package@
