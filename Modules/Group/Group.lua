@@ -802,7 +802,8 @@ do
 		end
 		local time = GetTime()
 		-- TODO: Remove?
-		if GetLootRollTimeLeft(parent.rollid) == 0 then
+		local status, result = pcall(GetLootRollTimeLeft, parent.rollid)
+		if not status or result == 0 then
 			local ended = parent.rollended
 			if ended then
 				if time - ended > 10 then
