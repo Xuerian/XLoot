@@ -85,7 +85,7 @@ function XLoot.FancyPlayerName(name, class, opt)
 	if realm and realm ~= "" then
 		name = name.." *"
 	end
-	if role ~= 'NONE' and opt.role_icon then
+	if role ~= 'NONE' and opt and opt.role_icon then
 		name = string_format('\124TInterface\\LFGFRAME\\LFGROLE:12:12:-1:0:64:16:%s:0:16\124t%s', dimensions[role], name)
 	end
 	return name, c.r, c.g, c.b
