@@ -920,7 +920,7 @@ function XLootFrame:Update(in_options)
 			
 			-- Autolooting currency
 			local type = GetLootSlotType(slot)
-			if (auto.all or auto.currency) and type == LOOT_SLOT_MONEY or type == LOOT_SLOT_CURRENCY then
+			if (auto.all or auto.currency) and (type == LOOT_SLOT_MONEY or type == LOOT_SLOT_CURRENCY) then
 				LootSlot(slot)
 				looted = true
 				
