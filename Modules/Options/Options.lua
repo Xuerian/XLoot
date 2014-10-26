@@ -37,16 +37,22 @@ Features/Finalize:
 Features/BetterOptions:
 - Nested tables with implied ordering and table values:
 -- Basic structure: { "key", "type"[, arg1[, ...]] [, key = value[, ...]] }
--- Examples: 
--- "key" -> { "key", "toggle" }
--- { "key", option = "blah" } -> { "key", "toggle", option = "blah" }
--- { "key", "group", inline } -> key = { type = "group", inline = true }
--- { "key", "execute", func } -> key = { type = "execute", func = func }
--- { "key", "select", items }
--- { "key", "color", hasAlpha }
--- { "key", "range", min, max, step, softMin, softMax, bigStep }
-
-Please note that inline and non-inline groups do not mix well for AceConfigDialog. -]=] 
+-- Examples:
+--  { "key", "toggle" }
+--  { "key", option = "blah" }  ->  { "key", "toggle", option = "blah" }
+--  { "key", "group", inline }  ->  key = { type = "group", inline = true }
+--  { "key", "execute", func }  ->  key = { type = "execute", func = func }
+--  { "key", "select", items }
+--  { "key", "color", hasAlpha }
+--  { "key", "range", min, max, step, softMin, softMax, bigStep }
+-- Automatic types:
+--  Entry is just a "key":  "toggle"
+--   "key"
+--  t[2] is unset:  "toggle"
+--   { "key" }
+--  t[2] is a table:  "select"
+--   { "key", {k, v} }
+Please note that inline and non-inline groups do not mix well for AceConfigDialog. -]=]
 
 -- Create module
 local addon, L = XLoot:NewModule("Options")
@@ -190,7 +196,14 @@ function addon:OnEnable() -- Construct addon option tables here
 
 		-- Shift required elements
 		local key = table_remove(t, 1)
-		t.type = table_remove(t, 1) or "toggle"
+		t.type = table_remove(t, 1)
+		-- Infer toggle by default
+		if not t.type then
+			t.type = "toggle"
+		-- Infer select from table
+		elseif type(t.type) == "table" then
+			t.items, t.type = t.type, "select"
+		end
 
 		-- Handle specific option types
 		if BetterOptionsTypes[t.type] then
