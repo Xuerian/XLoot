@@ -18,6 +18,7 @@ local defaults = {
 			direction = "up",
 			visible = true,
 			scale = 1.0,
+			draggable = true,
 			x = UIParent:GetWidth() * .85,
 			y = UIParent:GetHeight() * .2
 		},

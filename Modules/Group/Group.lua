@@ -44,6 +44,7 @@ local defaults = {
 		roll_anchor = {
 			direction = 'up',
 			visible = true,
+			draggable = true,
 			scale = 1.0,
 			x = UIParent:GetWidth() * .85,
 			y = UIParent:GetHeight() * .6
@@ -52,6 +53,7 @@ local defaults = {
 		alert_anchor = {
 			visible = true,
 			direction = 'up',
+			draggable = true,
 			scale = 1.0,
 			x = AlertFrame:GetLeft(),
 			y = AlertFrame:GetTop()
@@ -406,7 +408,7 @@ function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 	end
 end
 
-function addon:MODIFIER_STATE_CHANGED(_, modifier, state)
+function addon:MODIFIER_STATE_CHANGED()
 	if mouse_focus and MouseIsOver(mouse_focus) and mouse_focus.OnEnter then
 		mouse_focus:OnEnter()
 	end
@@ -567,6 +569,7 @@ do
 	local function RollLines(list, hid)
 		for _,pid in pairs(list) do
 			local name, class, rtype, roll, is_winner, is_me = HistoryGetPlayerInfo(hid, pid)
+			-- TODO- ACCOUNT FOR MISSING PLAYERS BETTER
 			if not name then return nil end
 			local text, r, g, b, color = FancyPlayerName(name, class, opt)
 			if roll ~= nil then
@@ -1109,8 +1112,13 @@ end
 SLASH_XLOOTGROUPA1 = '/xlga'
 SlashCmdList['XLOOTGROUPA'] = alert
 
+local _GetCurrencyInfo = GetCurrencyInfo
 local function bonus()
-	BONUS_ROLL_REQUIRED_CURRENCY = JUSTICE_CURRENCY
+	function GetCurrencyInfo(...)
+		local ret = {_GetCurrencyInfo(...)}
+		ret[2] = 5
+		return unpack(ret)
+	end
 	BonusRollFrame_StartBonusRoll(6603, "test", 30)
 end
 
