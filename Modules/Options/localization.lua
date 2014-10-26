@@ -19,8 +19,6 @@ local locales = {
 			link_button = "Link all button",
 			autolooting = "Auto-looting",
 			colors = "Colors",
-			fonts = "Fonts",
-			font_sizes = "Sizes",
 
 			-- Option labels
 			autoloot_currency = "Auto loot currency",
@@ -55,10 +53,7 @@ local locales = {
 			loot_texts_info = "Show detailed information",
 			loot_texts_bind = "Show loot bind type",
 			loot_texts_lock = "Show locked status",
-			font = "Font",
-			font_size_loot = "Loot",
 			font_size_info = "Loot information",
-			font_size_quantity = "Quantity",
 			font_size_bottombuttons = "Linkall/Close",
 			frame_snap = "Snap frame to mouse",
 			frame_snap_offset_x = "Horizontal snap offset",
@@ -131,7 +126,7 @@ local locales = {
 			-- Option labels
 			visible = "Anchor visible",
 			show_crafted = "Crafted",
-			show_totals = "Show total items in inventory"
+			show_totals = "Show total items in inventory",
 		},
 		Master = {
 			panel_title = "Loot Master",
@@ -152,6 +147,11 @@ local locales = {
 			award_guildannounce = "Echo in guild chat",
 			award_special = "Announce special recipients",
 		},
+		font = "Font",
+		font_sizes = "Sizes",
+		font_size_loot = "Loot",
+		font_size_quantity = "Quantity",
+		font_flag = "Flag",
 		desc_channel_auto = "Highest available",
 		growth_direction = "Growth direction",
 		scale = "Scale",

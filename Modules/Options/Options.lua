@@ -415,6 +415,31 @@ function addon:OnEnable() -- Construct addon option tables here
 		{ "down", L.down }
 	}
 
+	-- Shared Media
+	local LSM = LibStub and LibStub("LibSharedMedia-3.0",1)
+
+	local fonts
+	if LSM then
+		fonts = {}
+		for name, ttf in pairs(LSM:HashTable("font")) do
+			table.insert(fonts, {ttf, name})
+		end
+	else
+		fonts = {
+			{ STANDARD_TEXT_FONT, "Friz Quadrata TT" },
+			{ "Fonts\MORPHEUS.ttf", "Morpheus" },
+			{ "Fonts\ARIALN.ttf", "Arial Narrow" },
+			{ "Fonts\SKURRI.ttf", "Skurri" },
+		}
+	end
+
+	local font_flags = {
+		{ "", "NONE" },
+		{ "OUTLINE", "OUTLINE" },
+		{ "THICKOUTLINE", "THICKOUTLINE" },
+		{ "MONOCHROME", "MONOCHROME" }
+	}
+
 	-------------------------------------------------------------------------------
 	-- Module configs
 
@@ -482,8 +507,9 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "autoloot_item_list", "input", width = "double" },
 				{ "autolooting_details", "description" },
 			}},
-			{ "fonts", "group", {
-				{ "font", "input" },
+			{ "font", "group", {
+				{ "font", fonts },
+				{ "font_flag", font_flags },
 				{ "font_sizes", "header" },
 				{ "font_size_loot", "range", 4, 26, 1 },
 				{ "font_size_info", "range", 4, 26, 1 },
@@ -576,7 +602,14 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "details", "group", {
 				{ "show_totals", "toggle", width = "double" }
-			}}
+			}},
+			{ "font", "group", {
+				{ "font", fonts },
+				{ "font_flags", font_flags },
+				{ "font_sizes", "header" },
+				{ "font_size_loot", "range", 4, 26, 1 },
+				{ "font_size_quantity", "range", 4, 26, 1 },
+			}},
 		})
 	end
 
