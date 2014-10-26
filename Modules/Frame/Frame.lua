@@ -855,7 +855,7 @@ do
 			f:SetScript('OnDragStart', OnDragStart)
 			f:SetScript('OnDragStop', OnDragStop)
 			f:SetScript('OnHide', f.OnHide)
-			link:SetScript('OnClick', LinkClick)
+			link:SetScript('OnClick', f.LinkClick)
 
 			-- WoW now shows an error if any parameter is passed, and OnClick passes one
 			local function CloseLoot_Nil()
