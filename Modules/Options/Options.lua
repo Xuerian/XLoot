@@ -294,12 +294,12 @@ function addon:OnEnable() -- Construct addon option tables here
 		else
 			-- Automatically localized selects
 			if opts.type == "alpha" or opts.type == "scale" then
-				opts.name = opts.name or L[module_data.name][key] or L[opts.type]
-				opts.type = "range" 
+				opts.name = opts.name or L[module_data.name][key] or L[key] or L[opts.type]
+				opts.type = "range"
 			end
 
 			-- Fill in localized name/description
-			opts.name = opts.name or L[module_data.name][key] or key
+			opts.name = opts.name or L[module_data.name][key] or L[key] or key
 			opts.desc = opts.desc or L[module_data.name][key.."_desc"]
 
 			meta.subtable, meta.subkey = opts.subtable, opts.subkey
