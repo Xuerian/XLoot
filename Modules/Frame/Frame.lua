@@ -88,7 +88,7 @@ local defaults = {
 
 		autoloots = {
 			currency = 'never',
-			tradegoods = 'always',
+			tradegoods = 'never',
 			quest = 'never',
 			list = 'solo',
 			all = 'never',
