@@ -314,7 +314,7 @@ do
 
 		local total = icon_frame:CreateFontString(nil, "OVERLAY")
 		total:SetPoint("CENTER", icon_frame, "CENTER", 0, 0)
-		total:SetFont(XLootFrame.opt.font, opt.font_size_quantity, opt.font_flag)
+		total:SetFont(opt.font, opt.font_size_quantity, opt.font_flag)
 		total:SetJustifyH("CENTER")
 
 		frame.icon = icon
