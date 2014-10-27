@@ -950,22 +950,24 @@ function XLootFrame:Update(in_options)
 					if not family and isQuestItem then
 						LootSlot(slot)
 						looted = true
-
-					-- We have room
-					elseif family and bag_slots[family] and bag_slots[family] > 0 then
-						LootSlot(slot)
-						looted = true
-						bag_slots[family] = bag_slots[family] - 1
-
-					-- Fits with existing items?
 					else
-						local cur = GetItemCount(name)
-						if cur > 0 then
-							-- local stack = select(8, GetItemInfo(name))
-							local partial = cur % itemStackCount
-							if partial + quantity <= itemStackCount then
-								LootSlot(slot)
-								looted = true
+						-- We have room
+						family = family or 0
+						if bag_slots[family] and bag_slots[family] > 0 then
+							LootSlot(slot)
+							looted = true
+							bag_slots[family] = bag_slots[family] - 1
+
+						-- Fits with existing items?
+						else
+							local cur = GetItemCount(name)
+							if cur > 0 then
+								-- local stack = select(8, GetItemInfo(name))
+								local partial = cur % itemStackCount
+								if partial + quantity <= itemStackCount then
+									LootSlot(slot)
+									looted = true
+								end
 							end
 						end
 					end
