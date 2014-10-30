@@ -242,20 +242,6 @@ end
 --  >Rows
 --  >Loot frame
 
--- Instance prototyping
-local function Instance_New(self, new)
-	local new = new or {}
-	for k,v in pairs(self) do
-		if k ~= "New" then
-			if new[k] ~= nil then
-				new['_'..k] = new[k]
-			end
-			rawset(new, k, v)
-		end
-	end
-	return new
-end
-
 -- Universal events
 local function OnDragStart()
 	if opt.frame_draggable then
@@ -308,7 +294,7 @@ end
 local mouse_focus
 local BuildRow
 do
-	local RowPrototype = { New = Instance_New }
+	local RowPrototype = XLoot.NewPrototype()
 	-- Text helpers
 	local function smalltext(text)
 		text:SetDrawLayer'OVERLAY'
@@ -626,7 +612,7 @@ end
 
 -- Build frame
 do
-	local FramePrototype = { New = Instance_New }
+	local FramePrototype = XLoot.NewPrototype()
 	-- Frame snapping
 	function FramePrototype:SnapToCursor()
 		local x, y = GetCursorPosition()
