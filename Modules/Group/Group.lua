@@ -1,4 +1,4 @@
-﻿-- Create module
+-- Create module
 local addon, L = XLoot:NewModule("Group")
 -- Prepare global
 XLootGroup = addon
@@ -11,6 +11,7 @@ local GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot,
 local HistoryGetItem, HistoryGetPlayerInfo, HistoryGetNumItems
 	= C_LootHistory.GetItem, C_LootHistory.GetPlayerInfo, C_LootHistory.GetNumItems
 local CanEquipItem, IsItemUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.IsItemUpgrade, XLoot.FancyPlayerName
+local RollFramePrototype
 
 
 -------------------------------------------------------------------------------
@@ -106,7 +107,7 @@ function addon:OnEnable()
 	}, 'row')
 
 	-- Create Roll anchor
-	anchor = XLoot.Stack:CreateStaticStack(self.CreateRollFrame, L.anchor, opt.roll_anchor)
+	anchor = XLoot.Stack:CreateStaticStack(function() return RollFramePrototype:New() end, L.anchor, opt.roll_anchor)
 	anchor:SetFrameLevel(7)
 	anchor:Scale(opt.roll_anchor.scale)
 	addon.anchor = anchor
@@ -665,24 +666,22 @@ do
 	---------------------------------------------------------------------------
 	-- Roll buttons
 	---------------------------------------------------------------------------
-	local CreateRollButton
+	local RollButtonPrototype = XLoot.NewPrototype()
 	do
-		local function OnClick(self)
+		function RollButtonPrototype:OnClick()
 			RollOnLoot(self.parent.rollid, self.type)
 		end
 		
-		local function Toggle(self, status)
+		function RollButtonPrototype:Toggle(status)
 			if status then
-				self:Enable()
 				self:SetAlpha(1)
 			else
-				-- self:Disable()
 				self:SetAlpha(.6)
 			end
 			SetDesaturation(self:GetNormalTexture(), not status)
 		end
 
-		local function OnEnter(self)
+		function RollButtonPrototype:OnEnter()
 			mouse_focus = self
 			GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT')
 			if not AddTooltipLines(self.parent, false, self.type) and self:IsEnabled() ~= 0 then
@@ -691,12 +690,12 @@ do
 			end
 		end
 
-		local function OnLeave(self)
+		function RollButtonPrototype:OnLeave()
 			mouse_focus = nil
 			GameTooltip:Hide()
 		end
 
-		local function SetText(self, text)
+		function RollButtonPrototype:SetText(text)
 			if text and text > 0 then
 				self.text:SetText(text)
 			else
@@ -705,8 +704,8 @@ do
 		end
 
 		local path = [[Interface\Buttons\UI-GroupLoot-%s-%s]]
-		function CreateRollButton(parent, roll, label, tex, to, x, y)
-			local b = CreateFrame('Button', nil, parent)
+		function RollButtonPrototype:New(parent, roll, label, tex, to, x, y)
+			local b = self:_New(CreateFrame('Button', nil, parent))
 			b:SetPoint('LEFT', to, 'RIGHT', x, y)
 			b:SetWidth(opt.roll_button_size)
 			b:SetHeight(opt.roll_button_size)
@@ -726,15 +725,13 @@ do
 			text:SetPoint("CENTER", -x + 1, tex == 'DE' and -y +2 or -y)
 			b.text = text
 
-			b:SetScript('OnEnter', OnEnter)
-			b:SetScript('OnLeave', OnLeave)
-			b:SetScript('OnClick', OnClick)
+			b:SetScript('OnEnter', self.OnEnter)
+			b:SetScript('OnLeave', self.OnLeave)
+			b:SetScript('OnClick', self.OnClick)
 			b:SetMotionScriptsWhileDisabled(true)
-			b.OnEnter = OnEnter
-			b.Toggle = Toggle
+			b:Enable()
 			b.type = roll
 			b.label = label
-			b.SetText = SetText
 
 			return b
 		end
@@ -743,8 +740,9 @@ do
 	---------------------------------------------------------------------------
 	-- Roll frames
 	---------------------------------------------------------------------------
+	RollFramePrototype = XLoot.NewPrototype()
 	-- Events
-	local function OnEnter(self)
+	function RollFramePrototype:OnEnter()
 		mouse_focus = self
 		GameTooltip:SetOwner(self.icon_frame, 'ANCHOR_TOPLEFT', 28, 0)
 		GameTooltip:SetHyperlink(self.link)
@@ -761,12 +759,12 @@ do
 		end
 	end
 
-	local function OnLeave(self)
+	function RollFramePrototype:OnLeave()
 		mouse_focus = nil
 		GameTooltip:Hide()
 	end
 
-	local function OnClick(self, button)
+	function RollFramePrototype:OnClick(button)
 		if IsControlKeyDown() then
 			DressUpItemLink(self.link)
 		elseif IsShiftKeyDown() then
@@ -776,7 +774,7 @@ do
 
 	-- Status bar update
 	local max = math.max
-	local function BarUpdate(self)
+	function RollFramePrototype:OnBarUpdate()
 		local parent = self.parent
 		if parent.over then
 			self.spark:Hide()
@@ -817,21 +815,21 @@ do
 		end
 	end
 
-	local function Popped(self)
+	function RollFramePrototype:Popped()
 		rolls[self.rollid] = nil
 	end
 
 	-- Create roll frame
-	function addon.CreateRollFrame()
+	function RollFramePrototype:New()
 		-- Base frame
-		local frame = CreateFrame('Button', nil, UIParent)
+		local frame = self:_New(CreateFrame('Button', nil, UIParent))
 		frame:SetFrameLevel(anchor:GetFrameLevel())
 		frame:SetHeight(24)
 		frame:SetWidth(opt.roll_width)
 		frame:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-		frame:SetScript('OnEnter', OnEnter)
-		frame:SetScript('OnLeave', OnLeave)
-		frame:SetScript('OnClick', OnClick)
+		frame:SetScript('OnEnter', self.OnEnter)
+		frame:SetScript('OnLeave', self.OnLeave)
+		frame:SetScript('OnClick', self.OnClick)
 		frame.OnEnter = OnEnter
 		frame.Start = Start
 		frame.Popped = Popped
@@ -840,6 +838,7 @@ do
 		local overlay = CreateFrame('frame', nil, frame)
 		overlay:SetFrameLevel(frame:GetFrameLevel())
 		overlay:SetAllPoints()
+		frame.overlay = overlay
 		local skin = Skinner:Skin(overlay, 'row')
 
 		-- Item icon (For skin border)
@@ -847,6 +846,7 @@ do
 		icon_frame:SetPoint('LEFT', 0, 0)
 		icon_frame:SetWidth(28)
 		icon_frame:SetHeight(28)
+		frame.icon_frame = icon_frame
 		Skinner:Skin(icon_frame, 'item')
 
 		-- Item texture
@@ -854,6 +854,7 @@ do
 		icon:SetPoint('TOPLEFT', 3, -3)
 		icon:SetPoint('BOTTOMRIGHT', -3, 3)
 		icon:SetTexCoord(.07,.93,.07,.93)
+		frame.icon = icon
 		
 		-- Timer bar
 		local bar = CreateFrame('StatusBar', nil, frame)
@@ -863,8 +864,9 @@ do
 		bar:SetPoint('BOTTOMRIGHT', -pad - 3, pad + 3)
 		bar:SetPoint('LEFT', icon_frame, 'RIGHT', -pad, 0)
 		bar:SetStatusBarTexture(skin.bar_texture)
-		bar:SetScript('OnUpdate', BarUpdate)
+		bar:SetScript('OnUpdate', self.OnBarUpdate)
 		bar.parent = frame
+		frame.bar = bar
 		-- Reference bar for quick re-skinning when XLoot skin changes
 		table.insert(addon.bars, bar)
 		
@@ -879,17 +881,20 @@ do
 		local bind = icon_frame:CreateFontString(nil, 'OVERLAY')
 		bind:SetPoint('BOTTOM', 0, 1)
 		bind:SetFont(STANDARD_TEXT_FONT, 8, 'THICKOUTLINE')
+		frame.text_bind = bind
 
 		-- Time text
 		local time = icon_frame:CreateFontString(nil, 'OVERLAY')
 		time:SetPoint('CENTER', 0, 2)
 		time:SetFont(STANDARD_TEXT_FONT, 12, 'OUTLINE')
+		frame.text_time = time
 
 		-- Roll buttons
-		local n = CreateRollButton(frame, 1, NEED, 'Dice', icon_frame, 3, -1)
-		local g = CreateRollButton(frame, 2, GREED, 'Coin', n, 0, -2)
-		local d = CreateRollButton(frame, 3, ROLL_DISENCHANT, 'DE', g, 0, 2)
-		local p = CreateRollButton(frame, 0, PASS, 'Pass', d, 0, 2)
+		local n = RollButtonPrototype:New(frame, 1, NEED, 'Dice', icon_frame, 3, -1)
+		local g = RollButtonPrototype:New(frame, 2, GREED, 'Coin', n, 0, -2)
+		local d = RollButtonPrototype:New(frame, 3, ROLL_DISENCHANT, 'DE', g, 0, 2)
+		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', d, 0, 2)
+		frame.need, frame.greed, frame.disenchant, frame.pass = n, g, d, p
 
 		-- Roll status text
 		local status = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
@@ -898,6 +903,7 @@ do
 		SetOutline(status)
 		status:SetPoint('LEFT', icon_frame, 'RIGHT', 1, 0)
 		status:SetPoint('RIGHT', p, 'RIGHT', 2, 0)
+		frame.text_status = status
 
 		-- Loot name/link
 		local loot = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
@@ -906,18 +912,7 @@ do
 		SetOutline(loot)
 		loot:SetPoint('LEFT', p, 'RIGHT', 3, -1)
 		loot:SetPoint('RIGHT', frame, 'RIGHT', -5, 0)
-
-		-- Frame references
-		frame.need, frame.greed, frame.disenchant, frame.pass = n, g, d, p
-		frame.text_bind = bind
-		frame.text_status = status
 		frame.text_loot = loot
-		frame.text_time = time
-		frame.overlay = overlay
-		frame.bar = bar
-		frame.icon = icon
-		frame.icon_frame = icon_frame
-		frame.Update = UpdateRow
 
 		return frame
 	end
