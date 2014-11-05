@@ -97,7 +97,7 @@ XLoot:SetDefaultModulePrototype({
 -------------------------------------------------------------------------------
 -- Prototype helper
 
-local function XLoot.Prototype_New(self, new)
+function XLoot.Prototype_New(self, new)
 	local new = new or {}
 	for k,v in pairs(self) do
 		if k ~= "New" and k ~= "_New" then
