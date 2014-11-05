@@ -614,7 +614,7 @@ do
 		local tneed, tgreed, tpass, tnone, trolls
 			= wipe(tneed), wipe(tgreed), wipe(tpass), wipe(tnone), wipe(trolls)
 		for pid=1, players do
-			local _, _, rtype = HistoryGetPlayerInfo(hid, pid)
+			local _, _, rtype, roll = HistoryGetPlayerInfo(hid, pid)
 			local t
 			if rtype then
 				if rtype == 0 then
