@@ -171,9 +171,9 @@ function addon:OnEnable()
 	-- hooksecurefunc('BonusRollFrame_FinishedFading', self.BonusRollFrame_Hide)
 	-- BonusRollFrame._SetPoint, BonusRollFrame.SetPoint = BonusRollFrame.SetPoint, addon.BonusRollFrame_SetPoint
 	if not opt.compat_bonus then
-		hooksecurefunc(BonusRollFrame, 'SetPoint', addon.BonusRollFrame_SetPoint)
-		hooksecurefunc(BonusRollFrame, 'Show', addon.BonusRollFrame_Show)
-		hooksecurefunc(BonusRollFrame, 'Hide', addon.BonusRollFrame_Hide)
+		hooksecurefunc(BonusRollFrame, 'SetPoint', self.BonusRollFrame_SetPoint)
+		hooksecurefunc(BonusRollFrame, 'Show', self.BonusRollFrame_Show)
+		hooksecurefunc(BonusRollFrame, 'Hide', self.BonusRollFrame_Hide)
 	end
 end
 
@@ -830,9 +830,6 @@ do
 		frame:SetScript('OnEnter', self.OnEnter)
 		frame:SetScript('OnLeave', self.OnLeave)
 		frame:SetScript('OnClick', self.OnClick)
-		frame.OnEnter = OnEnter
-		frame.Start = Start
-		frame.Popped = Popped
 		
 		-- Overlay (For skin border)
 		local overlay = CreateFrame('frame', nil, frame)
