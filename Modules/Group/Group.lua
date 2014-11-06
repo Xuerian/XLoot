@@ -242,10 +242,10 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 	frame.pass:SetText()
 	frame.disenchant:SetText()
 
-	frame.need.reason = reason_need
-	frame.greed.reason = reason_greed
-	frame.disenchant.reason = reason_de
-	frame.disenchant.skill = de_skill
+	frame.need.reason = reason_need ~= 0 and reason_need or nil
+	frame.greed.reason = reason_greed ~= 0 and reason_greed or nil
+	frame.disenchant.reason = reason_de ~= 0 and reason_de or nil
+	frame.disenchant.skill = de_skill ~= 0 and de_skill or nil
 
 	local bar = frame.bar
 	bar.length = length
