@@ -198,7 +198,7 @@ local type_strings = {
 local rtypes = { [0] = 'pass', 'need', 'greed', 'disenchant' } -- Tekkub. Writing smaller addons than me since ever.
 
 function addon:START_LOOT_ROLL(id, length, uid, ongoing)
-	local icon, name, count, quality, bop, need, greed, de = GetLootRollItemInfo(id)
+	local icon, name, count, quality, bop, need, greed, de, reason_need, reason_greed, reason_de, de_skill = GetLootRollItemInfo(id)
 	local link = GetLootRollItemLink(id)
 	local r, g, b = GetItemQualityColor(quality)
 
@@ -241,6 +241,11 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 	frame.greed:SetText()
 	frame.pass:SetText()
 	frame.disenchant:SetText()
+
+	frame.need.reason = reason_need
+	frame.greed.reason = reason_greed
+	frame.disenchant.reason = reason_de
+	frame.disenchant.skill = de_skill
 
 	local bar = frame.bar
 	bar.length = length
@@ -596,6 +601,11 @@ do
 		return a > b and true or false
 	end
 
+	local function AddIneligibleReason(button, r, g, b)
+		GameTooltip:AddLine(string_format(_G["LOOT_ROLL_INELIGIBLE_REASON"..button.reason], button.skill), r or .6, g or .6, b or .6)
+		GameTooltip:Show()
+	end
+
 	local function AddTooltipLines(self, show_all, show)
 		-- Locate history item
 		local rollid, hid = self.rollid, 1
@@ -674,8 +684,10 @@ do
 		
 		function RollButtonPrototype:Toggle(status)
 			if status then
+				self:Enable()
 				self:SetAlpha(1)
 			else
+				self:Disable()
 				self:SetAlpha(.6)
 			end
 			SetDesaturation(self:GetNormalTexture(), not status)
@@ -684,9 +696,16 @@ do
 		function RollButtonPrototype:OnEnter()
 			mouse_focus = self
 			GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT')
-			if not AddTooltipLines(self.parent, false, self.type) and self:IsEnabled() ~= 0 then
-				GameTooltip:SetText(self.label)
+			AddTooltipLines(self.parent, false, self.type)
+			-- This isn't working for some stupid reason
+			if GameTooltip:NumLines() == 0 then
+				GameTooltip:SetText(self.label, unpack(self.label_colors))
 				GameTooltip:Show()
+			end
+			-- This is for those people who think they should be able
+			--  to roll on something, can't, and then come complain to me.
+			if self.reason then
+				AddIneligibleReason(self, 1, .2, 0)
 			end
 		end
 
@@ -704,9 +723,9 @@ do
 		end
 
 		local path = [[Interface\Buttons\UI-GroupLoot-%s-%s]]
-		function RollButtonPrototype:New(parent, roll, label, tex, to, x, y)
+		function RollButtonPrototype:New(parent, roll, label, tex, anchor_to, x, y, label_colors)
 			local b = self:_New(CreateFrame('Button', nil, parent))
-			b:SetPoint('LEFT', to, 'RIGHT', x, y)
+			b:SetPoint('LEFT', anchor_to, 'RIGHT', x, y)
 			b:SetWidth(opt.roll_button_size)
 			b:SetHeight(opt.roll_button_size)
 			b:SetNormalTexture(path:format(tex, 'Up'))
@@ -732,6 +751,7 @@ do
 			b:Enable()
 			b.type = roll
 			b.label = label
+			b.label_colors = label_colors
 
 			return b
 		end
@@ -748,6 +768,15 @@ do
 		GameTooltip:SetHyperlink(self.link)
 		if opt.show_decided or opt.show_undecided then
 			AddTooltipLines(self, true)
+			if self.need.reason then
+				AddIneligibleReason(self.need, 1, .2, 0)
+			end
+			if self.greed.reason and self.greed.reason ~= self.need.reason then
+				AddIneligibleReason(self.greed, .8, .1, 0)
+			end
+			if self.disenchant.reason then
+				AddIneligibleReason(self.disenchant, .6, .05, 0)
+			end
 		end
 		if IsShiftKeyDown() then
 			GameTooltip_ShowCompareItem()
@@ -887,10 +916,10 @@ do
 		frame.text_time = time
 
 		-- Roll buttons
-		local n = RollButtonPrototype:New(frame, 1, NEED, 'Dice', icon_frame, 3, -1)
-		local g = RollButtonPrototype:New(frame, 2, GREED, 'Coin', n, 0, -2)
-		local d = RollButtonPrototype:New(frame, 3, ROLL_DISENCHANT, 'DE', g, 0, 2)
-		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', d, 0, 2)
+		local n = RollButtonPrototype:New(frame, 1, NEED, 'Dice', icon_frame, 3, -1, {.2, 1, .1})
+		local g = RollButtonPrototype:New(frame, 2, GREED, 'Coin', n, 0, -2, {.1, .2, 1})
+		local d = RollButtonPrototype:New(frame, 3, ROLL_DISENCHANT, 'DE', g, 0, 2, {.1, .2, 1})
+		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', d, 0, 2, {.7, .7, .7})
 		frame.need, frame.greed, frame.disenchant, frame.pass = n, g, d, p
 
 		-- Roll status text
@@ -975,9 +1004,9 @@ end
 ---------------------------------------------------------------------------
 local preview_loot = {
 	{ 52722, false, true, true, true },
-	{ 31304, true, false, true, true },
-	{ 37254, true, false, false, true },
-	{ 13262, true, false, false, false },
+	{ 31304, true, false, true, true, 1 },
+	{ 37254, true, false, false, true, 2, 2 },
+	{ 13262, true, false, false, false, 4, 4, 4, 69 },
 	{ 15487, false, true, true, true }
 }
 -- Activate items
@@ -1077,7 +1106,7 @@ local function debug(msg)
 				{ 'Player3', 'WARRIOR', nil, nil, false, false },
 				{ 'Player4', 'SHAMAN', nil, nil, false, false }
 			}
-			FakeHistory.rolls[rollid] = { itex, iname, 1, iquality, item[2], item[3], item[4], item[5] }
+			FakeHistory.rolls[rollid] = { itex, iname, 1, iquality, select(2, unpack(item)) }
 			FakeHistory.links[rollid] = ilink
 
 			table.insert(FakeHistory.items, 1, fake)
