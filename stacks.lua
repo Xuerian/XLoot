@@ -21,12 +21,6 @@ do
 		self.data.x = self:GetLeft()
 		self.data.y = self:GetTop()
 	end
-	
-	function AnchorPrototype:OnClick(...)
-		if self.OnClick then
-			self:OnClick(...)
-		end
-	end
 
 	function AnchorPrototype:Show()
 		self:SetClampedToScreen(true)
@@ -129,9 +123,8 @@ do
 		anchor:SetClampedToScreen(true)
 		anchor:RegisterForDrag('LeftButton')
 		anchor:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-		anchor:SetScript('OnDragStart', OnDragStart)
-		anchor:SetScript('OnDragStop', OnDragStop)
-		anchor:SetScript('OnClick', OnClick)
+		anchor:SetScript('OnDragStart', anchor.OnDragStart)
+		anchor:SetScript('OnDragStop', anchor.OnDragStop)
 		anchor:SetAlpha(0.8)
 		
 		local hide = CreateFrame('Button', nil, anchor)
