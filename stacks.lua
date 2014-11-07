@@ -4,36 +4,38 @@ XLoot.Stack = lib
 local L = XLoot.L
 local print = print
 
+local AnchorPrototype = XLoot.NewPrototype()
+
 -- ANCHOR element
 do
 	local backdrop = { bgFile = [[Interface\Tooltips\UI-Tooltip-Background]] }
 
-	local function OnDragStart(self)
+	function AnchorPrototype:OnDragStart()
 		if self.data.draggable ~= false then
 			self:StartMoving()
 		end
 	end
 	
-	local function OnDragStop(self)
+	function AnchorPrototype:OnDragStop()
 		self:StopMovingOrSizing()
 		self.data.x = self:GetLeft()
 		self.data.y = self:GetTop()
 	end
 	
-	local function OnClick(self, ...)
+	function AnchorPrototype:OnClick(...)
 		if self.OnClick then
 			self:OnClick(...)
 		end
 	end
 
-	local function Show(self)
+	function AnchorPrototype:Show()
 		self:SetClampedToScreen(true)
 		self:Position()
 		self.data.visible = true
 		self:_Show()
 	end
 	
-	local function Hide(self)
+	function AnchorPrototype:Hide()
 		self:SetClampedToScreen(false)
 		if self.data.direction == 'up' then
 			self:Position(self.data.x, self.data.y - 20)
@@ -46,7 +48,7 @@ do
 		self:_Hide()
 	end
 
-	local function Position(self, x, y)
+	function AnchorPrototype:Position(x, y)
 		self:ClearAllPoints()
 		self:SetPoint('TOPLEFT', UIParent, 'BOTTOMLEFT', x or self.data.x, y or self.data.y)
 		self:SetHeight(20)
@@ -54,7 +56,7 @@ do
 		self:SetWidth(175)
 	end
 
-	local function AnchorChild(self, child, to)
+	function AnchorPrototype:AnchorChild(child, to)
 		local d = self.data.direction
 		if to then
 			local a, b, x, y = 'BOTTOMLEFT', 'TOPLEFT', 0, 2
@@ -82,7 +84,7 @@ do
 		end
 	end
 
-	function UpdateSVData(self, svdata)
+	function AnchorPrototype:UpdateSVData(svdata)
 		if svdata then
 			if self.data == svdata then
 				local mod = self:GetScale() / svdata.scale
@@ -118,6 +120,7 @@ do
 
 	function lib:CreateAnchor(text, svdata)
 		local anchor = CreateFrame('Button', nil, UIParent)
+		AnchorPrototype:New(anchor)
 		anchor:SetBackdrop(backdrop)
 		anchor:SetBackdropColor(0, 0, 0, 0.7)
 		anchor:SetMovable(true)
@@ -128,13 +131,6 @@ do
 		anchor:SetScript('OnDragStop', OnDragStop)
 		anchor:SetScript('OnClick', OnClick)
 		anchor:SetAlpha(0.8)
-		anchor.Show, anchor._Show = Show, anchor.Show
-		anchor.Hide, anchor._Hide = Hide, anchor.Hide
-		anchor.Position = Position
-		anchor.OnMove = OnMove
-		anchor.OnToggle = OnToggle
-		anchor.AnchorChild = AnchorChild
-		anchor.UpdateSVData = UpdateSVData
 		
 		local hide = CreateFrame('Button', nil, anchor)
 		hide:SetHighlightTexture([[Interface\Buttons\UI-Panel-MinimizeButton-Highlight]])
