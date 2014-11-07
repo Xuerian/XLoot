@@ -651,15 +651,15 @@ do
 		if show_all then
 			GameTooltip:AddLine('.', 0, 0, 0)
 		end
-		if next(tneed) and (show_all or show == 1) then
+		if #tneed ~= 0 and (show_all or show == 1) then
 			GameTooltip:AddLine(NEED, .2, 1, .1)
 			RollLines(tneed, hid)
 		end
-		if next(tgreed) and (show_all or (show == 2 or show == 3)) then
+		if #tgreed ~= 0 and (show_all or (show == 2 or show == 3)) then
 			GameTooltip:AddLine(GREED, .1, .2, 1)
 			RollLines(tgreed, hid)
 		end
-		if next(tpass) and (show_all or show == 0) then
+		if #tpass ~= 0 and (show_all or show == 0) then
 			GameTooltip:AddLine(PASS, .7, .7, .7)
 			RollLines(tpass, hid)
 		end
