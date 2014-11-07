@@ -94,7 +94,9 @@ do
 			self.data = svdata
 			self:SetScale(svdata.scale)
 			self:Position()
-			if not svdata.visible then
+			if svdata.visible then
+				self:Show()
+			else
 				self:Hide()
 			end
 		else
