@@ -20,10 +20,6 @@ do
 		self.data.y = self:GetTop()
 	end
 	
-	local function Close_OnClick(self)
-		self.parent:Hide()
-	end
-	
 	local function OnClick(self, ...)
 		if self.OnClick then
 			self:OnClick(...)
@@ -103,6 +99,22 @@ do
 			self.data = {}
 		end
 	end
+	
+	local function Hide_OnClick(self)
+		self.parent:Hide()
+	end
+
+	local function Hide_OnEnter(self)
+		GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT')
+		GameTooltip:SetText(L.anchor_hide_desc)
+		GameTooltip:Show()
+		self.label:SetTextColor(1, 1, 1)
+	end
+
+	local function Hide_OnLeave(self)
+		GameTooltip:Hide()
+		self.label:SetTextColor(.4, .4, .4)
+	end
 
 	function lib:CreateAnchor(text, svdata)
 		local anchor = CreateFrame('Button', nil, UIParent)
@@ -124,13 +136,23 @@ do
 		anchor.AnchorChild = AnchorChild
 		anchor.UpdateSVData = UpdateSVData
 		
-		local close = CreateFrame('Button', nil, anchor, 'UIPanelCloseButton')
-		close:SetScript('OnClick', Close_OnClick)
-		close:SetPoint('RIGHT', 1, 0)
-		close:SetHeight(20)
-		close:SetWidth(20)
-		close.parent = anchor
-		anchor.close = close
+		local hide = CreateFrame('Button', nil, anchor)
+		hide:SetHighlightTexture([[Interface\Buttons\UI-Panel-MinimizeButton-Highlight]])
+		hide:SetPoint('RIGHT', -3, 0)
+		hide:SetHeight(16)
+		hide:SetHitRectInsets(10, 10, 1, -2)
+		hide:SetScript('OnClick', Hide_OnClick)
+		hide:SetScript('OnEnter', Hide_OnEnter)
+		hide:SetScript('OnLeave', Hide_OnLeave)
+		hide.parent = anchor
+		anchor.hide = hide
+
+		hide.label = hide:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+		hide.label:SetPoint('TOP')
+		hide.label:SetPoint('BOTTOM')
+		hide.label:SetText(L.anchor_hide)
+		Hide_OnLeave(hide) -- Set text color
+		hide:SetWidth(hide.label:GetStringWidth()+30)
 
 		local label = anchor:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
 		label:SetPoint('CENTER', -5, 0)
