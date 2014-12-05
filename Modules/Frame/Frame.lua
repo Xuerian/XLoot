@@ -963,6 +963,11 @@ function XLootFrame:Update(in_options)
 								end
 							end
 						end
+
+						-- Try to loot all remaining quest items anyway
+						if not looted and isQuestItem then
+							LootSlot(slot)
+						end
 					end
 				end
 			end
