@@ -60,9 +60,9 @@ local defaults = {
 			y = AlertFrame:GetTop()
 		},
 
-		track_all = true,
+		track_all = false,
 		track_player_roll = false,
-		track_by_threshold = false,
+		track_by_threshold = true,
 		track_threshold = 3,
 
 		expire_won = 20,
