@@ -11,7 +11,7 @@
 			handled = true
 			dostuff()
 		end
-		XLootButtonOnClick(row, button, handled)
+		XLootButtonOnClick_Orig(row, button, handled)
 	end
 --]]---------------------------------------
 
