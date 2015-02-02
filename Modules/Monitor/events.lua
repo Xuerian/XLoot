@@ -374,7 +374,7 @@ for locale, t in pairs(locales) do
 		local m1, m2, m3, m4, matched
 		for i, v in ipairs(loot_patterns) do
 			if t.strings[v[3]] then
-				m1, m2, m3, m4 = extract(test, t.strings[v[3]])
+				m1, m2, m3, m4 = Deformat(test, t.strings[v[3]])
 				if m1 then
 					matched = v[3]
 					break
