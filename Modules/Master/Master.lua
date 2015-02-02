@@ -150,6 +150,8 @@ function addon.SpawnRoll(frame)
 end
 
 function addon.RaidRoll(frame, players)
+	-- Bail when loot frame is closed, avoiding nil error. Should be done better.
+	if not GetLootSlotLink(LootFrame.selectedSlot) then return nil end
 	local to = #players
 	local out = OutChannel("AUTO")
 	if to >=1 then
