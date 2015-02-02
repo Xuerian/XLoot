@@ -169,9 +169,9 @@ function addon.RaidRoll(frame, players)
  		RandomRoll(1,to)
  	end
 end
-local rollCapture = gsub(gsub(gsub(RANDOM_ROLL_RESULT, "[()]", "."), "%%s", "([^ ]+)") , "%%d", "(%%d+)")
+
 function addon:CHAT_MSG_SYSTEM(...)
-	local who, roll, from, to = match(..., rollCapture)
+	local who, roll, from, to = XLoot.Deformat(..., RANDOM_ROLL_RESULT)
 	if who == me then
 		eframe.value = tonumber(roll)
 		eframe:UnregisterEvent("CHAT_MSG_SYSTEM")
