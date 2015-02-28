@@ -1,4 +1,4 @@
-﻿## Interface: 60000
+﻿## Interface: 60100
 ## Title: XLoot Master
 ## Notes: Configurable Master Looter interface
 ## Version: @project-version@
