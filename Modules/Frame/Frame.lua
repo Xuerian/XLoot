@@ -381,6 +381,7 @@ do
 	end
 	
 	-- Appearance/skin updates
+	local resize_texts = {'text_name', 'text_info'}
 	function RowPrototype:UpdateAppearance()
 		local owner, opt = self.owner, self.owner.opt
 		-- Colors
@@ -401,8 +402,13 @@ do
 		self.text_locked:SetText(LOCKED) -- Can't set text until font is set
 
 		-- Resize fontstrings
-		AdjustFontstringSize(self.text_name)
-		AdjustFontstringSize(self.text_info)
+		for i=1,#resize_texts do
+			local fontstring = self[resize_texts[i]]
+			local text = fontstring:GetText()
+			fontstring:SetText("A")
+			AdjustFontstringSize(fontstring)
+			fontstring:SetText(text)
+		end
 
 		-- Dimensions
 		self.frame_item:SetWidth(opt.loot_icon_size)
