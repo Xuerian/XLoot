@@ -893,7 +893,7 @@ function XLootFrame:Update(in_options)
 	-- Construct frame
 	if not self.built then
 		self:BuildFrame()
-		XLootFrame:ParseAutolootList()
+		self:ParseAutolootList()
 	end
 
 	-- References
@@ -913,13 +913,13 @@ function XLootFrame:Update(in_options)
 		if icon then -- Occasionally WoW will open loot with empty or invalid slots
 			local looted = false
 			-- Row data
-			local is_item, link = (GetLootSlotType(slot) == LOOT_SLOT_ITEM)
+			local type = GetLootSlotType(slot)
+			local is_item, link = (type == LOOT_SLOT_ITEM)
 			if is_item then
 				link = GetLootSlotLink(slot)
 			end
 
 			-- Autolooting currency
-			local type = GetLootSlotType(slot)
 			if (auto.all or auto.currency) and (type == LOOT_SLOT_MONEY or type == LOOT_SLOT_CURRENCY) then
 				LootSlot(slot)
 				looted = true
@@ -960,12 +960,9 @@ function XLootFrame:Update(in_options)
 						-- Fits with existing items?
 						else
 							local partial = GetItemCount(link) % itemStackCount
-							if partial > 0 then
-								-- local stack = select(8, GetItemInfo(name))
-								if partial + quantity < itemStackCount then
-									LootSlot(slot)
-									looted = true
-								end
+							if partial > 0 and (partial + quantity < itemStackCount) then
+								LootSlot(slot)
+								looted = true
 							end
 						end
 
