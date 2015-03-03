@@ -188,6 +188,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	local BetterOptionsTypes = {}
+	BetterOptions.types = BetterOptionsTypes
 	function BetterOptions.any_type(t)
 		-- Simple
 		if type(t) == 'string' then
