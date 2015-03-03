@@ -254,7 +254,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	function BetterOptionsTypes.range(t)
-		t.min = t.max or t[1]
+		t.min = t.min or t[1]
 		t.max = t.max or t[2]
 		t.step = t.step or t[3]
 		t.softMin = t.softMin or t[4]
