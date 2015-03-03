@@ -179,7 +179,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	function BetterOptions.Compile(set)
 		for i,v in ipairs(set) do
-			local t, key = BetterOptions.any(v)
+			local t, key = BetterOptions.any_type(v)
 			t.order = i
 			set[key] = t
 			set[i] = nil
@@ -188,15 +188,15 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	local BetterOptionsTypes = {}
-	function BetterOptions.any(t)
+	function BetterOptions.any_type(t)
 		-- Simple
 		if type(t) == 'string' then
 			t = { t }
 		end
 
 		-- Shift required elements
-		local key = table_remove(t, 1)
-		t.type = table_remove(t, 1)
+		local key = table.remove(t, 1)
+		t.type = table.remove(t, 1)
 		-- Infer toggle by default
 		if not t.type then
 			t.type = "toggle"
