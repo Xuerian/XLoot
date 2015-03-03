@@ -234,7 +234,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	function BetterOptionsTypes.group(t)
 		t.args = t.args or t[1]
 		if t.inline == nil then
-			t.inline = (t[2] ~= nil and t[2] or true)
+			t.inline = (t[2] == nil and true or t[2])
 		end
 
 		if t.args then
@@ -266,7 +266,9 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	function BetterOptionsTypes.color(t)
-		t.hasAlpha = t.hasAlpha or t[1]
+		if t.hasAlpha == nil then
+			t.hasAlpha = t[1]
+		end
 	end
 
 	function BetterOptionsTypes.range(t)
