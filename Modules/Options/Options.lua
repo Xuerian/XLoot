@@ -219,6 +219,14 @@ function addon:OnEnable() -- Construct addon option tables here
 		return t, key
 	end
 
+	-- Many options are short enough that t[n] and t[n+1] can comfortably represent t.subtable and t.subkey
+	function BetterOptions.infer_db_path(t, offset)
+		offset = offset or 0
+		t.subtable = t.subtable or t[1+offset]
+		t.subkey = t.subkey or t[2+offset]
+	end
+
+
 	function BetterOptionsTypes.group(t)
 		t.args = t.args or t[1]
 		if t.inline == nil then
@@ -230,24 +238,27 @@ function addon:OnEnable() -- Construct addon option tables here
 		end
 	end
 
+	function BetterOptionsTypes.toggle(t)
+		BetterOptions.infer_db_path(t)
+	end
+
 	function BetterOptionsTypes.select(t)
 		t.items = t.items or t[1]
+		BetterOptions.infer_db_path(t, 1)
 	end
 
 	function BetterOptionsTypes.alpha(t)
 		t.min = 0.0
 		t.max = 1.0
 		t.step = 0.1
-		t.subtable = t.subtable or t[1]
-		t.subkey = t.subkey or t[2]
+		BetterOptions.infer_db_path(t)
 	end
 
 	function BetterOptionsTypes.scale(t)
 		t.min = 0.1
 		t.max = 2.0
 		t.step = 0.1
-		t.subtable = t.subtable or t[1]
-		t.subkey = t.subkey or t[2]
+		BetterOptions.infer_db_path(t)
 	end
 
 	function BetterOptionsTypes.color(t)
@@ -499,12 +510,12 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "autolooting", "group", {
 				{ "autolooting_text", "description" },
-				{ "autoloot_currency", "select", when_group, subtable = "autoloots", subkey = "currency" },
-				{ "autoloot_quest", "select", when_group, subtable = "autoloots", subkey = "quest" },
-				{ "autoloot_tradegoods", "select", when_group, subtable = "autoloots", subkey = "tradegoods" },
-				{ "autoloot_all", "select", when_group, subtable = "autoloots", subkey = "all" },
+				{ "autoloot_currency", "select", when_group, "autoloots", "currency" },
+				{ "autoloot_quest", "select", when_group, "autoloots", "quest" },
+				{ "autoloot_tradegoods", "select", when_group, "autoloots", "tradegoods" },
+				{ "autoloot_all", "select", when_group, "autoloots", "all" },
 				{ "autolooting_list", "description" },
-				{ "autoloot_list", "select", when_group, subtable = "autoloots", subkey = "list" },
+				{ "autoloot_list", "select", when_group, "autoloots", "list" },
 				{ "autoloot_item_list", "input", width = "double" },
 				{ "autolooting_details", "description" },
 			}},
@@ -535,8 +546,8 @@ function addon:OnEnable() -- Construct addon option tables here
 	if XLoot:GetModule("Group", true) then
 		addon:RegisterOptions({ name = "Group", addon =  XLootGroup }, {
 			{ "anchors", "group", {
-				{ "roll_anchor_visible", "toggle", subtable = "roll_anchor", subkey = "visible", set = set_anchor },
-				{ "alert_anchor_visible", "toggle", subtable = "alert_anchor", subkey = "visible", set = set_anchor, width = "double" },
+				{ "roll_anchor_visible", "toggle", "roll_anchor", "visible", set = set_anchor },
+				{ "alert_anchor_visible", "toggle", "alert_anchor", "visible", set = set_anchor, width = "double" },
 			}},
 			{ "other_frames", "group", {
 				"hook_bonus",
@@ -545,7 +556,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "alert_skin", requires = "hook_alert", width = "double" },
 			}},
 			{ "rolls", "group", {
-				{ "roll_direction", "select", directions, name = L.growth_direction, subtable = "roll_anchor", subkey = "direction" },
+				{ "roll_direction", "select", directions, "roll_anchor", "direction" , name = L.growth_direction },
 				{ "text_outline", "toggle" },
 				{ "text_time", "toggle" },
 				{ "roll_scale", "scale", "roll_anchor", "scale" },
@@ -573,7 +584,7 @@ function addon:OnEnable() -- Construct addon option tables here
 					{ "alert_scale", "scale" },
 					{ "alert_offset", "range", 0.1, 10.0, 0.1 },
 					{ "alert_alpha", "alpha" },
-					{ "alert_direction", "select", directions, subtable = "alert_anchor", subkey = "direction", name = L.growth_direction },
+					{ "alert_direction", "select", directions, "alert_anchor", "direction", name = L.growth_direction },
 				},
 				defaults = { requires = "hook_alert" }
 			}
