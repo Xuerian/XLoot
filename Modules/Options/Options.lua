@@ -103,7 +103,11 @@ function addon:OnEnable() -- Construct addon option tables here
 	-- General config methods
 
 	-- Find module options and requested key from AceConfigDialog info table
-	-- Also return meta table for option
+	--	returns:
+	--	db -- Current settings table for option (May be a subtable)
+	--	k -- Current settings key for option
+	--	meta -- Config metatable for option
+	--  full_db -- Full settings table for module
 	local function path(info)
 		local meta = option_metadata[info.option]
 		local db = meta.module_data.addon.db.profile
