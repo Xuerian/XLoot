@@ -107,7 +107,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	local function path(info)
 		local meta = option_metadata[info.option]
 		local db = meta.module_data.addon.db.profile
-		return meta.subtable and db[meta.subtable] or db, meta.subkey or info[#info], meta
+		return meta.subtable and db[meta.subtable] or db, meta.subkey or info[#info], meta, db
 	end
 
 	-- Generic option getter
@@ -166,9 +166,9 @@ function addon:OnEnable() -- Construct addon option tables here
 	-- Dependencies
 	-- TODO: Recursive dependencies
 	local function requires(info)
-		local db, k, meta = path(info)
-		return ((meta.requires and (not db[meta.requires]) or false)
-				or (meta.requires_inverse and db[meta.requires_inverse] or false))
+		local db, k, meta, full_db = path(info)
+		return ((meta.requires and (not full_db[meta.requires]) or false)
+				or (meta.requires_inverse and full_db[meta.requires_inverse] or false))
 	end
 
 	-------------------------------------------------------------------------------
