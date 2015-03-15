@@ -103,8 +103,8 @@ function addon:OnEnable()
 		anchor_pretty = { r = .6, g = .6, b = .6, a = .8 },
 		row = { gradient = false },
 		item = { backdrop = false },
-		alert = { gradient = false },
-		alert_item = { gradient = false, backdrop = false },
+		alert = { gradient = true },
+		alert_item = { gradient = true, backdrop = false },
 		bonus = { }
 	}, 'row')
 
@@ -484,7 +484,12 @@ function addon.AlertFrameHook(alert)
 			overlay:SetFrameLevel(alert:GetFrameLevel())
 			elements.overlay = overlay
 			Skinner:Skin(overlay, 'alert')
-			-- overlay:SetGradientColor(.5, .5, .5, .4)
+			if opt.alert_background then
+				local backdrop = CreateFrame('Frame', nil, alert)
+				backdrop:SetAllPoints(overlay)
+				backdrop:SetFrameLevel(alert:GetFrameLevel()-1)
+				overlay.gradient:SetParent(backdrop)
+			end
 
 			local icon_frame = CreateFrame('Frame', nil, alert)
 			icon_frame:SetPoint('CENTER', alert.Icon, 'CENTER', 0, 0)
@@ -492,7 +497,6 @@ function addon.AlertFrameHook(alert)
 			icon_frame:SetHeight(alert.Icon:GetHeight() + 4)
 			elements.icon_frame = icon_frame
 			Skinner:Skin(icon_frame, 'alert_item')
-			-- icon_frame:SetGradientColor(.5, .5, .5, .4)
 		end
 
 		alert_frames[alert] = elements
@@ -514,6 +518,8 @@ function addon.AlertFrameHook(alert)
 			c = {r = 1, g = .8, b = 0.1}
 		end
 		if type(c) == "table" then -- Sanity check due to 5.4.1 reported error
+			elements.overlay:SetGradientColor(c.r, c.g, c.b, .2)
+			elements.icon_frame:SetGradientColor(c.r, c.g, c.b, .2)
 			elements.overlay:SetBorderColor(c.r, c.g, c.b)
 			elements.icon_frame:SetBorderColor(c.r, c.g, c.b)
 		end
