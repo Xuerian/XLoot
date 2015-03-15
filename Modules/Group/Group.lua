@@ -163,14 +163,14 @@ function addon:OnEnable()
 	end
 
 	-- Hook alert actions
-	if not opt.compat_alert then
+	if opt.hook_alert then
 		hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
 		hooksecurefunc('AlertFrame_SetLootWonAnchors', self.AlertFrameAnchorHook)
 	end
 	-- hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusRollFrame_StartBonusRoll)
 	-- hooksecurefunc('BonusRollFrame_FinishedFading', self.BonusRollFrame_Hide)
 	-- BonusRollFrame._SetPoint, BonusRollFrame.SetPoint = BonusRollFrame.SetPoint, addon.BonusRollFrame_SetPoint
-	if not opt.compat_bonus then
+	if opt.hook_bonus then
 		hooksecurefunc(BonusRollFrame, 'SetPoint', self.BonusRollFrame_SetPoint)
 		hooksecurefunc(BonusRollFrame, 'Show', self.BonusRollFrame_Show)
 		hooksecurefunc(BonusRollFrame, 'Hide', self.BonusRollFrame_Hide)
