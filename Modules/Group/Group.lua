@@ -992,19 +992,21 @@ function addon:ApplyOptions()
 
 	anchor:Restack()
 	for _,frame in pairs(anchor.children) do
-		frame:SetWidth(opt.roll_width)
-		frame.need:SetWidth(opt.roll_button_size)
-		frame.need:SetHeight(opt.roll_button_size)
-		frame.greed:SetWidth(opt.roll_button_size)
-		frame.greed:SetHeight(opt.roll_button_size)
-		frame.disenchant:SetWidth(opt.roll_button_size)
-		frame.disenchant:SetHeight(opt.roll_button_size)
-		frame.pass:SetWidth(opt.roll_button_size)
-		frame.pass:SetHeight(opt.roll_button_size)
-		SetOutline(frame.text_status)
-		SetOutline(frame.text_loot)
-		if not opt.text_time then
-			frame.text_time:SetText()
+		if frame.need then
+			frame:SetWidth(opt.roll_width)
+			frame.need:SetWidth(opt.roll_button_size)
+			frame.need:SetHeight(opt.roll_button_size)
+			frame.greed:SetWidth(opt.roll_button_size)
+			frame.greed:SetHeight(opt.roll_button_size)
+			frame.disenchant:SetWidth(opt.roll_button_size)
+			frame.disenchant:SetHeight(opt.roll_button_size)
+			frame.pass:SetWidth(opt.roll_button_size)
+			frame.pass:SetHeight(opt.roll_button_size)
+			SetOutline(frame.text_status)
+			SetOutline(frame.text_loot)
+			if not opt.text_time then
+				frame.text_time:SetText()
+			end
 		end
 	end
 end
