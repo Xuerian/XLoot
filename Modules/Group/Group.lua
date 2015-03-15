@@ -134,7 +134,8 @@ function addon:OnEnable()
 			if mouse_focus and mouse_focus.aexpire and (mouse_focus.aexpire - time) < 5 then
 				mouse_focus.aexpire = time + 5
 			end
-			for i, frame in ipairs(anchor.expiring) do
+			for i=1, #anchor.expiring do
+				local frame = anchor.expiring[i]
 				if frame.aexpire and time > frame.aexpire then
 					anchor:Pop(frame)
 					table.remove(anchor.expiring, i)
