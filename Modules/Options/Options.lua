@@ -451,7 +451,7 @@ function addon:OnEnable() -- Construct addon option tables here
 		}
 	end
 
-	local font_flags = {
+	local font_flag = {
 		{ "", "NONE" },
 		{ "OUTLINE", "OUTLINE" },
 		{ "THICKOUTLINE", "THICKOUTLINE" },
@@ -527,7 +527,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "font", "group", {
 				{ "font", fonts },
-				{ "font_flag", font_flags },
+				{ "font_flag", font_flag },
 				{ "font_sizes", "header" },
 				{ "font_size_loot", "range", 4, 26, 1 },
 				{ "font_size_info", "range", 4, 26, 1 },
@@ -623,7 +623,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "font", "group", {
 				{ "font", fonts },
-				{ "font_flags", font_flags },
+				{ "font_flag", font_flag },
 				{ "font_sizes", "header" },
 				{ "font_size_loot", "range", 4, 26, 1 },
 				{ "font_size_quantity", "range", 4, 26, 1 },
