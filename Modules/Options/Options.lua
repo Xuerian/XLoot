@@ -556,9 +556,9 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "alert_anchor_visible", "toggle", "alert_anchor", "visible", set = set_anchor, width = "double" },
 			}},
 			{ "other_frames", "group", {
-				"hook_bonus",
+				{ "hook_bonus" },
 				{ "bonus_skin", requires = "hook_bonus", width = "double" },
-				"hook_alert",
+				{ "hook_alert" },
 				{ "alert_skin", requires = "hook_alert", width = "double" },
 			}},
 			{ "rolls", "group", {
@@ -591,6 +591,8 @@ function addon:OnEnable() -- Construct addon option tables here
 					{ "alert_offset", "range", 0.1, 10.0, 0.1 },
 					{ "alert_alpha", "alpha" },
 					{ "alert_direction", "select", directions, "alert_anchor", "direction", name = L.growth_direction },
+					{ "alert_background" },
+					{ "alert_icon_frame" },
 				},
 				defaults = { requires = "hook_alert" }
 			}
