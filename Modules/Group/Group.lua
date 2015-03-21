@@ -548,7 +548,7 @@ function addon.FixAnchors(frames, anchor)
 				end
 				anchor = frame
 				if first then
-					first, x, y = false, 0, (20 - opt.alert_offset) * (up and -1 or 1)
+					first, x, y = false, 0, opt.alert_offset - 20
 				end
 			end
 		end

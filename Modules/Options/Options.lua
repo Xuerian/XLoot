@@ -588,7 +588,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "alerts", "group", {
 					{ "alert_scale", "scale" },
-					{ "alert_offset", "range", 0.1, 10.0, 0.1 },
+					{ "alert_offset", "range", -5, 20, 0.1 },
 					{ "alert_alpha", "alpha" },
 					{ "alert_direction", "select", directions, "alert_anchor", "direction", name = L.growth_direction },
 					{ "alert_background" },
