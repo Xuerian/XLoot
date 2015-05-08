@@ -204,7 +204,7 @@ do
 	end
 
 	local function Restack(self)
-		local children
+		local children = self.children
 		local n = #children
 		-- Apparently it is faster to hide, move, and show than to just move.
 		-- See: Nameplate addons. Necessary here? Probably not.
