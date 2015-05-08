@@ -359,7 +359,7 @@ local function tprint(...)
 end
 
 -- Test each locale
-local function inv(pat) return select(1, invert(pat)) end
+local function inv(pat) return select(1, XLoot.InvertFormatString(pat)) end
 local fmt = string.format
 for locale, t in pairs(locales) do
 	setmetatable(t, locale_mt)

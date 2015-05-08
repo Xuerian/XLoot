@@ -1206,6 +1206,8 @@ SlashCmdList['XLOOTGROUPD'] = debug
 local function alert()
 	local _, link = GetItemInfo(preview_loot[random(1, #preview_loot)][1])
 	LootWonAlertFrame_ShowAlert(link, random(1, 4), random(1, 4)-1, random(1, 100))
+	LootUpgradeFrame_ShowAlert(link, random(1, 4), 1, random(1,4)-1)
+	MoneyWonAlertFrame_ShowAlert(random(1, 100000))
 end
 
 SLASH_XLOOTGROUPA1 = '/xlga'

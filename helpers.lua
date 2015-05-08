@@ -140,6 +140,7 @@ function XLoot.Deformat(str, pattern)
 	end
 	return func(str)
 end
+XLoot.InvertFormatString = invert
 
 --@do-not-package@
 -- Debug
