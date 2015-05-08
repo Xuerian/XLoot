@@ -569,6 +569,7 @@ end
 
 local bonus_elements
 function addon.BonusRollFrame_Show()
+	if anchor._moving then return nil end -- Hidden for performance while re-anchoring
 	local frame = BonusRollFrame
 	if not bonus_elements then
 		bonus_elements = {}
@@ -596,6 +597,7 @@ function addon.BonusRollFrame_Show()
 end
 
 function addon.BonusRollFrame_Hide()
+	if anchor._moving then return end -- Hidden for performance while re-anchoring
 	if anchor.children[1] == BonusRollFrame then
 		table.remove(anchor.children, 1)
 		anchor:Restack()
