@@ -204,9 +204,19 @@ do
 	end
 
 	local function Restack(self)
-		for i,child in ipairs(self.children) do
-			child:ClearAllPoints()
-			self:AnchorChild(child, i == 1 and self or self.children[i-1])
+		local children
+		local n = #children
+		-- Apparently it is faster to hide, move, and show than to just move.
+		-- See: Nameplate addons. Necessary here? Probably not.
+		for i=1,n do
+			children[i]:Hide()
+		end
+		for i=1,n do
+			children[i]:ClearAllPoints()
+			self:AnchorChild(children[i], i == 1 and self or children[i-1])
+		end
+		for i=1,n do
+			children[i]:Show()
 		end
 	end
 
