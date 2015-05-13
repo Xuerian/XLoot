@@ -205,24 +205,10 @@ do
 
 	local function Restack(self)
 		local children = self.children
-		local n = #children
-		if n == 0 then return end -- Shouldn't happen, but that's why they're called sanity checks
-		-- Apparently it is faster to hide, move, and show than to just move.
-		-- See: Nameplate addons. Necessary here? Probably not.
-		-- Not to mention we have to complicate the UI callbacks for these actions
-		-- Whatever. I'm already doing it.
-		self._moving = true
-		for i=1,n do
-			children[i]:Hide()
+		for i,child in ipairs(self.children) do
+			child:ClearAllPoints()
+			self:AnchorChild(child, i == 1 and self or self.children[i-1])
 		end
-		for i=1,n do
-			children[i]:ClearAllPoints()
-			self:AnchorChild(children[i], i == 1 and self or children[i-1])
-		end
-		for i=1,n do
-			children[i]:Show()
-		end
-		self._moving = false
 	end
 
 	function lib:CreateStaticStack(factory, ...)
