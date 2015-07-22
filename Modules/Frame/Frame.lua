@@ -149,6 +149,14 @@ function addon:OnEnable()
 	end)
 end
 
+local preview_loot = {
+	{ 52722, false, true, true },
+	{ 31304, true, false, false },
+	{ 37254, true, false, false },
+	{ 13262, true, false, false },
+	{ 15487, false, false, false }
+}
+
 function addon:ApplyOptions(in_options)
 	opt, XLootFrame.opt = self.opt, self.opt
 	if XLootFrame.built then
@@ -156,6 +164,41 @@ function addon:ApplyOptions(in_options)
 		XLootFrame:Update(true)
 	end
 	XLootFrame:ParseAutolootList()
+	-- Update preview frame in options
+	if in_options then
+		local Fake = XLootFakeFrame
+		Fake:UpdateAppearance()
+		Fake.opt = opt
+		local max_width, max_quality = 0, 0
+		for i,v in ipairs(preview_loot) do
+			local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(v[1])
+			local row = Fake.rows[i]
+			row.item = itemLink
+			row.quality = itemRarity
+			Fake.slots[i] = row
+			max_width = math.max(max_width, row:Update(true, itemTexture, itemName, itemLink, 1, itemRarity, v[2], v[3], v[4]))
+			max_quality = math.max(max_quality, itemRarity)
+		end
+		Fake:SizeAndColor(max_width, max_quality)
+	end
+end
+
+function addon:OnOptionsShow(panel)
+	-- Create preview frame
+	local frame = XLootFakeFrame
+	if not frame then
+		frame = CreateFrame('Frame', 'XLootFakeFrame', panel)
+		frame.fake = true
+		frame.opt = XLootFrame.opt
+		self:BuildLootFrame(frame)
+		frame:SetPoint('TOPLEFT', panel, 'TOPRIGHT', 25, 25)
+		self:ApplyOptions(true)
+	end
+	frame:Show()
+end
+
+function addon:OnOptionsHide(panel)
+	XLootFakeFrame:Hide()
 end
 
 -- CLI output
@@ -786,7 +829,7 @@ do
 	end
 
 	-- Factory
-	function XLootFrame.BuildFrame(f)
+	function addon:BuildLootFrame(f)
 		local name = f:GetName()
 		-- Setup frame
 		FramePrototype:New(f)
@@ -894,7 +937,7 @@ function XLootFrame:Update(in_options)
 
 	-- Construct frame
 	if not self.built then
-		self:BuildFrame()
+		addon:BuildLootFrame(self)
 		self:ParseAutolootList()
 	end
 
