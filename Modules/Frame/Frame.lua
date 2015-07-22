@@ -149,7 +149,7 @@ function addon:OnEnable()
 	end)
 end
 
-function addon:ApplyOptions()
+function addon:ApplyOptions(in_options)
 	opt, XLootFrame.opt = self.opt, self.opt
 	if XLootFrame.built then
 		XLootFrame:UpdateAppearance()

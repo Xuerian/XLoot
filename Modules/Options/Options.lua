@@ -84,7 +84,7 @@ local update_throttle, elapsed = CreateFrame("Frame"), 0
 update_throttle:Hide()
 update_throttle:SetScript("OnUpdate", function(self, delta)
 	if elapsed > .1 then
-		XLoot:ApplyOptions()
+		XLoot:ApplyOptions(true)
 		elapsed = 0
 		self:Hide()
 	else
@@ -380,7 +380,7 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	local function OnCoreChanged(k, v)
 		if k == 'skin' then
-			XLoot:ApplyOptions()
+			XLoot:ApplyOptions(true)
 		end
 	end
 
