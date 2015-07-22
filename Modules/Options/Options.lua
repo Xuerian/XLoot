@@ -472,15 +472,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "grouped", L.when_grouped }
 		}
 
-		local function OnChanged(k, v)
-			if not XLootFrame.built then
-				XLootFrame:BuildFrame()
-			end
-			XLootFrame:UpdateAppearance()
-			XLootFrame:ParseAutolootList()
-		end
-
- 		addon:RegisterOptions({ name = "Frame", addon =  XLootFrame.addon, OnChanged = OnChanged }, {
+ 		addon:RegisterOptions({ name = "Frame", addon =  XLootFrame.addon }, {
 			{ "frame_options", "group", {
 				{ "frame_width_automatic", "toggle", width = "double" },
 				{ "old_close_button", "toggle" },
