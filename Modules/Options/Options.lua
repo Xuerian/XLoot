@@ -56,6 +56,7 @@ Please note that inline and non-inline groups do not mix well for AceConfigDialo
 
 -- Create module
 local addon, L = XLoot:NewModule("Options")
+addon.modules = {}
 
 -- Global
 _G.XLootOptions = addon
@@ -383,7 +384,7 @@ function addon:OnEnable() -- Construct addon option tables here
 		end
 	end
 
-	local modules, skins = {}, {}
+	local skins = {}
 	local options = Finalize({ name = "Core", addon =  XLoot, OnChanged = OnCoreChanged }, BetterOptions.Compile({
 		{ "details", "description" },
 		{ "skin", "select", values = function()
@@ -413,6 +414,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	function addon:RegisterOptions(module_data, option_table)
 		-- Have to finalize here because Finalize needs to know what module we're in
 		-- There's probably a better way to do this.
+		addon.modules[module_data.name] = module_data
 		Finalize(module_data, BetterOptions.Compile(option_table))
 		self:RegisterAceOptionTable(module_data.name, option_table)
 	end
@@ -738,6 +740,21 @@ function addon:OpenPanel(module)
 		panel.default = PanelDefault
 		-- panel.okay = PanelOkay
 		-- panel.cancel = PanelCancel
+
+		local _OnShow = panel:GetScript("OnShow")
+		local _OnHide = panel:GetScript("OnHide")
+		panel:SetScript("OnShow", function(...)
+			_OnShow(...)
+			for name, module_data in pairs(self.modules) do
+				trigger(module_data.addon, "OnOptionsShow", panel)
+			end
+		end)
+		panel:SetScript("OnHide", function(...)
+			_OnHide(...)
+			for name, module_data in pairs(self.modules) do
+				trigger(module_data.addon, "OnOptionsHide", panel)
+			end
+		end)
 
  		-- Create profile panel
 		AceConfigRegistry:RegisterOptionsTable("XLootProfile", LibStub("AceDBOptions-3.0"):GetOptionsTable(XLoot.db))
