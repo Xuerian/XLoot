@@ -318,6 +318,7 @@ end
 
 local function GetColor(self, key, mult)
 	local skin, raw, default, t = self.skin, rawget(self.opt, key), defaults.profile[key]
+	assert(default, "No default color specified for key " .. key)
 	-- Use options if different from defaults
 	if raw and (raw[1] ~= default[1] or raw[2] ~= default[2] or raw[3] ~= default[3] or raw[4] ~= default[4]) then
 		t = raw
