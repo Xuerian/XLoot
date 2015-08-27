@@ -491,6 +491,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_highlight", "toggle", width = "double", },
 				{ "loot_collapse", "toggle" },
 				{ "loot_texts_lock", "toggle", width = "double" },
+				{ "loot_buttons_auto" },
 				{ "loot_alpha", "alpha" },
 				{ "loot_icon_size", "range", 16, 64, 1, name = L.icon_size },
 				{ "loot_row_height", "range", 14, 64, 1 },
@@ -527,6 +528,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "font_size_info", "range", 4, 26, 1 },
 				{ "font_size_quantity", "range", 4, 26, 1 },
 				{ "font_size_bottombuttons", "range", 4, 26, 1 },
+				{ "font_size_button_auto", "range", 4, 26, 1, requires = "loot_buttons_auto", name = L.Frame.loot_buttons_auto },
 			}},
 			{ "colors", "group", {
 				{ "quality_color_frame", "toggle", width = "full" },
@@ -537,7 +539,8 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_color_backdrop", "color", true },
 				{ "frame_color_gradient", "color", true, width = "double" },
 				{ "loot_color_gradient", "color", true },
-				{ "loot_color_info", "color", width = "full", requires = "loot_texts_info" }
+				{ "loot_color_info", "color", true, width = "double", requires = "loot_texts_info" },
+				{ "loot_color_button_auto", "color", true, requires = "loot_buttons_auto", name = L.Frame.loot_buttons_auto},
 			}}
 		})
 	end
