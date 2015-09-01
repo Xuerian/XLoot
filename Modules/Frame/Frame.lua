@@ -161,6 +161,10 @@ local preview_loot = {
 	{ 15487, false, false, false }
 }
 
+for i=1,#preview_loot do
+	GetItemInfo(preview_loot[i][1])
+end
+
 function addon:ApplyOptions(in_options)
 	opt, XLootFrame.opt = self.opt, self.opt
 	if XLootFrame.built then
