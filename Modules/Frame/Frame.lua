@@ -462,7 +462,7 @@ do
 	end
 
 	function RowPrototype:Auto_OnHide()
-		self.parent.text_name:SetPoint('RIGHT', self.parent, 'RIGHT', -4, 0)
+		self.parent.text_name:SetPoint('RIGHT', self.parent, 'RIGHT', -6, 0)
 	end
 	
 	-- Appearance/skin updates
@@ -490,7 +490,6 @@ do
 		self.text_button_auto:SetText(L.button_auto)
 		self.button_auto:SetWidth(self.text_button_auto:GetStringWidth()+4)
 		self.button_auto:SetHeight(self.text_button_auto:GetStringHeight()+4)
-		self.text_name:SetPoint('RIGHT', self.text_button_auto, 'LEFT')
 
 		-- Resize fontstrings
 		for i=1,#resize_texts do
@@ -673,7 +672,7 @@ do
 		smalltext(locked)
 		smalltext(quantity)
 		smalltext(auto)
-		name:SetPoint('RIGHT', row, 'RIGHT', -4, 0)
+		name:SetPoint('RIGHT', row, 'RIGHT', -6, 0)
 		info:SetPoint('TOPLEFT', name, 'BOTTOMLEFT', 8, 0)
 		info:SetPoint('RIGHT', row, 'RIGHT', -4, 0)
 		textpoints(name, item, row, 2)
