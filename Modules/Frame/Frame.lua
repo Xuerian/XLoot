@@ -103,7 +103,7 @@ local defaults = {
 
 		linkall_threshold = 2, -- Quality from 0 - 6, Poor - Artifact
 		linkall_channel = 'RAID',
-		linkall_show = 'grouped',
+		linkall_show = 'group',
 
 		old_close_button = false,
 
@@ -218,6 +218,15 @@ end
 -- CLI output
 local print, wprint = print, print
 local function xprint(text) wprint(('%s: %s'):format('|c2244dd22XLoot|r', text)) end
+
+local IsGroupState = {
+	always = function() return true end,
+	never = function() return false end,
+	raid = IsInRaid,
+	group = IsInGroup,
+	party = function() return IsInGroup() and not IsInRaid() end,
+	solo = function() return not IsInGroup() end
+}
 
 -------------------------------------------------------------------------------
 -- Link All
@@ -349,6 +358,7 @@ local function GetColor(self, key, mult)
 	end
 	return unpack(t)
 end
+
 
 -- Build individual loot row
 local mouse_focus
@@ -841,10 +851,8 @@ do
 			then
 				now = true
 			end
-		elseif show == 'always' 
-				or (show == 'solo' and not IsInGroup()) 
-				or (show == 'grouped' and IsInGroup()) then
-			now = true
+		else
+			now = IsGroupState[show]()
 		end
 		if now then
 			self.link:Show()
@@ -1021,13 +1029,14 @@ function XLootFrame:Update(in_options)
 
 	-- References
 	local rows, slots, slots_index = self.rows, wipe(self.slots), wipe(self.slots_index)
+	local bag_slots -- Only assigned if we start autolooting
 	
 	-- Autolooting options
-	local party = IsInGroup()
-	local auto, auto_items, bag_slots = auto, auto_items 
+	local auto, auto_items = auto, auto_items
 	for k,v in pairs(opt.autoloots) do
-		auto[k] = v == 'always' or (v == 'solo' and not party)
+		auto[k] = IsGroupState[v]()
 	end
+
 	-- Update rows
 	local max_quality, max_width, our_slot, slot = 0, 0, 0
 	for slot = 1, numloot do

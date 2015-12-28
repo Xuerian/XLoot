@@ -171,7 +171,9 @@ local locales = {
 		when_solo = "Solo",
 		when_always = "Always",
 		when_auto = "Automatic",
-		when_grouped = "In groups",
+		when_group = "In groups",
+		when_party = "In parties",
+		when_raid = "In raids",
 		confirm_reset_profile = "This will reset all options for this profile. Are you sure?",
 		profile = "Profile"
 	},

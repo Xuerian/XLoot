@@ -469,7 +469,9 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "never", L.when_never },
 			{ "solo", L.when_solo },
 			{ "always", L.when_always },
-			{ "grouped", L.when_grouped }
+			{ "group", L.when_group },
+			{ "party", L.when_party },
+			{ "raid", L.when_raid }
 		}
 
  		addon:RegisterOptions({ name = "Frame", addon =  XLootFrame.addon }, {
