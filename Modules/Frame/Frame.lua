@@ -189,8 +189,9 @@ function addon:ApplyOptions(in_options)
 		end
 		do
 			name, currentAmount, texture, earnedThisWeek, weeklyMax, totalMax, isDiscovered, rarity = GetCurrencyInfo(828)
-			max_width = math.max(max_width, Fake.rows[#preview_loot+1]:Update(false, texture, name, nil, 5, rarity))
-			Fake.slots[#preview_loot+1] = Fake.rows[#preview_loot+1]
+			local row =  Fake.rows[#preview_loot+1]
+			max_width = math.max(max_width, row:Update(false, texture, name, nil, 5, rarity))
+			Fake.slots[#preview_loot+1] = row
 		end
 		Fake:SizeAndColor(max_width, max_quality)
 	end
