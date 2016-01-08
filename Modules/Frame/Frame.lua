@@ -133,6 +133,7 @@ function addon:OnEnable()
 	XLootFrame:RegisterEvent("LOOT_CLOSED")
 	XLootFrame:RegisterEvent("LOOT_SLOT_CLEARED")
 	XLootFrame:RegisterEvent("MODIFIER_STATE_CHANGED")
+	XLootFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
 
 	-- Disable default frame
 	LootFrame:UnregisterEvent("LOOT_OPENED")
@@ -1014,6 +1015,22 @@ function XLootFrame:ParseAutolootList()
 	end
 end
 
+local states = {
+	always = true,
+	group = true, -- Secretly "Always" shh
+	never = false,
+	solo = nil,
+	party = nil,
+	raid = nil
+}
+
+function addon:PARTY_MEMBERS_CHANGED()
+	local raid = IsInRaid()
+	states.solo = not IsInGroup()
+	states.party = not raid
+	states.raid = raid
+end
+
 local _bag_slots = {}
 function XLootFrame:Update(in_options)
 	local numloot = GetNumLootItems()
@@ -1025,6 +1042,7 @@ function XLootFrame:Update(in_options)
 		addon:BuildLootFrame(self)
 		self:ParseAutolootList()
 		self.auto_items = auto_items
+		addon:PARTY_MEMBERS_CHANGED()
 	end
 
 	-- References
@@ -1034,7 +1052,7 @@ function XLootFrame:Update(in_options)
 	-- Autolooting options
 	local auto, auto_items = auto, auto_items
 	for k,v in pairs(opt.autoloots) do
-		auto[k] = IsGroupState[v]()
+		auto[k] = states[v]
 	end
 
 	-- Update rows
