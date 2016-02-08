@@ -554,12 +554,12 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "roll_anchor_visible", "toggle", "roll_anchor", "visible", set = set_anchor },
 				{ "alert_anchor_visible", "toggle", "alert_anchor", "visible", set = set_anchor, width = "double" },
 			}},
-			{ "other_frames", "group", {
-				{ "hook_bonus" },
-				{ "bonus_skin", requires = "hook_bonus", width = "double" },
-				{ "hook_alert" },
-				{ "alert_skin", requires = "hook_alert", width = "double" },
-			}},
+			-- { "other_frames", "group", {
+			-- 	{ "hook_bonus" },
+			-- 	{ "bonus_skin", requires = "hook_bonus", width = "double" },
+			-- 	{ "hook_alert" },
+			-- 	{ "alert_skin", requires = "hook_alert", width = "double" },
+			-- }},
 			{ "rolls", "group", {
 				{ "roll_direction", "select", directions, "roll_anchor", "direction" , name = L.growth_direction },
 				{ "text_outline", "toggle" },
