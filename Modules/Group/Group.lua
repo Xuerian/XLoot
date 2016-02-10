@@ -1,3 +1,6 @@
+-- Forcefully disable to avoid breaking people's stuff
+do return false end
+
 -- Create module
 local addon, L = XLoot:NewModule("Group")
 -- Prepare global
