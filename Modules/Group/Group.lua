@@ -1,6 +1,3 @@
--- Forcefully disable to avoid breaking people's stuff
-do return false end
-
 -- Create module
 local addon, L = XLoot:NewModule("Group")
 -- Prepare global
@@ -33,12 +30,7 @@ local defaults = {
 		prefix_equippable = "*",
 		prefix_upgrade = "+",
 
-		-- If you enable these options, you understand
-		-- that you may miss bonus rolls or other important things.
-		unsafe_hook_alert = false,
-		unsafe_hook_bonus = false,
-
-		hook_alert = false, -- Unsafe, ignored
+		hook_alert = false,
 		alert_skin = true,
 		alert_alpha = 1,
 		alert_scale = 1,
@@ -46,7 +38,7 @@ local defaults = {
 		alert_background = false,
 		alert_icon_frame = false,
 
-		hook_bonus = false, -- Unsafe, ignored
+		hook_bonus = false,
 		bonus_skin = true,
 
 		roll_button_size = 28,
@@ -76,7 +68,8 @@ local defaults = {
 		track_threshold = 3,
 
 		expire_won = 20,
-		expire_lost = 10
+		expire_lost = 10,
+		shown_hook_warning = false
 	}
 }
 
@@ -174,7 +167,7 @@ function addon:OnEnable()
 	end
 
 	-- Hook alert actions
-	if opt.unsafe_hook_alert then
+	if opt.hook_alert then
 		hooksecurefunc('LootUpgradeFrame_SetUp', self.AlertFrameHook)
 		hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
 		hooksecurefunc('MoneyWonAlertFrame_SetUp', self.AlertFrameHook)
@@ -195,10 +188,18 @@ function addon:OnEnable()
 	-- hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusRollFrame_StartBonusRoll)
 	-- hooksecurefunc('BonusRollFrame_FinishedFading', self.BonusRollFrame_Hide)
 	-- BonusRollFrame._SetPoint, BonusRollFrame.SetPoint = BonusRollFrame.SetPoint, addon.BonusRollFrame_SetPoint
-	if opt.unsafe_hook_bonus then
+	if opt.hook_bonus then
 		hooksecurefunc(BonusRollFrame, 'SetPoint', self.BonusRollFrame_SetPoint)
 		hooksecurefunc(BonusRollFrame, 'Show', self.BonusRollFrame_Show)
 		hooksecurefunc(BonusRollFrame, 'Hide', self.BonusRollFrame_Hide)
+	end
+
+	if (opt.hook_alert or opt.hook_bonus) and not opt.shown_hook_warning then
+		local function gprint(text) print(('%s: %s'):format('|c2244dd22XLoot Group|r', text)) end
+		gprint("The 'Modify bonus rolls' or 'Modify loot alerts' options are currently enabled, but are now disabled by default.")
+		gprint("I cannot guarantee that you will not experience any issues with bonus rolls with these options enabled.")
+		gprint("If you do not accept that risk, please disable those options or XLoot Group entirely. You should only see this message once.")
+		opt.shown_hook_warning = true
 	end
 end
 

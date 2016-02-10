@@ -118,7 +118,9 @@ local locales = {
 			equip_prefix = "Show equippable prefix",
 			equip_prefix_desc = "Prefixes item names to indicate if a item can be equipped or is a upgrade. (Upgrade prefix requires the Pawn addon)",
 			prefix_equippable = "Equippable prefix",
-			prefix_upgrade = "Upgrade prefix"
+			prefix_upgrade = "Upgrade prefix",
+
+			hook_warning_text = "Hooking the loot alert and bonus roll frames has rarely been reported to cause issues such as not seeing bonus rolls.\n\nBy enabling these options you acknowledge that you understand and accept that risk.",
 		},
 		Monitor = {
 			panel_title = "Loot Monitor",
