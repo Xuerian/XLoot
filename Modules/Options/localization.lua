@@ -120,7 +120,7 @@ local locales = {
 			prefix_equippable = "Equippable prefix",
 			prefix_upgrade = "Upgrade prefix",
 
-			hook_warning_text = "Hooking the loot alert and bonus roll frames has rarely been reported to cause issues such as not seeing bonus rolls.\n\nBy enabling these options you acknowledge that you understand and accept that risk.",
+			hook_warning_text = "Hooking the loot alert and bonus roll frames has rarely been reported to cause issues such as not seeing bonus rolls.\n\nBy enabling these options you acknowledge that you understand and accept that risk.\n",
 		},
 		Monitor = {
 			panel_title = "Loot Monitor",
