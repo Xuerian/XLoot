@@ -148,6 +148,9 @@ function addon:OnEnable() -- Construct addon option tables here
 		if meta.module_data.OnChanged then
 			meta.module_data.OnChanged(k, v, v2, v3, v4, ...)
 		end
+		if meta.must_reload_ui then
+			print((L.message_reloadui_warning):format(info.option.name))
+		end
 	end
 
 	-- Anchor toggles
@@ -329,6 +332,12 @@ function addon:OnEnable() -- Construct addon option tables here
 				meta.requires, meta.requires_inverse = opts.requires, opts.requires_inverse
 				opts.disabled = requires
 				opts.requires, opts.requires_inverse = nil, nil
+			end
+
+			-- Reload UI warning
+			if opts.must_reload_ui then
+				meta.must_reload_ui = true
+				opts.must_reload_ui = nil
 			end
 
 			-- Sorted select

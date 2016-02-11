@@ -177,7 +177,8 @@ local locales = {
 		when_party = "In parties",
 		when_raid = "In raids",
 		confirm_reset_profile = "This will reset all options for this profile. Are you sure?",
-		profile = "Profile"
+		profile = "Profile",
+		message_reloadui_warning = "|c2244dd22XLoot Options|r: Changing |c2244dd22%s|r requires you to reload your UI before continuing to play: |c2244dd22/reload ui|r",
 	},
 	-- Possibly localized
 	ptBR = {
