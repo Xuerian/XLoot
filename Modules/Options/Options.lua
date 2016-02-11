@@ -149,7 +149,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			meta.module_data.OnChanged(k, v, v2, v3, v4, ...)
 		end
 		if meta.must_reload_ui then
-			print((L.message_reloadui_warning):format(info.option.name))
+			print((L.message_reloadui_warning):format(meta.module_data.name, info.option.name))
 		end
 	end
 
