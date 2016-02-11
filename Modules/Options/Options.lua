@@ -565,9 +565,9 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "other_frames", "group", {
 				{ "hook_warning_text", "description" },
-				{ "hook_bonus" },
+				{ "hook_bonus", must_reload_ui = true },
 				{ "bonus_skin", requires = "hook_bonus", width = "double" },
-				{ "hook_alert" },
+				{ "hook_alert", must_reload_ui = true },
 				{ "alert_skin", requires = "hook_alert", width = "double" },
 			}},
 			{ "rolls", "group", {
