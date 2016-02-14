@@ -596,11 +596,9 @@ function addon.BonusRollFrame_Show()
 		end
 	end
 
-	-- GroupLootContainer_RemoveFrame(GroupLootContainer, frame) -- Prevent GLC from restacking
 	if anchor.children[1] ~= BonusRollFrame then
 		table.insert(anchor.children, 1, frame) -- Force in first position
 	end
-	--frame:Show()
 	anchor:Restack()
 end
 
@@ -609,7 +607,6 @@ function addon.BonusRollFrame_Hide()
 		table.remove(anchor.children, 1)
 		anchor:Restack()
 	end
-	--BonusRollFrame:Hide()
 end
 
 function addon.SlashHandler(msg)
