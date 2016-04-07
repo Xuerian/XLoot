@@ -125,11 +125,13 @@ local locales = {
 		Monitor = {
 			panel_title = "Loot Monitor",
 			-- Group labels
+			testing = "Testing",
 			anchor = "Anchor",
 			thresholds = "Quality thresholds",
 			fading = "Row fade times (in seconds)",
 			details = "Details",
 			-- Option labels
+			test_settings = "Click to test settings",
 			visible = "Anchor visible",
 			show_crafted = "Crafted",
 			show_totals = "Show total items in inventory",
