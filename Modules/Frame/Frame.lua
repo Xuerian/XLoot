@@ -1015,7 +1015,7 @@ function XLootFrame:ParseAutolootList()
 	end
 end
 
-local states = {
+local auto_states = {
 	always = true,
 	group = true, -- Secretly "Always" shh
 	never = false,
@@ -1026,9 +1026,9 @@ local states = {
 
 function addon:PARTY_MEMBERS_CHANGED()
 	local raid = IsInRaid()
-	states.solo = not IsInGroup()
-	states.party = not raid
-	states.raid = raid
+	auto_states.solo = not IsInGroup()
+	auto_states.party = not raid
+	auto_states.raid = raid
 end
 
 local _bag_slots = {}
@@ -1052,7 +1052,7 @@ function XLootFrame:Update(in_options)
 	-- Autolooting options
 	local auto, auto_items = auto, auto_items
 	for k,v in pairs(opt.autoloots) do
-		auto[k] = states[v]
+		auto[k] = auto_states[v]
 	end
 
 	-- Update rows
