@@ -119,6 +119,9 @@ function addon:OnEnable()
 	alert_anchor = XLoot.Stack:CreateAnchor(L.alert_anchor, opt.alert_anchor)
 	alert_anchor:SetFrameLevel(7)
 	addon.alert_anchor = alert_anchor
+	--  DISABLED-PATCH: LEGION PRE-PATCH
+	alert_anchor.Show = alert_anchor.Hide
+	alert_anchor:Hide()
 
 	-- Skin anchor
 	Skinner:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
@@ -166,6 +169,7 @@ function addon:OnEnable()
 		end
 	end
 
+	--[[ DISABLED-PATCH: LEGION PRE-PATCH
 	-- Hook alert actions
 	if opt.hook_alert then
 		hooksecurefunc('LootUpgradeFrame_SetUp', self.AlertFrameHook)
@@ -201,6 +205,7 @@ function addon:OnEnable()
 		gprint("If you do not accept that risk, please disable those options or XLoot Group entirely. You should only see this message once.")
 		opt.shown_hook_warning = true
 	end
+	]]
 end
 
 -------------------------------------------------------------------------------

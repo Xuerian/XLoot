@@ -561,8 +561,11 @@ function addon:OnEnable() -- Construct addon option tables here
 		addon:RegisterOptions({ name = "Group", addon =  XLootGroup }, {
 			{ "anchors", "group", {
 				{ "roll_anchor_visible", "toggle", "roll_anchor", "visible", set = set_anchor },
+				--[[ DISABLED-PATCH: LEGION PRE-PATCH
 				{ "alert_anchor_visible", "toggle", "alert_anchor", "visible", set = set_anchor, width = "double" },
+				]]
 			}},
+			--[[ DISABLED-PATCH: LEGION PRE-PATCH
 			{ "other_frames", "group", {
 				{ "hook_warning_text", "description" },
 				{ "hook_bonus", must_reload_ui = true },
@@ -570,6 +573,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "hook_alert", must_reload_ui = true },
 				{ "alert_skin", requires = "hook_alert", width = "double" },
 			}},
+			]]
 			{ "rolls", "group", {
 				{ "roll_direction", "select", directions, "roll_anchor", "direction" , name = L.growth_direction },
 				{ "text_outline", "toggle" },
@@ -595,6 +599,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "expire_won", "range", 5, 30, 1 },
 				{ "expire_lost", "range", 5, 30, 1 },
 			}},
+			--[[ DISABLED-PATCH: LEGION PRE-PATCH
 			{ "alerts", "group", {
 					{ "alert_scale", "scale" },
 					{ "alert_offset", "range", -5, 20, 0.1 },
@@ -605,6 +610,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				},
 				defaults = { requires = "hook_alert" }
 			}
+			]]
 		})
 	end
 
