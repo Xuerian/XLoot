@@ -1078,7 +1078,7 @@ function XLootFrame:Update(in_options)
 			else
 				-- TODO: Pass on to row update
 				local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(link or name)
-				if auto.all or (auto.quest and isQuestItem) or (auto.list and auto_items[name]) or (auto.tradegoods and itemType == 'Trade Goods') then
+				if auto.all or (auto.quest and isQuestItem) or (auto.list and auto_items[name]) or (auto.tradegoods and itemType == 'Tradeskill') then
 
 					-- Cache available space
 					--  Specific bag types make this a bit more annoying
