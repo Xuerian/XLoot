@@ -19,8 +19,8 @@ local defaults = {
 			visible = true,
 			scale = 1.0,
 			draggable = true,
-			x = UIParent:GetWidth() * .85,
-			y = UIParent:GetHeight() * .2
+			x = UIParent:GetWidth() * .75,
+			y = UIParent:GetHeight() * .15
 		},
 		name_width = 50,
 

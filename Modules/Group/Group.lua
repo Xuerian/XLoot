@@ -49,8 +49,8 @@ local defaults = {
 			visible = true,
 			draggable = true,
 			scale = 1.0,
-			x = UIParent:GetWidth() * .85,
-			y = UIParent:GetHeight() * .6
+			x = UIParent:GetWidth() * .75,
+			y = UIParent:GetHeight() * .4
 		},
 
 		alert_anchor = {
