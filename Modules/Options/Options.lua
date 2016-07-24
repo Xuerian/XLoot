@@ -548,12 +548,12 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "quality_color_slot", "toggle", width = "full" },
 				{ "frame_color_border", "color", width = "double", requires_inverse = "quality_color_frame" },
 				{ "loot_color_border", "color", requires_inverse = "quality_color_slot" },
-				{ "frame_color_backdrop", "color", true, width = "double" },
-				{ "loot_color_backdrop", "color", true },
-				{ "frame_color_gradient", "color", true, width = "double" },
-				{ "loot_color_gradient", "color", true },
-				{ "loot_color_info", "color", true, width = "double", requires = "loot_texts_info" },
-				{ "loot_color_button_auto", "color", true, requires = "loot_buttons_auto", name = L.Frame.loot_buttons_auto},
+				{ "frame_color_backdrop", "color", width = "double" },
+				{ "loot_color_backdrop", "color" },
+				{ "frame_color_gradient", "color", width = "double" },
+				{ "loot_color_gradient", "color" },
+				{ "loot_color_info", "color", width = "double", requires = "loot_texts_info" },
+				{ "loot_color_button_auto", "color", requires = "loot_buttons_auto", name = L.Frame.loot_buttons_auto},
 			}}
 		})
 	end

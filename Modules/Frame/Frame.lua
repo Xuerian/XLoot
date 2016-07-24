@@ -107,13 +107,13 @@ local defaults = {
 
 		old_close_button = false,
 
-		frame_color_border = { .5, .5, .5 },
+		frame_color_border = { .5, .5, .5, 1 },
 		frame_color_backdrop = { 0, 0, 0, .7 },
 		frame_color_gradient = { .5, .5, .5, .3 },
-		loot_color_border = { .5, .5, .5 },
+		loot_color_border = { .5, .5, .5, 1 },
 		loot_color_backdrop = { 0, 0, 0, .9 },
 		loot_color_gradient = { .5, .5, .5, .4 },
-		loot_color_info = { .5, .5, .5 },
+		loot_color_info = { .5, .5, .5, 1 },
 		loot_color_button_auto = { .4, .8, .4, .6 }
 	}
 }
