@@ -1024,11 +1024,19 @@ local auto_states = {
 	raid = nil
 }
 
+
 function addon:PARTY_MEMBERS_CHANGED()
-	local raid = IsInRaid()
 	auto_states.solo = not IsInGroup()
-	auto_states.party = not raid
-	auto_states.raid = raid
+	auto_states.raid = IsInRaid()
+	auto_states.party = not auto_states.raid
+end
+
+local function AutoLootSlot(slot, link)
+	LootSlot(slot)
+	if link and GetItemBindType(link) == 'pickup' then
+		return false
+	end
+	return true
 end
 
 local _bag_slots = {}
@@ -1071,8 +1079,7 @@ function XLootFrame:Update(in_options)
 
 			-- Autolooting currency
 			if (auto.all or auto.currency) and (type == LOOT_SLOT_MONEY or type == LOOT_SLOT_CURRENCY) then
-				LootSlot(slot)
-				looted = true
+				looted = AutoLootSlot(slot, link)
 				
 			-- Autolooting items
 			else
@@ -1095,14 +1102,12 @@ function XLootFrame:Update(in_options)
 					-- Simple quest item
 					local family = GetItemFamily(link)
 					if not family and isQuestItem then
-						LootSlot(slot)
-						looted = true
+						looted = AutoLootSlot(slot, link)
 					else
 						-- We have room
 						family = (family and family <= 4096) and family or 0
 						if bag_slots[0] > 0 or (bag_slots[family] and bag_slots[family] > 0) then
-							LootSlot(slot)
-							looted = true
+							looted = AutoLootSlot(slot, link)
 							-- Update remaining space
 							family = bag_slots[family] and family or 0 
 							bag_slots[family] = bag_slots[family] - 1
@@ -1111,14 +1116,13 @@ function XLootFrame:Update(in_options)
 						else
 							local partial = GetItemCount(link) % itemStackCount
 							if partial > 0 and (partial + quantity < itemStackCount) then
-								LootSlot(slot)
-								looted = true
+								looted = AutoLootSlot(slot, link)
 							end
 						end
 
 						-- Try to loot all remaining quest items anyway
 						if not looted and isQuestItem then
-							LootSlot(slot)
+							AutoLootSlot(slot, link)
 						end
 					end
 				end
