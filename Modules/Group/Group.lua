@@ -46,6 +46,8 @@ local defaults = {
 
 		roll_anchor = {
 			direction = 'up',
+			spacing = 2,
+			offset = 0,
 			visible = true,
 			draggable = true,
 			scale = 1.0,
