@@ -43,7 +43,7 @@ Features/BetterOptions:
 --  { "key", "group", inline }  ->  key = { type = "group", inline = true }
 --  { "key", "execute", func }  ->  key = { type = "execute", func = func }
 --  { "key", "select", items }
---  { "key", "color", hasAlpha }
+--  { "key", "color", hasAlpha (defaults to true) }
 --  { "key", "range", min, max, step, softMin, softMax, bigStep }
 -- Automatic types:
 --  Entry is just a "key":  "toggle"
@@ -270,8 +270,10 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	function BetterOptionsTypes.color(t)
-		if t.hasAlpha == nil then
+		if t.hasAlpha == nil and t[1] ~= nil then
 			t.hasAlpha = t[1]
+		else
+			t.hasAlpha = true
 		end
 	end
 
