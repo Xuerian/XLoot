@@ -254,11 +254,7 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 	frame.pass:Show()
 	frame.text_status:Hide()
 	frame.text_status:SetText()
-	if opt.text_time then
-		frame.text_time:Show()
-	else
-		frame.text_time:Hide()
-	end
+	frame.text_time:SetShown(opt.text_time)
 
 	frame.need.texture_special:SetTexture()
 	frame.greed.texture_special:SetTexture()
@@ -459,16 +455,6 @@ function addon:MODIFIER_STATE_CHANGED()
 	end
 end
 
-local function MaybeVisible(element, state)
-	if element then
-		if state then
-			element:Show()
-		else
-			element:Hide()
-		end
-	end
-end
-
 local alert_frames = {}
 function addon.AlertFrameHook(alert)
 	-- Reskin toast
@@ -517,10 +503,10 @@ function addon.AlertFrameHook(alert)
 
 		alert_frames[alert] = elements
 	end
-	MaybeVisible(alert.Background, opt.alert_background)
-	MaybeVisible(alert.IconBorder, opt.alert_icon_frame)
-	MaybeVisible(alert.BaseQualityBorder, opt.alert_icon_frame)
-	MaybeVisible(alert.UpgradeQualityBorder, opt.alert_icon_frame)
+	alert.Background:SetShown(opt.alert_background)
+	alert.IconBorder:SetShown(opt.alert_icon_frame)
+	alert.BaseQualityBorder:SetShown(opt.alert_icon_frame)
+	alert.UpgradeQualityBorder:SetShown(opt.alert_icon_frame)
 	alert:SetAlpha(opt.alert_alpha)
 	alert:SetScale(opt.alert_scale)
 
@@ -628,26 +614,14 @@ function addon.SlashHandler(msg)
 end
 
 function addon:UpdateAnchors()
-	if opt.roll_anchor.visible then
-		anchor:Show()
-	else
-		anchor:Hide()
-	end
-	if opt.alert_anchor.visible then
-		alert_anchor:Show()
-	else
-		alert_anchor:Hide()
-	end
+	anchor:SetShown(opt.roll_anchor.visible)
+	alert_anchor:SetShown(opt.alert_anchor.visible)
 end
 
-function addon.ToggleAnchors() 
-	if anchor:IsShown() then
-		anchor:Hide()
-		alert_anchor:Hide()
-	else
-		anchor:Show()
-		alert_anchor:Show()
-	end
+function addon.ToggleAnchors()
+	local state = anchor:IsShown()
+	anchor:SetShown(not state)
+	alert_anchor:SetShown(not state)
 end
 
 -------------------------------------------------------------------------------
