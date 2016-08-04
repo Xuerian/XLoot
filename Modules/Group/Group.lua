@@ -1084,7 +1084,7 @@ local init, tests, links = false, {}, {}
 local deframe = CreateFrame('Frame')
 
 -- Currently only debugs one roll at a time.
-local function debug(msg)
+function XLootGroup.TestSettings()
 	local FakeHistory
 	local schedule = {}
 	local type_index = { 'need', 'greed', 'disenchant', [0] = 'pass' }
@@ -1187,8 +1187,7 @@ local function debug(msg)
 	end
 end
 
-SLASH_XLOOTGROUPD1 = '/xlgd'
-SlashCmdList['XLOOTGROUPD'] = debug
+XLoot:SetSlashCommand('xlgd', XLootGroup.TestSettings)
 
 local function alert()
 	local _, link = GetItemInfo(preview_loot[random(1, #preview_loot)][1])
@@ -1197,8 +1196,7 @@ local function alert()
 	MoneyWonAlertFrame_ShowAlert(random(1, 100000))
 end
 
-SLASH_XLOOTGROUPA1 = '/xlga'
-SlashCmdList['XLOOTGROUPA'] = alert
+XLoot:SetSlashCommand('xlga', alert)
 
 local _GetCurrencyInfo = GetCurrencyInfo
 local function bonus()
@@ -1210,15 +1208,13 @@ local function bonus()
 	BonusRollFrame_StartBonusRoll(6603, "test", 30)
 end
 
-SLASH_XLOOTGROUPB1 = '/xlgb'
-SlashCmdList['XLOOTGROUPB'] = bonus
+XLoot:SetSlashCommand('xlgb', bonus)
 
 local function bonus_close()
 	BonusRollFrame_FinishedFading(BonusRollFrame)
 end
 
-SLASH_XLOOTGROUPBC1 = '/xlgbc'
-SlashCmdList['XLOOTGROUPBC'] = bonus_close
+XLoot:SetSlashCommand('xlgbc', bonus_close)
 
 local AC = LibStub('AceConsole-2.0', true)
 if AC then print = function(...) AC:PrintLiteral(...) end end
