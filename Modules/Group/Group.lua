@@ -19,12 +19,11 @@ local RollFramePrototype
 
 local defaults = {
 	profile = {
-		text_outline = true,
-		text_time = false,
 		role_icon = true,
 		win_icon = false,
 		show_decided = true,
 		show_undecided = false,
+		show_time_remaining = false,
 
 		equip_prefix = true,
 		prefix_equippable = "*",
@@ -43,6 +42,9 @@ local defaults = {
 
 		roll_button_size = 28,
 		roll_width = 325,
+
+		font = STANDARD_TEXT_FONT,
+		font_flag = "OUTLINE",
 
 		roll_anchor = {
 			direction = 'up',
@@ -213,11 +215,6 @@ end
 -------------------------------------------------------------------------------
 -- Frame helpers
 
-local function SetOutline(fontstring)
-	local f, s = fontstring:GetFont()
-	fontstring:SetFont(f, s, opt.text_outline and 'OUTLINE' or nil)
-end
-
 -------------------------------------------------------------------------------
 -- Event handlers
 
@@ -254,7 +251,7 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 	frame.pass:Show()
 	frame.text_status:Hide()
 	frame.text_status:SetText()
-	frame.text_time:SetShown(opt.text_time)
+	frame.text_time:SetShown(opt.show_time_remaining)
 
 	frame.need.texture_special:SetTexture()
 	frame.greed.texture_special:SetTexture()
@@ -784,8 +781,6 @@ do
 		function RollButtonPrototype:New(parent, roll, label, tex, anchor_to, x, y, label_colors)
 			local b = self:_New(CreateFrame('Button', nil, parent))
 			b:SetPoint('LEFT', anchor_to, 'RIGHT', x, y)
-			b:SetWidth(opt.roll_button_size)
-			b:SetHeight(opt.roll_button_size)
 			b:SetNormalTexture(path:format(tex, 'Up'))
 			if tex ~= 'Pass' then
 				b:SetHighlightTexture(path:format(tex, 'Highlight'))
@@ -803,7 +798,6 @@ do
 			b.texture_special = texture_special
 
 			local text = b:CreateFontString(nil, 'OVERLAY')
-			text:SetFont(STANDARD_TEXT_FONT, 12, 'THICKOUTLINE')
 			text:SetPoint("CENTER", -x + 1, tex == 'DE' and -y +2 or -y)
 			b.text = text
 
@@ -816,7 +810,15 @@ do
 			b.label = label
 			b.label_colors = label_colors
 
+			b:ApplyOptions()
+
 			return b
+		end
+
+		function RollButtonPrototype:ApplyOptions()
+			self.text:SetFont(opt.font, 12, opt.font_flag)
+			self:SetWidth(opt.roll_button_size)
+			self:SetHeight(opt.roll_button_size)
 		end
 	end
 
@@ -896,7 +898,7 @@ do
 			self.spark:SetPoint('CENTER', self, 'LEFT', (now / length) * self:GetWidth(), 0)
 			self:SetValue(now)
 			self.spark:Show()
-			if opt.text_time then
+			if opt.show_time_remaining then
 				if remaining >= 0 then
 					parent.text_time:SetText(sf('%.0f', max(0, remaining)))
 					parent.text_time:Show()
@@ -917,7 +919,6 @@ do
 		local frame = self:_New(CreateFrame('Button', nil, UIParent))
 		frame:SetFrameLevel(anchor:GetFrameLevel())
 		frame:SetHeight(24)
-		frame:SetWidth(opt.roll_width)
 		frame:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 		frame:SetScript('OnEnter', self.OnEnter)
 		frame:SetScript('OnLeave', self.OnLeave)
@@ -969,13 +970,11 @@ do
 		-- Bind text
 		local bind = icon_frame:CreateFontString(nil, 'OVERLAY')
 		bind:SetPoint('BOTTOM', 0, 1)
-		bind:SetFont(STANDARD_TEXT_FONT, 8, 'THICKOUTLINE')
 		frame.text_bind = bind
 
 		-- Time text
 		local time = icon_frame:CreateFontString(nil, 'OVERLAY')
 		time:SetPoint('CENTER', 0, 2)
-		time:SetFont(STANDARD_TEXT_FONT, 12, 'OUTLINE')
 		frame.text_time = time
 
 		-- Roll buttons
@@ -986,24 +985,42 @@ do
 		frame.need, frame.greed, frame.disenchant, frame.pass = n, g, d, p
 
 		-- Roll status text
-		local status = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+		local status = frame:CreateFontString(nil, 'OVERLAY')
 		status:SetHeight(16)
 		status:SetJustifyH('LEFT')
-		SetOutline(status)
 		status:SetPoint('LEFT', icon_frame, 'RIGHT', 1, 0)
 		status:SetPoint('RIGHT', p, 'RIGHT', 2, 0)
 		frame.text_status = status
 
 		-- Loot name/link
-		local loot = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
+		local loot = frame:CreateFontString(nil, 'OVERLAY')
 		loot:SetHeight(16)
 		loot:SetJustifyH('LEFT')
-		SetOutline(loot)
 		loot:SetPoint('LEFT', p, 'RIGHT', 3, -1)
 		loot:SetPoint('RIGHT', frame, 'RIGHT', -5, 0)
 		frame.text_loot = loot
 
+		frame:ApplyOptions()
+
 		return frame
+	end
+
+	function RollFramePrototype:ApplyOptions()
+		self:SetWidth(opt.roll_width)
+
+		-- Status bar is reskinned with SkinUpdate
+
+		self.need:ApplyOptions()
+		self.greed:ApplyOptions()
+		self.disenchant:ApplyOptions()
+		self.pass:ApplyOptions()
+
+		self.text_bind:SetFont(opt.font, 8, 'THICKOUTLINE')
+		self.text_time:SetFont(opt.font, 12, 'OUTLINE')
+		self.text_status:SetFont(opt.font, 12, opt.font_flag)
+		self.text_loot:SetFont(opt.font, 12, opt.font_flag)
+
+		self.text_time:SetShown(opt.show_time_remaining)
 	end
 end
 
@@ -1042,22 +1059,10 @@ function addon:ApplyOptions()
 	self:SkinUpdate()
 
 	anchor:Restack()
+
 	for _,frame in pairs(anchor.children) do
-		if frame.need then
-			frame:SetWidth(opt.roll_width)
-			frame.need:SetWidth(opt.roll_button_size)
-			frame.need:SetHeight(opt.roll_button_size)
-			frame.greed:SetWidth(opt.roll_button_size)
-			frame.greed:SetHeight(opt.roll_button_size)
-			frame.disenchant:SetWidth(opt.roll_button_size)
-			frame.disenchant:SetHeight(opt.roll_button_size)
-			frame.pass:SetWidth(opt.roll_button_size)
-			frame.pass:SetHeight(opt.roll_button_size)
-			SetOutline(frame.text_status)
-			SetOutline(frame.text_loot)
-			if not opt.text_time then
-				frame.text_time:SetText()
-			end
+		if frame.ApplyOptions then
+			frame:ApplyOptions()
 		end
 	end
 end
