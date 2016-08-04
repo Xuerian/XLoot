@@ -622,7 +622,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	if XLoot:GetModule("Monitor", true) then
 		addon:RegisterOptions({ name = "Monitor", addon =  XLootMonitor.addon }, {
 			{ "testing", "group", {
-				{ "test_settings", "execute", func = XLootMonitor.test_settings }
+				{ "test_settings", "execute", func = XLootMonitor.TestSettings }
 			}},
 			{ "anchor", "group", {
 				{ "visible", "toggle", set = set_anchor },
