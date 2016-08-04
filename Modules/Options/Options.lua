@@ -582,8 +582,8 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "text_time", "toggle" },
 				{ "roll_scale", "scale", "roll_anchor", "scale" },
 				{ "roll_width", "range", 150, 700, 1, 150, 400, 10, name = L.width },
-				{ "roll_spacing", "range", 0, 25, 1, name = L.spacing, subtable = "roll_anchor", subkey = "spacing" },
-				{ "roll_offset", "range", 0, 25, 1, name = L.offset, subtable = "roll_anchor", subkey = "offset" },
+				{ "roll_spacing", "range", -25, 25, 1, name = L.spacing, subtable = "roll_anchor", subkey = "spacing" },
+				{ "roll_offset", "range", -25, 25, 1, name = L.offset, subtable = "roll_anchor", subkey = "offset" },
 				{ "roll_button_size", "range", 16, 48, 1 },
 			}},
 			{ "extra_info", "group", {
