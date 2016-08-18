@@ -561,7 +561,7 @@ do
 		-- Items
 		local layout = 'simple'
 		if is_item then
-			r, g, b, hex = GetItemQualityColor(quality)
+			r, g, b, hex = GetItemQualityColor(quality or ITEM_QUALITY_COMMON)
 			
 			text_name = ('|c%s%s|r'):format(hex, name)
 			
