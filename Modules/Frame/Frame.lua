@@ -1133,7 +1133,7 @@ function XLootFrame:Update(no_snap, no_hide)
 			end
 				
 			-- Initialize slot
-			if not tried and not no_hide then
+			if not tried or no_hide then
 				our_slot = our_slot + 1 -- Incriment visible slots
 				local row = rows[our_slot] -- Acquire row
 				slots[our_slot] = row -- Place in active list
@@ -1160,7 +1160,7 @@ function XLootFrame:Update(no_snap, no_hide)
 	end
 
 	if not no_hide and need_refresh then
-		C_Timer.After(0.1, BoPRefresh)
+		C_Timer.After(0.8, BoPRefresh)
 	end
 
 	-- Exit if we autolooted everything
