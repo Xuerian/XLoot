@@ -1039,7 +1039,18 @@ local function AutoLootSlot(slot, link)
 	return true, true
 end
 
+local function clear(slot)
+	if not slot then return nil end
+	slot.slot = nil
+	slot.item = nil
+	slot.quality = nil
+	slot:Hide()
+end
+
 local function BoPRefresh()
+	for i, row in pairs(XLootFrame.rows) do
+		clear(row)
+	end
 	XLootFrame:Update(false, true)
 end
 
@@ -1176,14 +1187,6 @@ function XLootFrame:Update(no_snap, no_hide)
 		self:SnapToCursor()
 	end
 	self:Show()
-end
-
-local function clear(slot)
-	if not slot then return nil end
-	slot.slot = nil
-	slot.item = nil
-	slot.quality = nil
-	slot:Hide()
 end
 
 function addon:LOOT_CLOSED()
