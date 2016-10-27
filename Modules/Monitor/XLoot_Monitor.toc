@@ -1,4 +1,4 @@
-﻿## Interface: 70000
+﻿## Interface: 70100
 ## Title: XLoot Monitor
 ## Notes: A graphical presentation of items looted by yourself and your group
 ## Version: @project-version@
