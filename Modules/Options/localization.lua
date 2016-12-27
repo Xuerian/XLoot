@@ -135,6 +135,7 @@ local locales = {
 			visible = "Anchor visible",
 			show_crafted = "Crafted",
 			show_totals = "Show total items in inventory",
+			name_width = "Player name width",
 		},
 		Master = {
 			panel_title = "Loot Master",
