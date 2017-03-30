@@ -1,4 +1,4 @@
-﻿## Interface: 70100
+﻿## Interface: 70200
 ## Title: XLoot Frame
 ## Notes: A customizable, skinnable loot frame.
 ## Version: @project-version@
