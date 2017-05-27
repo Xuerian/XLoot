@@ -90,6 +90,7 @@ local locales = {
 			text_outline_desc = "Draws a dark outline around text on roll frames",
 			text_time = "Show time remaining",
 			text_time_desc = "Displays seconds remaining to roll over item icon",
+			text_ilvl = "Show item level",
 			role_icon = "Show role icons",
 			win_icon = "Show winning type icon",
 			show_decided = "Show decided",
