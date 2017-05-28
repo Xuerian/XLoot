@@ -41,14 +41,14 @@ local locales = {
 }
 
 -- Automatically inserted translations
---@localization(locale="ptBR", format="lua_additive_table", table-name="locales.ptBR", handle-unlocalized="ignore", namespace="Frame")@
---@localization(locale="frFR", format="lua_additive_table", table-name="locales.frFR", handle-unlocalized="ignore", namespace="Frame")@
---@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-unlocalized="ignore", namespace="Frame")@
---@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-unlocalized="ignore", namespace="Frame")@
---@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-unlocalized="ignore", namespace="Frame")@
---@localization(locale="ruRU", format="lua_additive_table", table-name="locales.ruRU", handle-unlocalized="ignore", namespace="Frame")@
---@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-unlocalized="ignore", namespace="Frame")@
---@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-unlocalized="ignore", namespace="Frame")@
---@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-unlocalized="ignore", namespace="Frame")@
+--@localization(locale="ptBR", format="lua_table", table-name="locales.ptBR", handle-unlocalized="ignore", namespace="Frame")@
+--@localization(locale="frFR", format="lua_table", table-name="locales.frFR", handle-unlocalized="ignore", namespace="Frame")@
+--@localization(locale="deDE", format="lua_table", table-name="locales.deDE", handle-unlocalized="ignore", namespace="Frame")@
+--@localization(locale="koKR", format="lua_table", table-name="locales.koKR", handle-unlocalized="ignore", namespace="Frame")@
+--@localization(locale="esMX", format="lua_table", table-name="locales.esMX", handle-unlocalized="ignore", namespace="Frame")@
+--@localization(locale="ruRU", format="lua_table", table-name="locales.ruRU", handle-unlocalized="ignore", namespace="Frame")@
+--@localization(locale="zhCN", format="lua_table", table-name="locales.zhCN", handle-unlocalized="ignore", namespace="Frame")@
+--@localization(locale="esES", format="lua_table", table-name="locales.esES", handle-unlocalized="ignore", namespace="Frame")@
+--@localization(locale="zhTW", format="lua_table", table-name="locales.zhTW", handle-unlocalized="ignore", namespace="Frame")@
 
 XLoot:Localize("Frame", locales)
