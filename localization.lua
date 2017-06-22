@@ -17,10 +17,12 @@ end
 function XLoot:Localize(name, locales)
 	-- We need to extract the root namespace due to how Curse is currently doing localizations.
 	for _,t in pairs(locales) do
-		for k, v in pairs(t[name]) do
-			t[k] = v
+		if t[name] then
+			for k, v in pairs(t[name]) do
+				t[k] = v
+			end
+			t[name] = nil
 		end
-		t[name] = nil
 	end
 	self["L_"..name] = CompileLocales(locales)
 end
