@@ -603,7 +603,6 @@ do
 
 	-- Update slot with loot
 	function RowPrototype:Update(slotData)
-		-- dprint(slotData)
 		local r, g, b, hex
 		local owner = self:GetParent()
 		local opt = owner.opt
@@ -1138,10 +1137,10 @@ function XLootFrame:Update(no_snap, is_refresh)
 
 		else
 			local autoloot = false
-			local type, slotData = GetLootSlotType(slot)
-			if type == LOOT_SLOT_ITEM then
+			local slotType, slotData = GetLootSlotType(slot)
+			if slotType == LOOT_SLOT_ITEM then
 				slotData = GetItemInfoTable(GetLootSlotLink(slot))
-				slotData.slotType = type
+				slotData.slotType = slotType
 				slotData.quantity = quantity
 				slotData.locked = locked
 				slotData.questItem = isQuestItem
@@ -1151,7 +1150,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 				slotData = {
 					name = name,
 					icon = icon,
-					slotType = type,
+					slotType = slotType,
 					quantity = quantity,
 					quality = quality,
 					locked = locked,
@@ -1165,7 +1164,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 			-- There's no reason to try to autoloot when refreshing the frame
 			if not is_refresh then
 				-- Autolooting currency
-				if (auto.all or auto.currency) and (type == LOOT_SLOT_MONEY or type == LOOT_SLOT_CURRENCY) then
+				if (auto.all or auto.currency) and (slotType == LOOT_SLOT_MONEY or slotType == LOOT_SLOT_CURRENCY) then
 					autoloot = true
 				-- Quest items			
 				elseif (auto.all or auto.quest) and (isQuestItem or startsQuest) then
@@ -1188,7 +1187,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 						end
 					end
 
-					local family = GetItemFamily(link)
+					local family = GetItemFamily(slotData.link)
 					-- Empty slots
 					family = (family and family <= 4096) and family or 0
 					if bag_slots[0] > 0 or (bag_slots[family] and bag_slots[family] > 0) then
@@ -1199,7 +1198,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 
 					-- Space in existing stacks
 					else
-						local partial = GetItemCount(link) % slotData.stackCount
+						local partial = GetItemCount(slotData.link) % slotData.stackCount
 						if partial > 0 and (partial + quantity < slotData.stackCount) then
 							autoloot = true
 						end
@@ -1223,8 +1222,8 @@ function XLootFrame:Update(no_snap, is_refresh)
 				slots[our_slot] = row
 				
 				-- Default UI and tooltip data
-				row.item = link
-				row.quality = quality
+				row.item = slotData.link
+				row.quality = slotData.quality
 				row.slot = slot
 				row.frame_slot = our_slot
 				row:SetID(slot)
