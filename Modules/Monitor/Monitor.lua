@@ -42,6 +42,20 @@ local defaults = {
 }
 
 
+----------------------------------------------------------------------
+-- Helpers
+
+local numberize = function(v)
+	if v <= 9999 then return v end
+	if v >= 1000000 then
+		local value = string.format("%.1fm", v/1000000)
+		return value
+	elseif v >= 10000 then
+		local value = string.format("%.0fk", v/1000)
+		return value
+	end
+end
+
 -------------------------------------------------------------------------------
 -- Module init
 
@@ -217,6 +231,7 @@ function addon:Restack()
 		anchor:AnchorChild(v, i == 1 and nil or stack[i-1])
 	end
 end
+
 -------------------------------------------------------------------------------
 -- Frame methods
 do
@@ -261,7 +276,7 @@ do
 		if not opt.show_totals or not total or total <= 1 then
 			total = ''
 		end
-		self.total:SetText(total)
+		self.total:SetText(numberize(total))
 		self.name:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		self.text:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		if name then
