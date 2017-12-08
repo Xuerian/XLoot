@@ -4,7 +4,6 @@
 ## Version: @project-version@
 ## Author: Xuerian
 ## X-Category: Inventory
-## X-eMail xuerian @ gmail DOT com
 ## X-Name: XLoot
 
 ## SavedVariables: XLootADB
