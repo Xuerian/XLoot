@@ -280,9 +280,10 @@ do
 		self.text:SetText(text)
 		self.ilvl:SetText()
 		if not opt.show_totals or not total or total <= 1 then
-			total = ''
+			self.total:SetText()
+		else
+			self.total:SetText(numberize(total))
 		end
-		self.total:SetText(numberize(total))
 		self.name:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		self.text:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		if name then
