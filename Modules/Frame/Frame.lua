@@ -171,7 +171,7 @@ function addon:OnEnable()
 	XLootFrame:RegisterEvent("LOOT_CLOSED")
 	XLootFrame:RegisterEvent("LOOT_SLOT_CLEARED")
 	XLootFrame:RegisterEvent("MODIFIER_STATE_CHANGED")
-	XLootFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
+	XLootFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 
 	-- Disable default frame
 	LootFrame:UnregisterEvent("LOOT_OPENED")
@@ -1075,7 +1075,7 @@ local auto_states = {
 }
 
 
-function addon:PARTY_MEMBERS_CHANGED()
+function addon:GROUP_ROSTER_UPDATE()
 	auto_states.solo = not IsInGroup()
 	auto_states.raid = IsInRaid()
 	auto_states.party = not auto_states.raid
@@ -1107,7 +1107,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 		addon:BuildLootFrame(self)
 		self:ParseAutolootList()
 		self.auto_items = auto_items
-		addon:PARTY_MEMBERS_CHANGED()
+		addon:GROUP_ROSTER_UPDATE()
 	end
 
 	-- References
@@ -1232,7 +1232,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 				local width = row:Update(slotData)
 				
 				max_width = max(width, max_width)
-				max_quality = max(quality, max_quality)
+				max_quality = max(slotData.quality or 0, max_quality)
 			end
 		end
 	end
