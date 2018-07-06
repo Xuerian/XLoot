@@ -215,8 +215,8 @@ function addon:ApplyOptions(in_options)
 	-- Update preview frame in options
 	if in_options then
 		local Fake = XLootFakeFrame
-		Fake:UpdateAppearance()
 		Fake.opt = opt
+		Fake:UpdateAppearance()
 		local slot, max_width, max_quality = 0, 0, 0
 		for i,v in ipairs(preview_loot) do
 			local t = GetItemInfoTable(v[1])
