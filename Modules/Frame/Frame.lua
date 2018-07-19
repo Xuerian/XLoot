@@ -1123,7 +1123,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 	-- Update rows
 	local max_quality, max_width, our_slot, slot, need_refresh = 0, 0, 0
 	for slot = 1, numloot do
-		local _, icon, name, quantity, quality, locked, isQuestItem, questID, startsQuest = pcall(GetLootSlotInfo, slot)
+		local _, icon, name, quantity, currencyID, quality, locked, isQuestItem, questID, startsQuest = pcall(GetLootSlotInfo, slot)
 		-- Already looted or erroring slot
 		if not name then
 			if not is_refresh and opt.show_slot_errors then
