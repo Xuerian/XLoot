@@ -212,6 +212,8 @@ function addon:OnEnable() -- Construct addon option tables here
 		-- Infer select from table
 		elseif type(t.type) == "table" then
 			t.items, t.type = t.type, "select"
+			-- Other positional arguments may be present
+			table.insert(t, 1, "select")
 		end
 
 		-- Handle specific option types
