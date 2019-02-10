@@ -139,6 +139,7 @@ local locales = {
 			visible = "Anchor visible",
 			show_crafted = "Crafted",
 			show_totals = "Show total items in inventory",
+			use_altoholic = "Include bank (Altoholic)",
 			show_ilvl = "Show item level",
 			name_width = "Player name width",
 		},
