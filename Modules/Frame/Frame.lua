@@ -66,7 +66,7 @@ local function GetItemInfoTable(link)
 		quality = rarity,
 		level = level,
 		minLevel = minLevel,
-		typeName = type, -- type and subType are localzied
+		typeName = type, -- type and subType are localized
 		subTypeName = subType,
 		stackCount = stackCount,
 		equipLoc = equipLoc,
@@ -240,7 +240,8 @@ function addon:ApplyOptions(in_options)
 				max_quality = math.max(max_quality, t.quality)
 			end
 		end
-		do
+		-- !CLASSIC
+		if GetCurrencyInfo then
 			local name, currentAmount, texture, earnedThisWeek, weeklyMax, totalMax, isDiscovered, rarity = GetCurrencyInfo(828)
 			if name and texture then
 				local row =  Fake.rows[slot+1]
