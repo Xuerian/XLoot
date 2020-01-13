@@ -144,7 +144,9 @@ local defaults = {
 
 		linkall_threshold = 2, -- Quality from 0 - 6, Poor - Artifact
 		linkall_channel = 'RAID',
+		linkall_channel_secondary = 'NONE',
 		linkall_show = 'group',
+		linkall_first_only = false,
 
 		old_close_button = false,
 
@@ -301,9 +303,12 @@ do
 		end
 
 		local linkthreshold, reached = opt.linkall_threshold
+
+		local first_only = opt.linkall_first_only
+
 		for i=1, GetNumLootItems() do
 			if GetLootSlotType(i) == LOOT_SLOT_ITEM then 
-				local texture, item, quantity, rarity = GetLootSlotInfo(i)
+				local _, _, quantity, _, rarity = GetLootSlotInfo(i)
 				local link = GetLootSlotLink(i)
 				if rarity >= linkthreshold then
 					reached = true
@@ -313,6 +318,9 @@ do
 						output[key] = (quantity > 1 and quantity.."x" or "")..link
 					else
 						output[key] = buffer
+					end
+					if opt.linkall_first_only then
+						break
 					end
 				end
 			end
@@ -328,6 +336,9 @@ do
 		for k, v in pairs(output) do
 			v  = string.gsub(v, "\n", " ", 1, true) -- DIE NEWLINES, DIE A HORRIBLE DEATH
 			SendChatMessage(v, channel)
+			if opt.linkall_channel_secondary ~= 'NONE' then
+				SendChatMessage(v, opt.linkall_channel_secondary)
+			end
 			output[k] = nil
 		end
 

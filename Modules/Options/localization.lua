@@ -64,7 +64,9 @@ local locales = {
 			frame_draggable = "Loot frame draggable",
 			linkall_threshold = "Minimum chat link quality",
 			linkall_channel = "Default chat link channel",
+			linkall_channel_secondary = "Secondary chat link channel",
 			linkall_show = "Link button visibility",
+			linkall_first_only = "Only link top item",
 
 			autolooting_text = "XLoot's autolooting features act separately from the default UI. As such, if both are enabled, you may recieve warnings like 'that object is busy'. They are safe to ignore, but can be resolved by picking one autoloot method to use exclusively.",
 
@@ -159,6 +161,7 @@ local locales = {
 			menu_self = "Show self",
 			award_qualitythreshold = "Minimum announce quality",
 			award_channel = "Default chat announce channel",
+			award_channel_secondary = "Secondary chat announce channel",
 			award_guildannounce = "Echo in guild chat",
 			award_special = "Announce special recipients",
 		},
