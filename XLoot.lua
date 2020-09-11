@@ -1,4 +1,4 @@
-﻿local XLoot = LibStub("AceAddon-3.0"):NewAddon(select(2, ...), "XLoot")
+local XLoot = LibStub("AceAddon-3.0"):NewAddon(select(2, ...), "XLoot")
 _G.XLoot = XLoot
 local L = XLoot.L
 local print, wprint = print, print
@@ -31,7 +31,7 @@ end
 -- Set up basic event handler
 local function SetEventHandler(addon, frame)
 	if not frame then
-		frame = CreateFrame("Frame")
+		frame = CreateFrame("Frame", nil)
 		addon.eframe = frame
 	end
 	frame:SetScript("OnEvent", function(self, event, ...)
@@ -146,7 +146,3 @@ function XLoot:OnEnable()
 	self:SetSlashCommand("xloot", function() self:ShowOptionPanel(self) end)
 end
 
---@do-not-package@
-local AC = LibStub("AceConsole-2.0", true)
-if AC then print = function(...) AC:PrintLiteral(...) end end
---@end-do-not-package@
