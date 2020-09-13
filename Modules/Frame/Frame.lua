@@ -39,7 +39,7 @@ end
 -- Create module
 local addon, L = XLoot:NewModule("Frame")
 -- Prepare frame/global
-local XLootFrame = CreateFrame("Frame", "XLootFrame", UIParent)
+local XLootFrame = CreateFrame("Frame", "XLootFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
 XLootFrame.addon = addon
 -- Grab locals
 local mouse_focus, opt
