@@ -113,11 +113,8 @@ function events.item(player, link, num)
 		end
 		local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
 		local num = tonumber(num) or 1
-		local total = GetItemCount(link)
-		if opt.show_totals and opt.use_altoholic and Altoholic then
-			total = Altoholic:GetItemCount(Altoholic:GetIDFromLink(link))
-		end
-		row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, total + num, nr, ng, nb)
+		row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, nil, nr, ng, nb)
+		row.timeToTotal = 0.5
 		if opt.show_ilvl and level > 1 then
 			local ilvl = GetDetailedItemLevelInfo(link)
 			row.ilvl:SetText(ilvl)
@@ -171,6 +168,25 @@ local timer = 0
 function addon.EframeUpdate(self, elapsed)
 	timer = timer + elapsed
 	for i,row in ipairs(stack) do
+		-- Deferred total calculation due to GetItemCount reliability
+		local ttt = row.timeToTotal
+		if ttt then
+			ttt = ttt - elapsed
+			if ttt <= 0 then
+				ttt = nil
+				local total
+				if opt.show_totals and opt.use_altoholic and Altoholic then
+					total = Altoholic:GetItemCount(Altoholic:GetIDFromLink(link))
+				else
+					total = GetItemCount(row.item)
+				end
+				if total and total > 1 then
+					row.total:SetText(numberize(total))
+				end
+			end
+			row.timeToTotal = ttt
+		end
+		-- Animation
 		local remaining = row.expires - timer
 		if remaining < 0 then
 			row:SetAlpha(0)
@@ -287,11 +303,8 @@ do
 		self.name:SetText(name and name.." " or nil)
 		self.text:SetText(text)
 		self.ilvl:SetText()
-		if not opt.show_totals or not total or total <= 1 then
-			self.total:SetText()
-		else
-			self.total:SetText(numberize(total))
-		end
+		-- Show total after 0.5 seconds to get a valid count
+		self.total:SetText()
 		self.name:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		self.text:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		if name then
