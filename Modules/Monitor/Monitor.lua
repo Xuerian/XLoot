@@ -119,7 +119,8 @@ function events.item(player, link, num)
 		end
 		row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, total + num, nr, ng, nb)
 		if opt.show_ilvl and level > 1 then
-			row.ilvl:SetText(level)
+			local ilvl = GetDetailedItemLevelInfo(link)
+			row.ilvl:SetText(ilvl)
 		end
 		row.item = link
 	elseif link and link:match("|Hbattlepet:") then -- Battlepets. Really?
