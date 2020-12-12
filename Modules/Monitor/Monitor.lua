@@ -412,6 +412,10 @@ local items = {
 	{ 72120 },
 	{ 2589 }
 }
+local currencies = {
+	81,
+	1728
+}
 for i,v in ipairs(items) do
 	GetItemInfo(v[1])
 end
@@ -446,7 +450,9 @@ local function test_coin(event, is_me)
 end
 
 local function test_currency(event)
-	addon.LOOT_EVENT('currency', event, 81, random_item_num(5))
+	for _,id in ipairs(currencies) do
+		addon.LOOT_EVENT('currency', event, id, random_item_num(5))
+	end
 end
 
 local function test_crafted(event)
@@ -485,6 +491,9 @@ local function queue_update(self, elapsed)
 		local time = GetTime()
 		for k,v in pairs(queue) do
 			if v[1] < time then
+				if v[3] then
+					print("Testing "..v[3])
+				end
 				v[2](select(3, unpack(v)))
 				queue[k] = nil
 			end
