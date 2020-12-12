@@ -410,7 +410,7 @@ for locale, t in pairs(locales) do
 	elseif fail ~= 0 then
 		print(("[FAIL %s/%s]"):format(fail, fail+pass), locale)
 	else
-		print("[PASS]", localse)
+		print("[PASS]", locale)
 	end
 end
 
