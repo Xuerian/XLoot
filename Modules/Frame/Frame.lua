@@ -250,7 +250,7 @@ function addon:ApplyOptions(in_options)
 		end
 		-- !CLASSIC
 		if C_CurrencyInfo then
-			for i,id in ipairs(preview_currency) then
+			for i,id in ipairs(preview_currency) do
 				local c = C_CurrencyInfo.GetCurrencyInfo(id)
 				if c.name then
 					local row =  Fake.rows[slot+i]
