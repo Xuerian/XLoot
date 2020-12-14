@@ -177,8 +177,8 @@ function addon.EframeUpdate(self, elapsed)
 			if ttt <= 0 then
 				ttt = nil
 				local total
-				if opt.show_totals and opt.use_altoholic and Altoholic then
-					total = Altoholic:GetItemCount(Altoholic:GetIDFromLink(link))
+				if opt.use_altoholic and Altoholic then
+					total = Altoholic:GetItemCount(Altoholic:GetIDFromLink(row.item))
 				else
 					total = GetItemCount(row.item)
 				end
