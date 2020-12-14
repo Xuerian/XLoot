@@ -114,7 +114,9 @@ function events.item(player, link, num)
 		local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
 		local num = tonumber(num) or 1
 		row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, nil, nr, ng, nb)
-		row.timeToTotal = 0.5
+		if opt.show_totals then
+			row.timeToTotal = 0.5
+		end
 		if opt.show_ilvl and level > 1 then
 			local ilvl = GetDetailedItemLevelInfo(link)
 			row.ilvl:SetText(ilvl)
