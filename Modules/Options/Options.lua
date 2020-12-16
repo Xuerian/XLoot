@@ -663,6 +663,9 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "font_size_quantity", "range", 4, 26, 1 },
 				{ "font_size_ilvl", "range", 4, 26, 1 },
 			}},
+			{ "colors", "group", {
+				{ "gradients", must_reload_ui = true },
+			}, name = L.Frame.colors },
 		})
 	end
 
