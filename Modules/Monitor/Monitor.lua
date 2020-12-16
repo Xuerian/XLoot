@@ -31,6 +31,7 @@ local defaults = {
 		show_crafted = false,
 
 		show_totals = false,
+		totals_delay = 0.5,
 		use_altoholic = true,
 		show_ilvl = false,
 
@@ -115,7 +116,7 @@ function events.item(player, link, num)
 		local num = tonumber(num) or 1
 		row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, nil, nr, ng, nb)
 		if opt.show_totals then
-			row.timeToTotal = 0.5
+			row.timeToTotal = opt.totals_delay
 		end
 		if opt.show_ilvl and level > 1 then
 			local ilvl = GetDetailedItemLevelInfo(link)
