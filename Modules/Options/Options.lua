@@ -661,6 +661,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "font_sizes", "header" },
 				{ "font_size_loot", "range", 4, 26, 1 },
 				{ "font_size_quantity", "range", 4, 26, 1 },
+				{ "font_size_ilvl", "range", 4, 26, 1 },
 			}},
 		})
 	end
