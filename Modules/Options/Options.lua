@@ -465,9 +465,9 @@ function addon:OnEnable() -- Construct addon option tables here
 	else
 		fonts = {
 			{ STANDARD_TEXT_FONT, "Friz Quadrata TT" },
-			{ "Fonts\MORPHEUS.ttf", "Morpheus" },
-			{ "Fonts\ARIALN.ttf", "Arial Narrow" },
-			{ "Fonts\SKURRI.ttf", "Skurri" },
+			{ [[Fonts\MORPHEUS.ttf]], "Morpheus" },
+			{ [[Fonts\ARIALN.ttf]], "Arial Narrow" },
+			{ [[Fonts\SKURRI.ttf]], "Skurri" },
 		}
 	end
 
