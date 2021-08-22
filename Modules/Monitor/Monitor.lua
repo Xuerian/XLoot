@@ -140,7 +140,8 @@ function events.coin(coin_string, copper)
 end
 
 function events.currency(id, num)
-	if opt.show_currency then
+	-- Not sure what event is causing us to capture nothing for (%d+), this isn't ideal
+	if id ~= nil and opt.show_currency then
 		local num = tonumber(num) or 1
 		local c = C_CurrencyInfo.GetCurrencyInfo(id)
 		if c then
