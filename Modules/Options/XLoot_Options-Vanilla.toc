@@ -1,0 +1,11 @@
+﻿## Interface: 11400
+## Title: XLoot Options
+## Notes: Configuration interface for XLoot
+## Version: @project-version@
+## Author: Xuerian
+## X-Category: Inventory
+
+## Dependencies: XLoot
+## LoadOnDemand: 1
+
+load.xml
