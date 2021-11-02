@@ -1,4 +1,4 @@
-﻿local XLoot = select(2, ...)
+local XLoot = select(2, ...)
 local lib = {
 	skins = {},
 	masque_tweaks = {}
@@ -138,7 +138,6 @@ do
 				tex:SetPoint("BOTTOMRIGHT", borders[4], "TOPRIGHT")
 			end
 		end
-		return tex
 	end
 
 	local function create_borders(frame, options)

@@ -447,7 +447,7 @@ do
 		text:SetDrawLayer'OVERLAY'
 		text:SetHeight(10)
 		text:SetJustifyH'LEFT'
-		text.ext = ext
+		text.text = text
 	end
 
 	local function textpoints(text, item, row, x)
