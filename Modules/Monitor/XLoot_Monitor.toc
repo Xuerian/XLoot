@@ -1,4 +1,6 @@
-﻿## Interface: 90100
+## Interface: 90105
+## Interface-Classic: 11400
+## Interface-BCC: 20502
 ## Title: XLoot Monitor
 ## Notes: A graphical presentation of items looted by yourself and your group
 ## Version: @project-version@

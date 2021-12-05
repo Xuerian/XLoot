@@ -1,4 +1,6 @@
-﻿## Interface: 90100
+## Interface: 90105
+## Interface-Classic: 11400
+## Interface-BCC: 20502
 ## Title: XLoot Frame
 ## Notes: A customizable, skinnable loot frame.
 ## Version: @project-version@
