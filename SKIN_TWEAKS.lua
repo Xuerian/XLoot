@@ -1,4 +1,6 @@
 function XLoot:ApplySkinTweaks()
+	XLoot:RegisterMasqueTweak('LiteStep', { size = 14, padding = 0 })
+	XLoot:RegisterMasqueTweak('LiteStep - XLT', { size = 14, padding = 0 })
 	XLoot:RegisterMasqueTweak('simpleSquare', { size = 12, row_spacing = 4 })
 	XLoot:RegisterMasqueTweak('Caith', { size = 12, row_spacing = 4 })
 	XLoot:RegisterMasqueTweak('Svelte Shadow', { size = 14 })
