@@ -1,4 +1,4 @@
-﻿local XLoot = LibStub("AceAddon-3.0"):NewAddon(select(2, ...), "XLoot")
+local XLoot = LibStub("AceAddon-3.0"):NewAddon(select(2, ...), "XLoot")
 _G.XLoot = XLoot
 local L = XLoot.L
 local print, wprint = print, print
@@ -8,7 +8,7 @@ local print, wprint = print, print
 local defaults = {
 	profile = {
 		skin = "smooth",
-		skin_anchors = false
+		skin_anchors = false,
 	}
 }
 

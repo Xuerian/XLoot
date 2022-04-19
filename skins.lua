@@ -1,7 +1,7 @@
 local XLoot = select(2, ...)
 local lib = {
 	skins = {},
-	masque_tweaks = {}
+	masque_tweaks = {},
 }
 XLoot.Skin = lib
 local L = XLoot.L
@@ -97,6 +97,11 @@ do
 
 	local function update_borders(frame, options, borders, r, g, b, a)
 		local padding = options.padding
+		local size = options.size
+		r = r or options.r
+		g = g or options.g
+		b = b or options.b
+		a = a or options.a
 		for pos, tex in ipairs(borders) do
 			-- Set texture options
 			tex:SetDrawLayer(options.layer)
@@ -104,7 +109,7 @@ do
 			tex:SetBlendMode(options.mode)
 			tex:SetWidth(options.size)
 			tex:SetHeight(options.size)
-			tex:SetVertexColor(r or options.r, g or options.g, b or options.b, a or options.a)
+			tex:SetVertexColor(r, g, b, a)
 
 			-- Position texture
 			tex:ClearAllPoints()
