@@ -97,7 +97,7 @@ do
 
 	local function update_borders(frame, options, borders, r, g, b, a)
 		local padding = options.padding
-		local size = options.size
+		local size = options.size/2
 		r = r or options.r
 		g = g or options.g
 		b = b or options.b
@@ -107,38 +107,38 @@ do
 			tex:SetDrawLayer(options.layer)
 			tex:SetTexture(options.texture)
 			tex:SetBlendMode(options.mode)
-			tex:SetWidth(options.size)
-			tex:SetHeight(options.size)
+			tex:SetWidth(size)
+			tex:SetHeight(size)
 			tex:SetVertexColor(r, g, b, a)
 
 			-- Position texture
 			tex:ClearAllPoints()
 			if pos == 1 then
-				tex:SetTexCoord(0, 1/3, 0, 1/3)
+				tex:SetTexCoord(0, 1/6, 0, 1/6)
 				tex:SetPoint("TOPLEFT", frame, "TOPLEFT", -padding, padding)
 			elseif pos == 2 then
-				tex:SetTexCoord(2/3, 1, 0, 1/3)
+				tex:SetTexCoord(5/6, 1, 0, 1/6)
 				tex:SetPoint("TOPRIGHT", frame, "TOPRIGHT", padding, padding)
 			elseif pos == 3 then
-				tex:SetTexCoord(0, 1/3, 2/3, 1)
+				tex:SetTexCoord(0, 1/6, 5/6, 1)
 				tex:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", -padding, -padding)
 			elseif pos == 4 then
-				tex:SetTexCoord(2/3, 1, 2/3, 1)
+				tex:SetTexCoord(5/6, 1, 5/6, 1)
 				tex:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", padding, -padding)
 			elseif pos == 5 then
-				tex:SetTexCoord(1/3, 2/3, 0, 1/3)
+				tex:SetTexCoord(1/6, 5/6, 0, 1/6)
 				tex:SetPoint("TOPLEFT", borders[1], "TOPRIGHT")
 				tex:SetPoint("TOPRIGHT", borders[2], "TOPLEFT")
 			elseif pos == 6 then
-				tex:SetTexCoord(1/3, 2/3, 2/3, 1)
+				tex:SetTexCoord(1/6, 5/6, 5/6, 1)
 				tex:SetPoint("BOTTOMLEFT", borders[3], "BOTTOMRIGHT")
 				tex:SetPoint("BOTTOMRIGHT", borders[4], "BOTTOMLEFT")
 			elseif pos == 7 then
-				tex:SetTexCoord(0, 1/3, 1/3, 2/3)
+				tex:SetTexCoord(0, 1/6, 1/6, 5/6)
 				tex:SetPoint("TOPLEFT", borders[1], "BOTTOMLEFT")
 				tex:SetPoint("BOTTOMLEFT", borders[3], "TOPLEFT")
 			elseif pos == 8 then
-				tex:SetTexCoord(2/3, 1, 1/3, 2/3)
+				tex:SetTexCoord(5/6, 1, 1/6, 5/6)
 				tex:SetPoint("TOPRIGHT", borders[2], "BOTTOMRIGHT")
 				tex:SetPoint("BOTTOMRIGHT", borders[4], "TOPRIGHT")
 			end
@@ -391,7 +391,7 @@ local legacy = {
 	name = ('|c2244dd22%s|r'):format(L.skin_legacy),
 	row_spacing = 3,
 	texture = [[Interface\AddOns\XLoot\Textures\border_legacy]],
-	size = 14,
+	size = 16,
 	highlight = {
 		size = 12
 	},
