@@ -634,6 +634,9 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "scale", "scale" },
 				{ "direction", directions, name = L.growth_direction },
 				{ "alignment", leftright, name = L.alignment },
+				{ "offsets", "header", name = '' },
+				{ "spacing", "range", -25, 25, 1, name = L.spacing, subtable = "anchor" },
+				{ "offset", "range", -25, 25, 1, name = L.offset, subtable = "anchor" },
 			}, defaults = { subtable = "anchor" } },
 			{ "thresholds", "group", {
 				{ "threshold_own", item_qualities, name = L.items_own },

@@ -19,6 +19,8 @@ local defaults = {
 			visible = true,
 			scale = 1.0,
 			draggable = true,
+			offset = 0,
+			spacing = 2,
 			x = UIParent:GetWidth() * .75,
 			y = UIParent:GetHeight() * .15,
 		},
