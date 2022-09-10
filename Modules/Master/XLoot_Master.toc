@@ -1,6 +1,7 @@
-## Interface: 90205
-## Interface-Classic: 11400
+## Interface: 90207
+## Interface-Classic: 11403
 ## Interface-BCC: 20502
+## Interface-WoTLK: 30400
 ## Title: XLoot Master
 ## Notes: Configurable Master Looter interface
 ## Version: @project-version@
