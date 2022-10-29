@@ -521,8 +521,12 @@ do
 		if not XLootButtonOnClick(self, button) then
 			if IsModifiedClick() then
 				HandleModifiedItemClick(GetLootSlotLink(self.slot))
+			elseif LootButton_OnClick then
+				LootButton_OnClick(self, button)
 			else
-	 			LootButton_OnClick(self, button)
+				StaticPopup_Hide("CONFIRM_LOOT_DISTRIBUTION")
+				LootSlot(self.slot)
+				EventRegistry:TriggerEvent("LootFrame.ItemLooted")
 			end
 		end
 	end
