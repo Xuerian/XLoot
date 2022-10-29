@@ -889,7 +889,7 @@ do
 	-- Bottom buttons
 	local function BottomButton(frame, name, text, justify)
 		local b = CreateFrame('Button', name, frame)
-		b.text = b:CreateFontString(name..'Text', 'DIALOG')--, 'GameFontNormalSmall')
+		b.text = b:CreateFontString(name..'Text', 'OVERLAY')
 		b.text:SetFont(frame.opt.font, frame.opt.font_size_bottombuttons)
 		b.text:SetText('|c22AAAAAA'..text)
 		b.text:SetJustifyH(justify)
