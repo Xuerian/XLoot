@@ -232,6 +232,11 @@ local rtypes = { [0] = 'pass', 'need', 'greed', 'disenchant' } -- Tekkub. Writin
 
 function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 	local icon, name, count, quality, bop, need, greed, de, reason_need, reason_greed, reason_de, de_skill = GetLootRollItemInfo(id)
+	-- LootFrame.lua includes this sanity check
+	if name == nil then
+		print('XLoot Group: Ignoring START_LOOT_ROLL with no name')
+		return
+	end
 	local link = GetLootRollItemLink(id)
 	local r, g, b = GetItemQualityColor(quality)
 
