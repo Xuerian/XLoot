@@ -658,8 +658,10 @@ do
 			if opt.loot_texts_info then -- This is a bit gnarly
 				local equip = slotData.typeName == ENCHSLOT_WEAPON and ENCHSLOT_WEAPON or slotData.equipLoc ~= '' and _G[slotData.equipLoc] or ''
 				local itemtype = (slotData.subTypeName == 'Junk' and slotData.quality > 0) and MISCELLANEOUS or slotData.subTypeName
-				text_info = ((type(equip) == 'string' and equip ~= '') and equip..', ' or '') .. itemtype
-				layout = 'detailed'
+				if itemtype then
+					text_info = ((type(equip) == 'string' and equip ~= '') and equip..', ' or '') .. itemtype
+					layout = 'detailed'
+				end
 			end
 
 			if opt.loot_texts_bind and slotData.bindType then
