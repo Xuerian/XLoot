@@ -171,13 +171,7 @@ do
 	local alphaworks = false
 	local function SetBorderColor(self, r, g, b, a)
 		for i, x in pairs(self._skin_borders) do
-			if alphaworks then
-				x:SetVertexColor(r, g, b, a or 1)
-			elseif pcall(x.SetVertexColor, x, r, g, b, a or 1) then
-				alphaworks = true
-			else
-				x:SetVertexColor(r, g, b)
-			end
+			x:SetVertexColor(r, g, b, a or 1)
 		end
 	end
 
