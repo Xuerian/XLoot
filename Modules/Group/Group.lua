@@ -668,8 +668,10 @@ do
 	end
 
 	local function AddIneligibleReason(button, r, g, b)
-		GameTooltip:AddLine(string_format(_G["LOOT_ROLL_INELIGIBLE_REASON"..button.reason], button.skill), r or .6, g or .6, b or .6)
-		GameTooltip:Show()
+		if button.reason and _G["LOOT_ROLL_INELIGIBLE_REASON"..button.reason] then
+			GameTooltip:AddLine(string_format(_G["LOOT_ROLL_INELIGIBLE_REASON"..button.reason], button.skill), r or .6, g or .6, b or .6)
+			GameTooltip:Show()
+		end
 	end
 
 	local function AddTooltipLines(self, show_all, show)
