@@ -321,7 +321,7 @@ end
 local tidx = { [0] = 1, [3] = 2, [2] = 2, [1] = 3 }
 function addon:LOOT_HISTORY_ROLL_COMPLETE()
 	-- Locate history item
-	local hid, frame, rollid, players, done, _ = 1
+	local hid, frame, rollid, players, done, _ = 1, nil, nil, nil, nil, nil
 	while true do
 		rollid, _, players, done = HistoryGetItem(hid)
 		if not rollid or (rolls[rollid] and rolls[rollid].over) then
@@ -335,7 +335,7 @@ function addon:LOOT_HISTORY_ROLL_COMPLETE()
 
 	-- Active frame found
 	frame.over = true
-	local top_type, top_roll, top_pid, top_is_me = 0, 0
+	local top_type, top_roll, top_pid, top_is_me = 0, 0, nil, nil
 	for j=1, players do
 		local name, class, rtype, roll, is_winner, is_me = HistoryGetPlayerInfo(hid, j)
 		-- roll = roll and roll or true
@@ -936,7 +936,7 @@ do
 		frame:SetScript('OnEnter', self.OnEnter)
 		frame:SetScript('OnLeave', self.OnLeave)
 		frame:SetScript('OnClick', self.OnClick)
-		
+
 		-- Overlay (For skin border)
 		local overlay = CreateFrame('frame', nil, frame, BackdropTemplateMixin and "BackdropTemplate")
 		overlay:SetFrameLevel(frame:GetFrameLevel())
@@ -958,7 +958,7 @@ do
 		icon:SetPoint('BOTTOMRIGHT', -3, 3)
 		icon:SetTexCoord(.07,.93,.07,.93)
 		frame.icon = icon
-		
+
 		-- Timer bar
 		local bar = CreateFrame('StatusBar', nil, frame)
 		bar:SetFrameLevel(frame:GetFrameLevel())
@@ -972,7 +972,7 @@ do
 		frame.bar = bar
 		-- Reference bar for quick re-skinning when XLoot skin changes
 		table.insert(addon.bars, bar)
-		
+
 		local spark = bar:CreateTexture(nil, 'OVERLAY')
 		spark:SetWidth(14)
 		spark:SetHeight(38)
@@ -1088,7 +1088,6 @@ function addon:ApplyOptions()
 end
 
 
---@do-not-package@
 ---------------------------------------------------------------------------
 -- Test rolls
 ---------------------------------------------------------------------------
@@ -1104,7 +1103,7 @@ for i, t in ipairs(preview_loot) do
 	GetItemInfo(t[1])
 end
 
-local init, tests, links = false, {}, {}
+local init, tests, links, StartFakeRoll = false, {}, {}, nil
 
 local deframe = CreateFrame('Frame')
 
@@ -1114,6 +1113,8 @@ function XLootGroup.TestSettings()
 	local schedule = {}
 	local type_index = { 'need', 'greed', 'disenchant', [0] = 'pass' }
 	if not init then
+		print(L.debug_warning)
+		init = true
 		local tick = 0
 		deframe:SetScript('OnUpdate', function(self, elapsed)
 			tick = tick + elapsed
@@ -1136,6 +1137,14 @@ function XLootGroup.TestSettings()
 			links = {},
 			items = {}
 		}
+
+		local function after(seconds, func, target, ...)
+			table.insert(schedule, { GetTime() + seconds, func, target, {...} } )
+		end
+
+		local function changed(...)
+			addon:LOOT_HISTORY_ROLL_CHANGED(...)
+		end
 
 		function GetLootRollItemInfo(id)
 			return unpack(FakeHistory.rolls[id])
@@ -1172,15 +1181,7 @@ function XLootGroup.TestSettings()
 			return unpack(FakeHistory.items[hid].players[pid])
 		end
 
-		local function after(seconds, func, target, ...)
-			table.insert(schedule, { GetTime() + seconds, func, target, {...} } )
-		end 
-		
-		local function changed(...)
-			addon:LOOT_HISTORY_ROLL_CHANGED(...)
-		end
-
-		local function StartFakeRoll()
+		function StartFakeRoll()
 			local fake = {}
 
 			local item = preview_loot[random(1, #preview_loot)]
@@ -1208,12 +1209,13 @@ function XLootGroup.TestSettings()
 			after(11, function() fake.players[5][3] = 1 end, changed, 1, 5)
 		end
 
-		StartFakeRoll()
 	end
+	StartFakeRoll()
 end
 
 XLoot:SetSlashCommand('xlgd', XLootGroup.TestSettings)
 
+--@do-not-package@
 local function alert()
 	local _, link = GetItemInfo(preview_loot[random(1, #preview_loot)][1])
 	LootWonAlertFrame_ShowAlert(link, random(1, 4), random(1, 4)-1, random(1, 100))
