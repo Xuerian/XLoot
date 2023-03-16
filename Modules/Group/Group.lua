@@ -13,6 +13,8 @@ local HistoryGetItem, HistoryGetPlayerInfo, HistoryGetNumItems
 local CanEquipItem, IsItemUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.IsItemUpgrade, XLoot.FancyPlayerName
 local RollFramePrototype
 
+local BUILD_HAS_DISENCHANT = select(4, GetBuildInfo()) >= 30300
+
 
 -------------------------------------------------------------------------------
 -- Settings
@@ -255,7 +257,9 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 
 	frame.need:Show()
 	frame.greed:Show()
-	frame.disenchant:Show()
+	if BUILD_HAS_DISENCHANT then
+		frame.disenchant:Show()
+	end
 	frame.pass:Show()
 	frame.text_status:Hide()
 	frame.text_status:SetText()
@@ -999,7 +1003,12 @@ do
 		local n = RollButtonPrototype:New(frame, 1, NEED, 'Dice', icon_frame, 3, -1, {.2, 1, .1})
 		local g = RollButtonPrototype:New(frame, 2, GREED, 'Coin', n, 0, -2, {.1, .2, 1})
 		local d = RollButtonPrototype:New(frame, 3, ROLL_DISENCHANT, 'DE', g, 0, 2, {.1, .2, 1})
-		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', d, 0, 2, {.7, .7, .7})
+		local p_to = d
+		if not BUILD_HAS_DISENCHANT then
+			p_to = g
+			d:Hide()
+		end
+		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', p_to, 0, 2, {.7, .7, .7})
 		frame.need, frame.greed, frame.disenchant, frame.pass = n, g, d, p
 
 		-- Roll status text
