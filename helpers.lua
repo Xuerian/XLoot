@@ -68,7 +68,7 @@ function XLoot.CanEquipItem(link)
 			local lr, lg, lb = _G["XLootTooltipTextLeft"..i]:GetTextColor()
 			return (r > .8 and b > .8 and g > .8 and lr > .8 and lg > .8 and lb > .8) and true or false
 		end
-	end	
+	end
 end
 function XLoot.IsItemUpgrade(link)
 	if not XLoot.CanEquipItem(link) then
@@ -115,7 +115,7 @@ function XLoot.FancyPlayerName(name, class, opt)
 end
 
 
-local temp_list, template = {}, 
+local temp_list, template = {},
 [[local string_match = string.match
 return function(message)
 	local pcall_status, m1, m2, m3, m4, m5 = pcall(string_match, message, [=[^%s$]=])

@@ -40,7 +40,7 @@ local defaults = {
 
 		fade_own = 10,
 		fade_other = 5,
-		
+
 		font = STANDARD_TEXT_FONT,
 		font_size_loot = 12,
 		font_size_quantity = 10,
