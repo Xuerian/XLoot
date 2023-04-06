@@ -1,7 +1,9 @@
 -- Create module
 local addon, L = XLoot:NewModule("Monitor")
-local XLootMonitor = CreateFrame("Frame", "XLootMonitor", UIParent)
+
+XLootMonitor = CreateFrame("Frame", "XLootMonitor", UIParent)
 XLootMonitor.addon = addon
+
 -- Grab locals
 local print, opt, eframe, anchor = print
 local CopperToString, FancyPlayerName = XLoot.CopperToString, XLoot.FancyPlayerName

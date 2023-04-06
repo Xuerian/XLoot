@@ -1,6 +1,6 @@
+---@class XLootAddon
 local XLoot = select(2, ...)
 local buffer, print = {}, print
-local _G = _G
 
 local table_insert, table_concat, string_format = table.insert, table.concat, string.format
 
@@ -28,7 +28,8 @@ function XLoot.CopperToString(copper)
 	return table_concat(buffer, ", ")
 end
 
-local tooltip = CreateFrame('GameTooltip', 'XLootTooltip', UIParent, 'GameTooltipTemplate')
+XLootTooltip = CreateFrame('GameTooltip', 'XLootTooltip', UIParent, 'GameTooltipTemplate')
+local tooltip = XLootTooltip
 tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 
 local bind_types = {
@@ -126,7 +127,7 @@ end]]
 -- Return a inverted match string and corresponding list of ordered match slots (m1-m5)
 local match, gsub, insert = string.match, string.gsub, table.insert
 local function invert(pattern)
-	local inverted, arglist = pattern
+	local inverted, arglist = pattern, nil
 	-- Escape magic characters
 	inverted = gsub(inverted, "%(", "%%(")
 	inverted = gsub(inverted, "%)", "%%)")
