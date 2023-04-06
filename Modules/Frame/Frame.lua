@@ -762,7 +762,7 @@ do
 		local row = CreateFrame('Button', not fake and frame_name or nil, frame, BackdropTemplateMixin and "BackdropTemplate")
 		local item = CreateFrame('Frame', nil, row)
 		local button_auto = CreateFrame('Button', nil, row)
-		local tex = item:CreateTexture(not fake and frame_name..'IconTexture' or nil, 'ARTWORK')
+		local tex = item:CreateTexture(not fake and frame_name..'IconTexture' or nil, 'BACKGROUND')
 		local bang = item:CreateTexture(nil, 'OVERLAY')
 		row.owner = frame
 		row.frame_item = item
