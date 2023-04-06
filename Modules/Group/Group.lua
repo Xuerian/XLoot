@@ -177,44 +177,6 @@ function addon:OnEnable()
 			end
 		end
 	end
-
-	--[[ DISABLED-PATCH: LEGION PRE-PATCH
-	-- Hook alert actions
-	if opt.hook_alert then
-		hooksecurefunc('LootUpgradeFrame_SetUp', self.AlertFrameHook)
-		hooksecurefunc('LootWonAlertFrame_SetUp', self.AlertFrameHook)
-		hooksecurefunc('MoneyWonAlertFrame_SetUp', self.AlertFrameHook)
-		local SetLootWonAnchors = AlertFrame_SetLootWonAnchors
-		local SetLootUpgradeFrameAnchors = AlertFrame_SetLootUpgradeFrameAnchors
-		local SetMoneyWonAnchors = AlertFrame_SetMoneyWonAnchors
-
-		local function SetAnchorPassthrough(alertAnchor)
-			return alertAnchor
-		end
-
-		AlertFrame_SetLootWonAnchors = SetAnchorPassthrough
-		AlertFrame_SetLootUpgradeFrameAnchors = SetAnchorPassthrough
-		AlertFrame_SetMoneyWonAnchors = SetAnchorPassthrough
-
-		hooksecurefunc('AlertFrame_FixAnchors', self.FixAnchors)
-	end
-	-- hooksecurefunc('BonusRollFrame_StartBonusRoll', self.BonusRollFrame_StartBonusRoll)
-	-- hooksecurefunc('BonusRollFrame_FinishedFading', self.BonusRollFrame_Hide)
-	-- BonusRollFrame._SetPoint, BonusRollFrame.SetPoint = BonusRollFrame.SetPoint, addon.BonusRollFrame_SetPoint
-	if opt.hook_bonus then
-		hooksecurefunc(BonusRollFrame, 'SetPoint', self.BonusRollFrame_SetPoint)
-		hooksecurefunc(BonusRollFrame, 'Show', self.BonusRollFrame_Show)
-		hooksecurefunc(BonusRollFrame, 'Hide', self.BonusRollFrame_Hide)
-	end
-
-	if (opt.hook_alert or opt.hook_bonus) and not opt.shown_hook_warning then
-		local function gprint(text) print(('%s: %s'):format('|c2244dd22XLoot Group|r', text)) end
-		gprint("The 'Modify bonus rolls' or 'Modify loot alerts' options are currently enabled, but are now disabled by default.")
-		gprint("I cannot guarantee that you will not experience any issues with bonus rolls with these options enabled.")
-		gprint("If you do not accept that risk, please disable those options or XLoot Group entirely. You should only see this message once.")
-		opt.shown_hook_warning = true
-	end
-	]]
 end
 
 -------------------------------------------------------------------------------
@@ -393,7 +355,7 @@ function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 	if not frame or frame.rollid ~= rollid or not frame:IsShown() then
 		return nil
 	end
-	
+
 	-- Acquire player information
 	local name, class, rtypeid, roll, winner, is_me = HistoryGetPlayerInfo(hid, pid)
 	local rtype = rtypes[rtypeid]
@@ -546,74 +508,6 @@ local AlertFrameTables = {
 	'MONEY_WON_ALERT_FRAMES'
 }
 
-function addon.FixAnchors(frames, anchor)
-	local anchor = alert_anchor
-	local up, first, x, y = opt.alert_anchor.direction == 'up', true, 44, -10
-	for ix=1, #AlertFrameTables do
-		local t = _G[AlertFrameTables[ix]]
-		for i=1, #t do
-			local frame = t[i]
-			if frame:IsShown() then
-				frame:ClearAllPoints()
-				if up then
-					frame:SetPoint("BOTTOM", anchor, "TOP", x, y)
-				else
-					frame:SetPoint("TOP", anchor, "BOTTOM", x, -y)
-				end
-				anchor = frame
-				if first then
-					first, x, y = false, 0, opt.alert_offset - 20
-				end
-			end
-		end
-	end
-end
-
--- function addon.BonusRollFrame_StartBonusRoll()
--- 	if BonusRollFrame:IsShown() then
--- 		addon.BonusRollFrame_Show()
--- 	end
--- end
-
-function addon.BonusRollFrame_SetPoint(self, _, frame)
-	if frame ~= anchor then
-		self:ClearAllPoints()
-	end
-end
-
-local bonus_elements
-function addon.BonusRollFrame_Show()
-	local frame = BonusRollFrame
-	if not bonus_elements then
-		bonus_elements = {}
-
-		frame.active = true -- Prevent anchor from acquiring as child
-		frame.scale_mod = 0.9 -- Anchor's scale modifier
-		if opt.bonus_skin then
-			frame.Background:Hide()
-			local overlay = CreateFrame('Frame', nil, frame, BackdropTemplateMixin and "BackdropTemplate")
-			overlay:SetAllPoints()
-			overlay:SetFrameLevel(frame:GetFrameLevel()-1)
-			Skinner:Skin(overlay, 'bonus')
-			overlay:SetGradientColor(.5, .5, .5, .4)
-			overlay:SetBorderColor(1, .8, .1)
-			bonus_elements.overlay = overlay
-		end
-	end
-
-	if anchor.children[1] ~= BonusRollFrame then
-		table.insert(anchor.children, 1, frame) -- Force in first position
-	end
-	anchor:Restack()
-end
-
-function addon.BonusRollFrame_Hide()
-	if anchor.children[1] == BonusRollFrame then
-		table.remove(anchor.children, 1)
-		anchor:Restack()
-	end
-end
-
 function addon.SlashHandler(msg)
 	if msg == 'reset' then
 		anchor:Position()
@@ -753,7 +647,7 @@ do
 		function RollButtonPrototype:OnClick()
 			RollOnLoot(self.parent.rollid, self.type)
 		end
-		
+
 		function RollButtonPrototype:Toggle(status)
 			if status then
 				self:Enable()
@@ -1233,24 +1127,6 @@ local function alert()
 end
 
 XLoot:SetSlashCommand('xlga', alert)
-
-local _GetCurrencyInfo = GetCurrencyInfo
-local function bonus()
-	function GetCurrencyInfo(...)
-		local ret = {_GetCurrencyInfo(...)}
-		ret[2] = 5
-		return unpack(ret)
-	end
-	BonusRollFrame_StartBonusRoll(6603, "test", 30)
-end
-
-XLoot:SetSlashCommand('xlgb', bonus)
-
-local function bonus_close()
-	BonusRollFrame_FinishedFading(BonusRollFrame)
-end
-
-XLoot:SetSlashCommand('xlgbc', bonus_close)
 
 local AC = LibStub('AceConsole-2.0', true)
 if AC then print = function(...) AC:PrintLiteral(...) end end
