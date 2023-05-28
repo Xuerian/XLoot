@@ -13,7 +13,9 @@ local HistoryGetItem, HistoryGetPlayerInfo, HistoryGetNumItems
 local CanEquipItem, IsItemUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.IsItemUpgrade, XLoot.FancyPlayerName
 local RollFramePrototype
 
-local BUILD_HAS_DISENCHANT = select(4, GetBuildInfo()) >= 30300
+local BUILD_NUMBER = select(4, GetBuildInfo())
+local BUILD_HAS_DISENCHANT = BUILD_NUMBER >= 30300
+local BUILD_HAS_TRANSMOG_GREED = BUILD_NUMBER >= 49407
 
 
 -------------------------------------------------------------------------------
@@ -97,10 +99,17 @@ end
 function addon:OnEnable()
 	-- Register events
 	eframe:RegisterEvent('START_LOOT_ROLL')
-	eframe:RegisterEvent('LOOT_HISTORY_ROLL_CHANGED')
-	eframe:RegisterEvent('LOOT_HISTORY_ROLL_COMPLETE')
-	eframe:RegisterEvent('LOOT_ROLLS_COMPLETE')
 	eframe:RegisterEvent('MODIFIER_STATE_CHANGED')
+
+	if BUILD_HAS_TRANSMOG_GREED then
+		print("XLoot Group does not yet work on this version and will not be loaded")
+		return
+		eframe:RegisterEvent('LOOT_HISTORY_UPDATE_DROP')
+	else
+		eframe:RegisterEvent('LOOT_HISTORY_ROLL_CHANGED')
+		eframe:RegisterEvent('LOOT_HISTORY_ROLL_COMPLETE')
+		eframe:RegisterEvent('LOOT_ROLLS_COMPLETE')
+	end
 
 	-- Disable default frame
 	UIParent:UnregisterEvent("START_LOOT_ROLL")
