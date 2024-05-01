@@ -1058,13 +1058,13 @@ do
 		f.overlay = overlay
 
 		-- Link all button
-		local link = BottomButton(f, name..'Link', L.button_link, 'MIDDLE')
+		local link = BottomButton(f, name..'Link', L.button_link, 'CENTER')
 		link:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 		link:SetPoint('LEFT', 6, 0)
 		f.link = link
 
 		-- Close button
-		local close = BottomButton(f, name..'Close', L.button_close, 'MIDDLE')
+		local close = BottomButton(f, name..'Close', L.button_close, 'CENTER')
 		close:SetPoint('RIGHT', -6, 0)
 		f.close = close
 

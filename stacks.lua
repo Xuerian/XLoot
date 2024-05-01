@@ -145,7 +145,7 @@ do
 
 		local label = anchor:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
 		label:SetPoint('CENTER', -5, 0)
-		label:SetJustifyH('MIDDLE')
+		label:SetJustifyH('CENTER')
 		label:SetText(text)
 		anchor.label = label
 
