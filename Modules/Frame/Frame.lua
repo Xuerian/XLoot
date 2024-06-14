@@ -54,6 +54,7 @@ local LOOT_SLOT_MONEY = LOOT_SLOT_MONEY or Enum.LootSlotType.Money
 local LOOT_SLOT_CURRENCY = LOOT_SLOT_CURRENCY or Enum.LootSlotType.Currency
 
 local GetContainerNumFreeSlots = C_Container and C_Container.GetContainerNumFreeSlots or GetContainerNumFreeSlots
+local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 
 -- Chat output
 local print, wprint = print, print

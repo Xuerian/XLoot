@@ -17,6 +17,7 @@ local BUILD_NUMBER = select(4, GetBuildInfo())
 local BUILD_HAS_DISENCHANT = BUILD_NUMBER >= 30300
 local BUILD_HAS_TRANSMOG_GREED = BUILD_NUMBER >= 49407
 
+local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 
 -------------------------------------------------------------------------------
 -- Settings

@@ -2,6 +2,8 @@ local lib = LibStub:NewLibrary("LootEvents", "1.2")
 if not lib then return nil end
 local print = print
 
+local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
+
 --[[// Usage
 	Callbacks recieve (event, chat_event, ...)
 	LootEvents:RegisterLootCallback(func)

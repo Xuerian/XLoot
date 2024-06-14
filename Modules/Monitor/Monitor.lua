@@ -10,6 +10,8 @@ local CopperToString, FancyPlayerName = XLoot.CopperToString, XLoot.FancyPlayerN
 local table_insert, table_remove = table.insert, table.remove
 local me = UnitName("player")
 
+local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
+
 -------------------------------------------------------------------------------
 -- Settings
 
