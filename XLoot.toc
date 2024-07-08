@@ -1,9 +1,9 @@
-## Interface: 100100
+## Interface: 100207
 ## Interface-Classic: 11403
 ## Interface-BCC: 20502
 ## Interface-WoTLK: 30401
 ## Title: XLoot
-## Notes: Core module for Loot and Looting-related UI improvements
+## Notes: Core module for Loot and Looting-related UI improvements. Thank you to J.N., A.J.C., R.L., E.V., B.Y., J.C., R.P., R.R., and K.K. for your donations over the years.
 ## Version: @project-version@
 ## Author: Xuerian
 ## X-Category: Inventory
