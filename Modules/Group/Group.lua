@@ -102,7 +102,7 @@ function addon:OnEnable()
 	eframe:RegisterEvent('START_LOOT_ROLL')
 	eframe:RegisterEvent('MODIFIER_STATE_CHANGED')
 
-	if BUILD_HAS_TRANSMOG_GREED then
+	if BUILD_HAS_TRANSMOG_GREED or C_Item then
 		print("XLoot Group does not yet work on this version and will not be loaded")
 		return
 		eframe:RegisterEvent('LOOT_HISTORY_UPDATE_DROP')
