@@ -52,8 +52,8 @@ end
 
 function XLoot:ShowOptionPanel(module)
 	if not XLootOptions then
-		EnableAddOn("XLoot_Options")
-		LoadAddOn("XLoot_Options")
+		C_AddOns.EnableAddOn("XLoot_Options")
+		C_AddOns.LoadAddOn("XLoot_Options")
 	end
 	XLootOptions:OpenPanel(module)
 end
@@ -136,16 +136,16 @@ end
 function XLoot:OnEnable()
 	-- Check for old addons
 	for _,name in ipairs({ "XLoot1.0", "XLootGroup", "XLootMaster", "XLootMonitor" }) do
-		if C_Addons.IsAddOnLoaded(name) then
-			DisableAddOn(name)
+		if C_AddOns.IsAddOnLoaded(name) then
+			C_AddOns.DisableAddOn(name)
 			wprint(("|c2244dd22XLoot|r now includes |c2244dd22%s|r - the old version will be disabled on next load, and no longer needs to be installed."):format(name))
 		end
 	end
 
 	-- Create option stub
 	if Settings then
-		EnableAddOn("XLoot_Options")
-		LoadAddOn("XLoot_Options")
+		C_AddOns.EnableAddOn("XLoot_Options")
+		C_AddOns.LoadAddOn("XLoot_Options")
 	else
 		local stub = CreateFrame("Frame", "XLootConfigPanel", UIParent)
 		stub.name = "XLoot"
