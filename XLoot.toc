@@ -1,4 +1,4 @@
-## Interface: 100207
+## Interface: 110000
 ## Interface-Classic: 11403
 ## Interface-BCC: 20502
 ## Interface-WoTLK: 30401
