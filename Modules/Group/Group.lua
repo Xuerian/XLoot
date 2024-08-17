@@ -98,13 +98,16 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
+	if C_Item then
+		print("XLoot Group does not yet work on this version and will not be loaded")
+		C_AddOns.DisableAddOn("XLoot_Group")
+		return
+	end
 	-- Register events
 	eframe:RegisterEvent('START_LOOT_ROLL')
 	eframe:RegisterEvent('MODIFIER_STATE_CHANGED')
 
 	if BUILD_HAS_TRANSMOG_GREED or C_Item then
-		print("XLoot Group does not yet work on this version and will not be loaded")
-		return
 		eframe:RegisterEvent('LOOT_HISTORY_UPDATE_DROP')
 	else
 		eframe:RegisterEvent('LOOT_HISTORY_ROLL_CHANGED')
