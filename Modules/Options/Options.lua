@@ -438,7 +438,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	local item_qualities = {}
 	do
 		for i=0, #ITEM_QUALITY_COLORS do
-			local hex = select(4, GetItemQualityColor(i))
+			local hex = select(4, C_Item.GetItemQualityColor(i))
 			table.insert(item_qualities, { i, ("|c%s%s"):format(hex, _G["ITEM_QUALITY"..tostring(i).."_DESC"]) })
 		end
 	end
@@ -680,7 +680,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			for i, v in ipairs({ "ITEM_QUALITY2_DESC", "ITEM_QUALITY3_DESC", "ITEM_QUALITY4_DESC", "CANCEL" }) do -- we only care for the qualities available as ML filters
 				local quality = tonumber(strmatch(v,"%d+"))
 				if quality then
-					local hex = select(4, GetItemQualityColor(quality))
+					local hex = select(4, C_Item.GetItemQualityColor(quality))
 					item_qualities[i] = { quality, ('|c%s%s'):format(hex, _G[v]) }
 				end
 			end

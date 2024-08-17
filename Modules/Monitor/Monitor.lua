@@ -113,7 +113,7 @@ function events.item(player, link, num)
 		if (player == me and opt.threshold_own or opt.threshold_other) > quality then
 			return -- Doesn't meet threshold requirements
 		end
-		local r, g, b = GetItemQualityColor(quality)
+		local r, g, b = C_Item.GetItemQualityColor(quality)
 		local nr, ng, nb
 		if player ~= me then
 			player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)), opt)

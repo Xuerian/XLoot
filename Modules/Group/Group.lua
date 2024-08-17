@@ -212,7 +212,7 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 		return
 	end
 	local link = GetLootRollItemLink(id)
-	local r, g, b = GetItemQualityColor(quality)
+	local r, g, b = C_Item.GetItemQualityColor(quality)
 
 	local start = length
 	if ongoing then
@@ -974,7 +974,7 @@ function addon:SkinUpdate()
 		bar:SetStatusBarTexture(skin.bar_texture)
 		local link = bar.parent.link
 		if link then
-			local r, g, b = GetItemQualityColor(select(3, GetItemInfo(link)))
+			local r, g, b = C_Item.GetItemQualityColor(select(3, GetItemInfo(link)))
 			bar.parent.overlay:SetBorderColor(r, g, b)
 			bar.parent.icon_frame:SetBorderColor(r, g, b)
 		end

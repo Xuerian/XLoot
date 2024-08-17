@@ -671,7 +671,7 @@ do
 		-- Items
 		local layout = 'simple'
 		if slotData.slotType == LOOT_SLOT_ITEM then
-			r, g, b, hex = GetItemQualityColor(slotData.quality or 0)
+			r, g, b, hex = C_Item.GetItemQualityColor(slotData.quality or 0)
 
 			text_name = ('|c%s%s|r'):format(hex, slotData.name)
 
@@ -982,7 +982,7 @@ do
 
 		-- Color frame
 		if self.opt.quality_color_frame then
-			local r, g, b = GetItemQualityColor(max_quality)
+			local r, g, b = C_Item.GetItemQualityColor(max_quality)
 			self.overlay:SetBorderColor(r, g, b, 1)
 		end
 	end
