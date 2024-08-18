@@ -1250,7 +1250,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 						end
 					end
 
-					local family = GetItemFamily(slotData.link)
+					local family = C_Item.GetItemFamily(slotData.link)
 					-- Empty slots
 					family = (family and family <= 4096) and family or 0
 					if bag_slots[0] > 0 or (bag_slots[family] and bag_slots[family] > 0) then
@@ -1261,7 +1261,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 
 					-- Space in existing stacks
 					else
-						local partial = GetItemCount(slotData.link) % slotData.stackCount
+						local partial = C_Item.GetItemCount(slotData.link) % slotData.stackCount
 						if partial > 0 and (partial + quantity < slotData.stackCount) then
 							autoloot = true
 						end

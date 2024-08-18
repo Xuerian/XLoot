@@ -57,7 +57,7 @@ function XLoot.GetItemBindType(link)
 end
 
 function XLoot.CanEquipItem(link)
-	if not IsEquippableItem(link) then
+	if not C_Item.IsEquippableItem(link) then
 		return false
 	end
 	tooltip:ClearLines()

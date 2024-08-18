@@ -192,7 +192,7 @@ function addon.EframeUpdate(self, elapsed)
 				if opt.use_altoholic and Altoholic then
 					total = Altoholic:GetItemCount(Altoholic:GetIDFromLink(row.item))
 				else
-					total = GetItemCount(row.item)
+					total = C_Item.GetItemCount(row.item)
 				end
 				if total and total > 1 then
 					row.total:SetText(numberize(total))
