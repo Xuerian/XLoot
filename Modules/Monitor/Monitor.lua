@@ -141,7 +141,7 @@ end
 
 function events.coin(coin_string, copper)
 	if opt.show_coin then
-		addon:AddRow(GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
+		addon:AddRow(C_CurrencyInfo.GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
 	end
 end
 
