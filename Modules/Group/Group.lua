@@ -98,7 +98,7 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
-	if C_Item then
+	if BUILD_NUMBER >= 100000 then
 		print("XLoot Group does not yet work on this version and will not be loaded")
 		C_AddOns.DisableAddOn("XLoot_Group")
 		return
@@ -107,13 +107,13 @@ function addon:OnEnable()
 	eframe:RegisterEvent('START_LOOT_ROLL')
 	eframe:RegisterEvent('MODIFIER_STATE_CHANGED')
 
-	if BUILD_HAS_TRANSMOG_GREED or C_Item then
-		eframe:RegisterEvent('LOOT_HISTORY_UPDATE_DROP')
-	else
+	-- if BUILD_HAS_TRANSMOG_GREED or C_Item then
+	-- 	eframe:RegisterEvent('LOOT_HISTORY_UPDATE_DROP')
+	-- else
 		eframe:RegisterEvent('LOOT_HISTORY_ROLL_CHANGED')
 		eframe:RegisterEvent('LOOT_HISTORY_ROLL_COMPLETE')
 		eframe:RegisterEvent('LOOT_ROLLS_COMPLETE')
-	end
+	-- end
 
 	-- Disable default frame
 	UIParent:UnregisterEvent("START_LOOT_ROLL")
