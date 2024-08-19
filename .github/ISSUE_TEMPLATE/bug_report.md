@@ -13,6 +13,10 @@ assignees: ''
 **Game version:**
 
 
+**Description:**
+
+
 **Errors:**
 ```
 PASTE ERRORS HERE
+```
