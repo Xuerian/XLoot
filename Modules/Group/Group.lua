@@ -100,7 +100,6 @@ end
 function addon:OnEnable()
 	if BUILD_NUMBER >= 100000 then
 		print("XLoot Group does not yet work on this version and will not be loaded")
-		C_AddOns.DisableAddOn("XLoot_Group")
 		return
 	end
 	-- Register events
