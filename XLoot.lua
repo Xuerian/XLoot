@@ -142,21 +142,9 @@ function XLoot:OnEnable()
 		end
 	end
 
-	-- Create option stub
-	if Settings then
-		C_AddOns.EnableAddOn("XLoot_Options")
-		C_AddOns.LoadAddOn("XLoot_Options")
-	else
-		local stub = CreateFrame("Frame", "XLootConfigPanel", UIParent)
-		stub.name = "XLoot"
-		stub:Hide()
-		InterfaceOptions_AddCategory(stub)
-		stub:SetScript("OnShow", function() self:ShowOptionPanel(self) end)
-	end
+	-- Load options via Settings API (InterfaceOptions_AddCategory removed in 12.0)
+	C_AddOns.EnableAddOn("XLoot_Options")
+	C_AddOns.LoadAddOn("XLoot_Options")
+
 	self:SetSlashCommand("xloot", function() self:ShowOptionPanel(self) end)
 end
-
---@do-not-package@
-local AC = LibStub("AceConsole-2.0", true)
-if AC then print = function(...) AC:PrintLiteral(...) end end
---@end-do-not-package@

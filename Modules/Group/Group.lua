@@ -1,4 +1,4 @@
--- Create module
+﻿-- Create module
 local addon, L = XLoot:NewModule("Group")
 -- Prepare global
 XLootGroup = addon
@@ -68,8 +68,9 @@ local defaults = {
 			direction = 'up',
 			draggable = true,
 			scale = 1.0,
-			x = AlertFrame:GetLeft(),
-			y = AlertFrame:GetTop()
+			-- [PATCH 12.0] AlertFrame may be nil at parse time; use safe fallback coords.
+			x = AlertFrame and AlertFrame:GetLeft() or 0,
+			y = AlertFrame and AlertFrame:GetTop() or UIParent:GetHeight() * 0.7,
 		},
 
 		track_all = false,
@@ -98,10 +99,6 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
-	if BUILD_NUMBER >= 100000 then
-		print("XLoot Group does not yet work on this version and will not be loaded")
-		return
-	end
 	-- Register events
 	eframe:RegisterEvent('START_LOOT_ROLL')
 	eframe:RegisterEvent('MODIFIER_STATE_CHANGED')
@@ -181,7 +178,9 @@ function addon:OnEnable()
 	end
 
 	-- Find and show active rolls
-	if IsInGroup() and (GetLootMethod() == 'group' or GetLootMethod() == 'needbeforegreed') then
+	-- [PATCH 12.0] GetLootMethod 'group'/'needbeforegreed' no longer used in retail.
+	-- START_LOOT_ROLL fires when group loot rolls happen regardless of method string.
+	if IsInGroup() then
 		for i=1,300 do
 			local time = GetLootRollTimeLeft(i)
 			if time > 0 and time <  300000 then
@@ -1130,16 +1129,3 @@ end
 
 XLoot:SetSlashCommand('xlgd', XLootGroup.TestSettings)
 
---@do-not-package@
-local function alert()
-	local _, link = GetItemInfo(preview_loot[random(1, #preview_loot)][1])
-	LootWonAlertFrame_ShowAlert(link, random(1, 4), random(1, 4)-1, random(1, 100))
-	LootUpgradeFrame_ShowAlert(link, random(1, 4), 1, random(1,4)-1)
-	MoneyWonAlertFrame_ShowAlert(random(1, 100000))
-end
-
-XLoot:SetSlashCommand('xlga', alert)
-
-local AC = LibStub('AceConsole-2.0', true)
-if AC then print = function(...) AC:PrintLiteral(...) end end
---@end-do-not-package@

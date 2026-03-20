@@ -719,21 +719,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
---[=[ 	-- Generate reset staticpopup
-	if not StaticPopupDialogs['XLOOT_RESETPROFILE'] then
-		StaticPopupDialogs['XLOOT_RESETPROFILE'] = {
-			preferredIndex = 3,
-			text = L.confirm_reset_profile,
-			button1 = ACCEPT,
-			button2 = CANCEL,
-			OnAccept = function() addon:ResetProfile() end,
-			exclusive = true,
-			timeout = 0,
-			whileDead = true,
-			hideOnEscape = true,
-		}
-	end--]=]
-
 	if Settings then
 		addon:Init()
 	end
@@ -747,7 +732,6 @@ end
 -- Panel methods
 
 local function PanelDefault(self)
-	-- StaticPopup_Show("XLOOT_RESETPROFILE")
 	addon:ResetProfile()
 end
 
@@ -755,7 +739,6 @@ local function PanelOkay(self)
 end
 
 local function PanelCancel(self)
-	-- Restore old options?
 end
 
 function addon:ResetProfile()
@@ -767,24 +750,19 @@ local init = false
 local AceConfigDialog, AceConfigRegistry = LibStub("AceConfigDialog-3.0"), LibStub("AceConfigRegistry-3.0")
 
 function addon:Init()
-	-- One-time init
 	if not init then
 		init = true
 		if not Settings then
-			-- Remove bootstrap
 			for i,frame in ipairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
 				if frame.name == "XLoot" then
 					table.remove(INTERFACEOPTIONS_ADDONCATEGORIES, i)
 				end
 			end
 		end
-		-- Generate new panel
 		AceConfigRegistry:RegisterOptionsTable("XLoot", self.config)
 		local panel = AceConfigDialog:AddToBlizOptions("XLoot")
 		XLoot.option_panel = panel
 		panel.default = PanelDefault
-		-- panel.okay = PanelOkay
-		-- panel.cancel = PanelCancel
 
 		local _OnShow = panel:GetScript("OnShow")
 		local _OnHide = panel:GetScript("OnHide")
@@ -801,11 +779,9 @@ function addon:Init()
 			end
 		end)
 
- 		-- Create profile panel
 		AceConfigRegistry:RegisterOptionsTable("XLootProfile", LibStub("AceDBOptions-3.0"):GetOptionsTable(XLoot.db))
 		XLoot.profile_panel = AceConfigDialog:AddToBlizOptions("XLootProfile", L.profile, "XLoot")
 		XLoot.profile_panel.default = PanelDefault
-		-- Force list to expand
 		if not Settings then
 			InterfaceAddOnsList_Update()
 		end
@@ -814,21 +790,15 @@ end
 
 function addon:OpenPanel(module)
 	addon:Init()
-	-- Open panel
 	if Settings then
-		Settings.OpenToCategory("XLoot")
+		-- [PATCH 12.0] Settings.OpenToCategory requires a numeric category ID,
+		-- not a string name. AceConfigDialog:AddToBlizOptions stores the ID on
+		-- the returned panel as .categoryID.
+		local categoryID = XLoot.option_panel and XLoot.option_panel.categoryID
+		if categoryID then
+			Settings.OpenToCategory(categoryID)
+		end
 	else
 		InterfaceOptionsFrame_OpenToCategory(XLoot.option_panel)
 	end
 end
-
---@do-not-package@
--- function print(...)
--- 	_G.UIParentLoadAddOn("Blizzard_DebugTools");
--- 	_G.DevTools_Dump((...));
--- 	_G.DevTools_Dump(select(2, ...));
--- end
-local AC = LibStub('AceConsole-2.0', true)
-
-if AC then print = function(...) AC:PrintLiteral(...) end end
---@end-do-not-package@

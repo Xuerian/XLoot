@@ -4,6 +4,9 @@ local buffer, print = {}, print
 
 local table_insert, table_concat, string_format = table.insert, table.concat, string.format
 
+-- [PATCH 12.0] math.floor/math.fmod explicitly; bare global aliases removed.
+local floor, fmod = math.floor, math.fmod
+
 local coin_table = {
 	{ GOLD_AMOUNT, 0, "ffd700" },
 	{ SILVER_AMOUNT, 0, "c7c7cf" },
@@ -14,8 +17,8 @@ for i,v in ipairs(coin_table) do
 end
 function XLoot.CopperToString(copper)
 	coin_table[1][2] = floor(copper / 10000)
-	coin_table[2][2] = mod(floor(copper / 100), 100)
-	coin_table[3][2] = mod(copper, 100)
+	coin_table[2][2] = fmod(floor(copper / 100), 100)
+	coin_table[3][2] = fmod(copper, 100)
 
 	local buffer = wipe(buffer)
 	for i,v in ipairs(coin_table) do
@@ -71,6 +74,7 @@ function XLoot.CanEquipItem(link)
 		end
 	end
 end
+
 function XLoot.IsItemUpgrade(link)
 	if not XLoot.CanEquipItem(link) then
 		return false
@@ -81,6 +85,7 @@ function XLoot.IsItemUpgrade(link)
 	end
 	return false
 end
+
 -- Tack role icon on to player name and return class colors
 local white = { r = 1, g = 1, b = 1 }
 local dimensions = {
@@ -116,58 +121,65 @@ function XLoot.FancyPlayerName(name, class, opt)
 end
 
 
-local temp_list, template = {},
-[[local string_match = string.match
-return function(message)
-	local pcall_status, m1, m2, m3, m4, m5 = pcall(string_match, message, [=[^%s$]=])
-	assert(pcall_status, "Please report this on XLoot's curse page", message, [=[^%s$]=], m1)
-	return %s
-end]]
+-- Return an inverted match string and the capture-return order for Deformat.
+-- For simple patterns (%s/%d), captures are always m1..m5 in order.
+-- For positional patterns (%1$s etc.), captures may be reordered; we record
+-- the desired return order as a numeric array so we can reorder at call time
+-- without needing loadstring/load.
+local temp_list = {}
+local match, gsub = string.match, string.gsub
 
--- Return a inverted match string and corresponding list of ordered match slots (m1-m5)
-local match, gsub, insert = string.match, string.gsub, table.insert
 local function invert(pattern)
-	local inverted, arglist = pattern, nil
+	local inverted, order = pattern, nil
 	-- Escape magic characters
 	inverted = gsub(inverted, "%(", "%%(")
 	inverted = gsub(inverted, "%)", "%%)")
 	inverted = gsub(inverted, "%-", "%%-")
 	inverted = gsub(inverted, "%+", "%%+")
 	inverted = gsub(inverted, "%.", "%%.")
-	-- Account for reordered replacements
+	-- Account for reordered replacements (%1$s style)
 	local k = match(inverted, '%%(%d)%$')
 	if k then
 		local i, list = 1, wipe(temp_list)
 		while k ~= nil do
 			inverted = gsub(inverted, "(%%%d%$.)", "(.-)", 1)
-			list[i] = 'm'..tostring(k)
+			list[i] = tonumber(k)
 			k, i = match(inverted, "%%(%d)%$"), i + 1
 		end
-		arglist = table.concat(list, ", ")
-	-- Simple patterns
+		-- Store as a plain numeric array copy (temp_list is reused)
+		order = { list[1], list[2], list[3], list[4], list[5] }
+	-- Simple %s / %d patterns
 	else
 		inverted = gsub(inverted, "%%d", "(%%d+)")
 		inverted = gsub(inverted, "%%s", "(.-)")
-		arglist = "m1, m2, m3, m4, m5"
+		-- order stays nil → return captures in natural order
 	end
-	return inverted, arglist
+	return inverted, order
 end
 
--- Match string against a pattern, caching the inverted pattern
+-- [PATCH 12.0] loadstring() and load() are both unavailable in the WoW 12.0
+-- Lua sandbox. The previous implementation compiled match functions as strings;
+-- this version builds a plain closure instead, storing the anchored inverted
+-- pattern and (for positional formats) a capture-reorder table.
 local invert_cache = {}
 function XLoot.Deformat(str, pattern)
-	local func = invert_cache[pattern]
-	if not func then
-		local inverted, arglist = invert(pattern)
-		func = loadstring(template:format(inverted, inverted, arglist))()
-		invert_cache[pattern] = func
+	local cached = invert_cache[pattern]
+	if not cached then
+		local inverted, order = invert(pattern)
+		cached = { pat = "^" .. inverted .. "$", order = order }
+		invert_cache[pattern] = cached
 	end
-	return func(str)
-end
-XLoot.InvertFormatString = invert
 
---@do-not-package@
--- Debug
-local AC = LibStub('AceConsole-2.0', true)
-if AC then print = function(...) AC:PrintLiteral(...) end end
---@end-do-not-package@
+	local ok, m1, m2, m3, m4, m5 = pcall(string.match, str, cached.pat)
+	assert(ok, "Please report this on XLoot's curse page")
+
+	local ord = cached.order
+	if ord then
+		-- Reorder captures to match positional format specifiers
+		local c = { m1, m2, m3, m4, m5 }
+		return c[ord[1]], c[ord[2]], c[ord[3]], c[ord[4]], c[ord[5]]
+	end
+	return m1, m2, m3, m4, m5
+end
+
+XLoot.InvertFormatString = invert
