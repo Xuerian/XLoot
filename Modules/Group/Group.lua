@@ -181,7 +181,7 @@ function addon:OnEnable()
 	end
 
 	-- Find and show active rolls
-	if IsInGroup() and (GetLootMethod() == 'group' or GetLootMethod() == 'needbeforegreed') then
+	if IsInGroup() and (C_PartyInfo.GetLootMethod() == 'group' or C_PartyInfo.GetLootMethod() == 'needbeforegreed') then
 		for i=1,300 do
 			local time = GetLootRollTimeLeft(i)
 			if time > 0 and time <  300000 then
