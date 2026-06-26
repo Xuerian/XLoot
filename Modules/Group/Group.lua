@@ -14,10 +14,12 @@ local CanEquipItem, IsItemUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.I
 local RollFramePrototype
 
 local BUILD_NUMBER = select(4, GetBuildInfo())
-local BUILD_HAS_DISENCHANT = BUILD_NUMBER >= 30300
-local BUILD_HAS_TRANSMOG_GREED = BUILD_NUMBER >= 49407
+local IS_RETAIL = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local BUILD_HAS_DISENCHANT = not IS_RETAIL and BUILD_NUMBER >= 30300
+local HAS_TRANSMOG = IS_RETAIL
 
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
+local GetDetailedItemLevelInfo = C_Item and C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo
 
 -------------------------------------------------------------------------------
 -- Settings
@@ -98,21 +100,18 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
-	if BUILD_NUMBER >= 100000 then
-		print("XLoot Group does not yet work on this version and will not be loaded")
-		return
-	end
 	-- Register events
 	eframe:RegisterEvent('START_LOOT_ROLL')
 	eframe:RegisterEvent('MODIFIER_STATE_CHANGED')
 
-	-- if BUILD_HAS_TRANSMOG_GREED or C_Item then
-	-- 	eframe:RegisterEvent('LOOT_HISTORY_UPDATE_DROP')
-	-- else
+	if IS_RETAIL then
+		eframe:RegisterEvent('CANCEL_LOOT_ROLL')
+		eframe:RegisterEvent('CANCEL_ALL_LOOT_ROLLS')
+	else
 		eframe:RegisterEvent('LOOT_HISTORY_ROLL_CHANGED')
 		eframe:RegisterEvent('LOOT_HISTORY_ROLL_COMPLETE')
 		eframe:RegisterEvent('LOOT_ROLLS_COMPLETE')
-	-- end
+	end
 
 	-- Disable default frame
 	UIParent:UnregisterEvent("START_LOOT_ROLL")
@@ -181,7 +180,7 @@ function addon:OnEnable()
 	end
 
 	-- Find and show active rolls
-	if IsInGroup() and (GetLootMethod() == 'group' or GetLootMethod() == 'needbeforegreed') then
+	if IsInGroup() and (IS_RETAIL or GetLootMethod() == 'group' or GetLootMethod() == 'needbeforegreed') then
 		for i=1,300 do
 			local time = GetLootRollTimeLeft(i)
 			if time > 0 and time <  300000 then
@@ -207,7 +206,7 @@ local type_strings = {
 local rtypes = { [0] = 'pass', 'need', 'greed', 'disenchant' } -- Tekkub. Writing smaller addons than me since ever.
 
 function addon:START_LOOT_ROLL(id, length, uid, ongoing)
-	local icon, name, count, quality, bop, need, greed, de, reason_need, reason_greed, reason_de, de_skill = GetLootRollItemInfo(id)
+	local icon, name, count, quality, bop, need, greed, de, reason_need, reason_greed, reason_de, de_skill, can_transmog = GetLootRollItemInfo(id)
 	-- LootFrame.lua includes this sanity check
 	if name == nil then
 		print('XLoot Group: Ignoring START_LOOT_ROLL with no name')
@@ -231,8 +230,11 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 
 	frame.need:Show()
 	frame.greed:Show()
-	if BUILD_HAS_DISENCHANT then
+	if frame.disenchant then
 		frame.disenchant:Show()
+	end
+	if frame.transmog then
+		frame.transmog:Show()
 	end
 	frame.pass:Show()
 	frame.text_status:Hide()
@@ -252,18 +254,22 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 		end
 	end
 	frame.need:Toggle(need)
-	frame.greed:Toggle(greed)
-	frame.disenchant:Toggle(de)
+	frame.greed:Toggle(greed and not can_transmog)
+	if frame.disenchant then frame.disenchant:Toggle(de) end
+	if frame.transmog then frame.transmog:Toggle(can_transmog) end
 
 	frame.need:SetText()
 	frame.greed:SetText()
 	frame.pass:SetText()
-	frame.disenchant:SetText()
+	if frame.disenchant then frame.disenchant:SetText() end
+	if frame.transmog then frame.transmog:SetText() end
 
 	frame.need.reason = reason_need ~= 0 and reason_need or nil
 	frame.greed.reason = reason_greed ~= 0 and reason_greed or nil
-	frame.disenchant.reason = reason_de ~= 0 and reason_de or nil
-	frame.disenchant.skill = de_skill ~= 0 and de_skill or nil
+	if frame.disenchant then
+		frame.disenchant.reason = reason_de ~= 0 and reason_de or nil
+		frame.disenchant.skill = de_skill ~= 0 and de_skill or nil
+	end
 
 	local bar = frame.bar
 	bar.length = length
@@ -281,7 +287,7 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 	frame.text_bind:SetText(bop and '|cffff4422BoP' or '')
 	frame.text_loot:SetText(name)
 	local ilvl = GetDetailedItemLevelInfo(link)
-	frame.text_ilvl:SetText(ilvl > 1 and ilvl or nil)
+	frame.text_ilvl:SetText(ilvl and ilvl > 1 and ilvl or nil)
 
 	frame.text_loot:SetVertexColor(r, g, b)
 	frame.overlay:SetBorderColor(r, g, b)
@@ -294,6 +300,19 @@ function addon:START_LOOT_ROLL(id, length, uid, ongoing)
 
 
 	return frame
+end
+
+function addon:CANCEL_LOOT_ROLL(id)
+	local frame = rolls[id]
+	if frame then
+		anchor:Pop(frame)
+	end
+end
+
+function addon:CANCEL_ALL_LOOT_ROLLS()
+	for _, frame in pairs(rolls) do
+		anchor:Pop(frame)
+	end
 end
 
 local tidx = { [0] = 1, [3] = 2, [2] = 2, [1] = 3 }
@@ -379,7 +398,7 @@ function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 			or (opt.track_by_threshold and frame.quality >= opt.track_threshold) then
 			frame.need:Hide()
 			frame.greed:Hide()
-			frame.disenchant:Hide()
+			if frame.disenchant then frame.disenchant:Hide() end
 			frame.pass:Hide()
 			frame.text_status:Show()
 			frame.have_rolled = true
@@ -426,7 +445,8 @@ function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 				bracket = bracket + 1
 			end
 		end
-		frame[rtype]:SetText(bracket)
+		local btn = frame[rtype]
+		if btn then btn:SetText(bracket) end
 	end
 
 	-- Refresh tooltip
@@ -674,8 +694,9 @@ do
 		function RollButtonPrototype:OnEnter()
 			mouse_focus = self
 			GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT')
-			AddTooltipLines(self.parent, false, self.type)
-			-- This isn't working for some stupid reason
+			if not IS_RETAIL then
+				AddTooltipLines(self.parent, false, self.type)
+			end
 			if GameTooltip:NumLines() == 0 then
 				GameTooltip:SetText(self.label, unpack(self.label_colors))
 				GameTooltip:Show()
@@ -701,17 +722,25 @@ do
 		end
 
 		local path = [[Interface\Buttons\UI-GroupLoot-%s-%s]]
+		local transmog_texture = [[Interface\MINIMAP\TRACKING\Transmogrifier]]
 		function RollButtonPrototype:New(parent, roll, label, tex, anchor_to, x, y, label_colors)
 			local b = self:_New(CreateFrame('Button', nil, parent))
 			b:SetPoint('LEFT', anchor_to, 'RIGHT', x, y)
-			b:SetNormalTexture(path:format(tex, 'Up'))
-			if tex ~= 'Pass' then
-				b:SetHighlightTexture(path:format(tex, 'Highlight'))
-				b:SetPushedTexture(path:format(tex, 'Down'))
-			else
-				b:SetHighlightTexture(path:format(tex, 'Up'))
-				b:GetNormalTexture():SetVertexColor(0.8, 0.7, 0.7)
+			if tex == 'Transmog' then
+				b:SetNormalTexture(transmog_texture)
+				b:SetHighlightTexture(transmog_texture)
+				b:SetPushedTexture(transmog_texture)
 				b:GetHighlightTexture():SetAlpha(0.5)
+			else
+				b:SetNormalTexture(path:format(tex, 'Up'))
+				if tex ~= 'Pass' then
+					b:SetHighlightTexture(path:format(tex, 'Highlight'))
+					b:SetPushedTexture(path:format(tex, 'Down'))
+				else
+					b:SetHighlightTexture(path:format(tex, 'Up'))
+					b:GetNormalTexture():SetVertexColor(0.8, 0.7, 0.7)
+					b:GetHighlightTexture():SetAlpha(0.5)
+				end
 			end
 			b.parent = parent
 
@@ -755,14 +784,16 @@ do
 		GameTooltip:SetOwner(self.icon_frame, 'ANCHOR_TOPLEFT', 28, 0)
 		GameTooltip:SetHyperlink(self.link)
 		if opt.show_decided or opt.show_undecided then
-			AddTooltipLines(self, true)
+			if not IS_RETAIL then
+				AddTooltipLines(self, true)
+			end
 			if self.need.reason then
 				AddIneligibleReason(self.need, 1, .2, 0)
 			end
 			if self.greed.reason and self.greed.reason ~= self.need.reason then
 				AddIneligibleReason(self.greed, .8, .1, 0)
 			end
-			if self.disenchant.reason then
+			if self.disenchant and self.disenchant.reason then
 				AddIneligibleReason(self.disenchant, .6, .05, 0)
 			end
 		end
@@ -905,17 +936,20 @@ do
 		ilvl:SetPoint('TOPLEFT', 3, -3)
 		frame.text_ilvl = ilvl
 
-		-- Roll buttons
 		local n = RollButtonPrototype:New(frame, 1, NEED, 'Dice', icon_frame, 3, -1, {.2, 1, .1})
 		local g = RollButtonPrototype:New(frame, 2, GREED, 'Coin', n, 0, -2, {.1, .2, 1})
-		local d = RollButtonPrototype:New(frame, 3, ROLL_DISENCHANT, 'DE', g, 0, 2, {.1, .2, 1})
-		local p_to = d
-		if not BUILD_HAS_DISENCHANT then
-			p_to = g
-			d:Hide()
+		local d, t, third
+		if HAS_TRANSMOG then
+			t = RollButtonPrototype:New(frame, 4, (TRANSMOGRIFY or 'Transmog'), 'Transmog', g, 0, -2, {.9, .5, .9})
+			third = t
+		elseif BUILD_HAS_DISENCHANT then
+			d = RollButtonPrototype:New(frame, 3, ROLL_DISENCHANT, 'DE', g, 0, 2, {.1, .2, 1})
+			third = d
+		else
+			third = g
 		end
-		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', p_to, 0, 2, {.7, .7, .7})
-		frame.need, frame.greed, frame.disenchant, frame.pass = n, g, d, p
+		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', third, 0, 2, {.7, .7, .7})
+		frame.need, frame.greed, frame.disenchant, frame.transmog, frame.pass = n, g, d, t, p
 
 		-- Roll status text
 		local status = frame:CreateFontString(nil, 'OVERLAY')
@@ -945,7 +979,8 @@ do
 
 		self.need:ApplyOptions()
 		self.greed:ApplyOptions()
-		self.disenchant:ApplyOptions()
+		if self.disenchant then self.disenchant:ApplyOptions() end
+		if self.transmog then self.transmog:ApplyOptions() end
 		self.pass:ApplyOptions()
 
 		self.text_ilvl:SetFont(opt.font, 8, 'OUTLINE')
@@ -987,6 +1022,8 @@ end
 -- Move anchors when scale changes
 function addon:ApplyOptions()
 	opt = self.opt
+
+	if not anchor then return end
 
 	anchor:UpdateSVData(opt.roll_anchor)
 	alert_anchor:UpdateSVData(opt.alert_anchor)
@@ -1074,6 +1111,11 @@ function XLootGroup.TestSettings()
 		end
 
 		function RollOnLoot(rollid, rtypeid)
+			if IS_RETAIL then
+				local frame = rolls[rollid]
+				if frame then anchor:Pop(frame) end
+				return
+			end
 			FakeHistory.items[1].players[1][3] = rtypeid
 			changed(1, 1)
 		end
@@ -1112,16 +1154,18 @@ function XLootGroup.TestSettings()
 				{ 'Player3', 'WARRIOR', nil, nil, false, false },
 				{ 'Player4', 'SHAMAN', nil, nil, false, false }
 			}
-			FakeHistory.rolls[rollid] = { itex, iname, 1, iquality, select(2, unpack(item)) }
+			FakeHistory.rolls[rollid] = { itex, iname, 1, iquality, item[2], item[3], item[4], item[5], 0, 0, 0, 0, IS_RETAIL and random(1, 2) == 2 or nil }
 			FakeHistory.links[rollid] = ilink
 
 			table.insert(FakeHistory.items, 1, fake)
 
 			addon:START_LOOT_ROLL(rollid, random(20000, 40000), true)
-			after(5, function() fake.players[2][3] = 0 end, changed, 1, 2)
-			after(7, function() fake.players[3][3] = 2 end, changed, 1, 3)
-			after(9, function() fake.players[4][3] = 3 end, changed, 1, 4)
-			after(11, function() fake.players[5][3] = 1 end, changed, 1, 5)
+			if not IS_RETAIL then
+				after(5, function() fake.players[2][3] = 0 end, changed, 1, 2)
+				after(7, function() fake.players[3][3] = 2 end, changed, 1, 3)
+				after(9, function() fake.players[4][3] = 3 end, changed, 1, 4)
+				after(11, function() fake.players[5][3] = 1 end, changed, 1, 5)
+			end
 		end
 
 	end

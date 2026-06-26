@@ -1,0 +1,15 @@
+# Editor / local config
+.vscode/
+
+# Packager output
+*.zip
+.release/
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Backup files
+*.bak
+*.orig
