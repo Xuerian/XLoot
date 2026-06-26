@@ -145,12 +145,19 @@ local defaults = {
 		autoloots = {
 			currency = 'never',
 			tradegoods = 'never',
+			gear = 'never',
+			value = 'never',
 			quest = 'never',
 			list = 'solo',
 			all = 'never',
 		},
 
 		autoloot_item_list = '',
+
+		autoloot_gear_quality = 0, -- Minimum quality (0 - 6, Poor - Artifact) to autoloot gear
+		autoloot_gear_minlevel = 0, -- Minimum item level to autoloot gear
+
+		autoloot_value_minprice = 0, -- Minimum total vendor value (in gold) to autoloot an item
 
 		frame_draggable = true,
 
@@ -1237,6 +1244,17 @@ function XLootFrame:Update(no_snap, is_refresh)
 					auto.all
 					or (auto.list and auto_items[name])
 					or (auto.tradegoods and slotData.isCraftingReagent)
+					or (
+						auto.gear
+						and slotData.equipLoc and slotData.equipLoc ~= ""
+						and (slotData.quality or 0) >= opt.autoloot_gear_quality
+						and (C_Item.GetDetailedItemLevelInfo(slotData.link) or slotData.level or 0) >= opt.autoloot_gear_minlevel
+					)
+					or (
+						auto.value
+						and slotData.sellPrice and slotData.sellPrice > 0
+						and slotData.sellPrice * quantity >= opt.autoloot_value_minprice * 10000
+					)
 				then
 					-- Cache available space
 					--  Specific bag types make this a bit more annoying

@@ -988,6 +988,10 @@ end
 function addon:ApplyOptions()
 	opt = self.opt
 
+	-- Module may be registered but not fully enabled (e.g. unsupported game
+	-- version short-circuits OnEnable before the anchors are created)
+	if not anchor then return end
+
 	anchor:UpdateSVData(opt.roll_anchor)
 	alert_anchor:UpdateSVData(opt.alert_anchor)
 
