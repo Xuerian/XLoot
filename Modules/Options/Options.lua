@@ -780,8 +780,10 @@ function addon:Init()
 		end
 		-- Generate new panel
 		AceConfigRegistry:RegisterOptionsTable("XLoot", self.config)
-		local panel = AceConfigDialog:AddToBlizOptions("XLoot")
+		local panel, category_id = AceConfigDialog:AddToBlizOptions("XLoot")
 		XLoot.option_panel = panel
+		-- On 12.0 Settings.OpenToCategory needs the numeric category ID, not the addon name
+		XLoot.option_category_id = category_id
 		panel.default = PanelDefault
 		-- panel.okay = PanelOkay
 		-- panel.cancel = PanelCancel
@@ -816,7 +818,7 @@ function addon:OpenPanel(module)
 	addon:Init()
 	-- Open panel
 	if Settings then
-		Settings.OpenToCategory("XLoot")
+		Settings.OpenToCategory(XLoot.option_category_id or "XLoot")
 	else
 		InterfaceOptionsFrame_OpenToCategory(XLoot.option_panel)
 	end

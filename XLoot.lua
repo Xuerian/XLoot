@@ -142,17 +142,8 @@ function XLoot:OnEnable()
 		end
 	end
 
-	-- Create option stub
-	if Settings then
-		C_AddOns.EnableAddOn("XLoot_Options")
-		C_AddOns.LoadAddOn("XLoot_Options")
-	else
-		local stub = CreateFrame("Frame", "XLootConfigPanel", UIParent)
-		stub.name = "XLoot"
-		stub:Hide()
-		InterfaceOptions_AddCategory(stub)
-		stub:SetScript("OnShow", function() self:ShowOptionPanel(self) end)
-	end
+	C_AddOns.EnableAddOn("XLoot_Options")
+	C_AddOns.LoadAddOn("XLoot_Options")
 	self:SetSlashCommand("xloot", function() self:ShowOptionPanel(self) end)
 end
 

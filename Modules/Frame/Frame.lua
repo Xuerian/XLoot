@@ -200,15 +200,7 @@ function addon:OnEnable()
 	-- Register for escape close
 	table.insert(UISpecialFrames, "XLootFrame")
 
-	-- Reattach master looter frame
-	MasterLooterFrame:SetScript('OnShow',
-	function(self)
-		if XLootFrame:IsVisible() then
-			MasterLooterFrame:SetFrameLevel(XLootFrame:GetFrameLevel()+2)
-			MasterLooterFrame:ClearAllPoints()
-			MasterLooterFrame:SetPoint("BOTTOM",XLootFrame,"TOP")
-		end
-	end)
+	-- MasterLooterFrame reattach hook removed: the global is nil on retail (master loot gone since 8.0.1)
 end
 
 local preview_loot = {

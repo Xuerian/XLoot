@@ -30,5 +30,4 @@ move-folders:
 	XLoot/Modules/Frame: XLoot_Frame
 	XLoot/Modules/Group: XLoot_Group
 	XLoot/Modules/Monitor: XLoot_Monitor
-	XLoot/Modules/Master: XLoot_Master
 	XLoot/Modules/Options: XLoot_Options
