@@ -1,27 +1,7 @@
-﻿package-as: XLoot
+package-as: XLoot
 
-externals:
-	Libs/LibStub:
-		url: svn://svn.wowace.com/wow/libstub/mainline/trunk
-		tag: latest
-	Libs/CallbackHandler-1.0:
-		url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
-		tag: latest
-	Libs/AceDB-3.0:
-		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDB-3.0
-		tag: latest
-	Libs/AceAddon-3.0:
-		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
-		tag: latest
-	Modules/Options/Libs/AceGUI-3.0:
-		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceGUI-3.0
-		tag: latest
-	Modules/Options/Libs/AceConfig-3.0:
-		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceConfig-3.0
-		tag: latest
-	Modules/Options/Libs/AceDBOptions-3.0:
-		url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDBOptions-3.0
-		tag: latest
+# Ace3 libraries are vendored under Libs/ and Modules/Options/Libs/, so the packager
+# does not need to fetch externals (the old svn://svn.wowace.com URLs are dead anyway).
 
 ignore:
 	- .pkgmeta

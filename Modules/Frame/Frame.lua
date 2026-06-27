@@ -45,7 +45,7 @@ XLootFrame.addon = addon
 local XLootFrame = XLootFrame
 
 -- Grab locals
-local mouse_focus, opt
+local opt
 
 -- Because forking the API is a great idea
 local LOOT_SLOT_NONE = LOOT_SLOT_NONE or Enum.LootSlotType.None
@@ -346,7 +346,7 @@ do
 			channel = 'PARTY'
 		end
 		for k, v in pairs(output) do
-			v  = string.gsub(v, "\n", " ", 1, true) -- DIE NEWLINES, DIE A HORRIBLE DEATH
+			v = v:gsub("\n", " ")
 			SendChatMessage(v, channel)
 			if opt.linkall_channel_secondary ~= 'NONE' then
 				SendChatMessage(v, opt.linkall_channel_secondary)
@@ -480,11 +480,6 @@ do
 	function RowPrototype:SetBorderColor(r, g, b, a)
 		self:_SetBorderColor(r, g, b, a or 1)
 		self.frame_item:SetBorderColor(r, g, b, a or 1)
-	end
-
-	function RowPrototype:SetHighlightColor(r, g, b, a)
-		self:SetHighlightColor(r, g, b, a)
-		self.frame_item:SetHighlightColor(r, g, b, a)
 	end
 
 	-- Frame events
@@ -1194,11 +1189,17 @@ function XLootFrame:Update(no_snap, is_refresh)
 			local autoloot = false
 			local slotType, slotData = GetLootSlotType(slot)
 			if slotType == LOOT_SLOT_ITEM then
-				slotData = GetItemInfoTable(GetLootSlotLink(slot))
+				local link = GetLootSlotLink(slot)
+				slotData = GetItemInfoTable(link)
+				-- Item not in client cache yet: render from loot-slot data, refresh shortly
+				if not slotData then
+					slotData = { name = name, icon = icon, quality = quality, link = link, stackCount = 1, bindType = 0 }
+					need_refresh = true
+				end
 				slotData.slotType = slotType
 				slotData.quantity = quantity
 				slotData.locked = locked
-				slotData.questItem = isQuestItem
+				slotData.isQuestItem = isQuestItem
 				slotData.questID = questID
 				slotData.startsQuest = startsQuest
 			else
@@ -1362,7 +1363,7 @@ end
 
 -- Show compare tooltip when shift pressed
 -- Without using OnUpdate for all frames
-function addon:MODIFIER_STATE_CHANGED(self, modifier, state)
+function addon:MODIFIER_STATE_CHANGED()
 	if (GetNumLootItems() ~= 0) and mouse_focus and MouseIsOver(mouse_focus) then
 		mouse_focus:ShowTooltip()
 	end

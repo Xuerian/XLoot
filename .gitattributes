@@ -1,0 +1,14 @@
+# Normalize line endings: store LF in the repo, check out LF.
+* text=auto eol=lf
+
+*.lua text eol=lf
+*.toc text eol=lf
+*.xml text eol=lf
+*.md text eol=lf
+
+*.tga binary
+*.blp binary
+
+# Leave vendored third-party libraries untouched.
+Libs/** -text
+Modules/Options/Libs/** -text

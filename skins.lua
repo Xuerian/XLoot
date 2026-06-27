@@ -15,7 +15,7 @@ local print = print
 -- [optional] name - Shown in UI, name provided to RegisterSkin used by default
 -- [optional] size, size_highlight
 -- [optional] row_spacing
--- [optional] frame_color_*, loot_color_* -- See above
+-- [optional] frame_color_*, loot_color_* -- see the color keys in Frame.lua profile defaults
 -- [optional] color_mod - Multiplier for border quality colors
 -- [optional] padding, padding_highlight - Padding refers to how far outward (or inward) the border should be offset from the frame
 
@@ -168,8 +168,6 @@ do
 	local g_color = { .5, .5, .5, .6 }
 
 	-- Frame methods
-	-- https://www.wowace.com/projects/xloot/issues/205 is not reproducible, but user gets error reliably
-	local alphaworks = false
 	local function SetBorderColor(self, r, g, b, a)
 		for i, x in pairs(self._skin_borders) do
 			x:SetVertexColor(r, g, b, a or 1)

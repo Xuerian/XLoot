@@ -3,6 +3,5 @@
 	<Include file="Frame\load.xml"/>
 	<Include file="Monitor\load.xml"/>
 	<Include file="Group\load.xml"/>
-	<!-- Master module retired on retail: master loot was removed in patch 8.0.1. Source kept for a future Classic build. -->
 	<Include file="Options\load.xml"/>
 </Ui>

@@ -5,7 +5,6 @@ XLootGroup = addon
 -- Grab locals
 local opt, anchor, alert_anchor, mouse_focus, Skinner
 local rolls = {}
-local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
 local GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string_format
 	= GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string.format
 local HistoryGetItem, HistoryGetPlayerInfo, HistoryGetNumItems
@@ -205,7 +204,7 @@ local type_strings = {
 }
 local rtypes = { [0] = 'pass', 'need', 'greed', 'disenchant' } -- Tekkub. Writing smaller addons than me since ever.
 
-function addon:START_LOOT_ROLL(id, length, uid, ongoing)
+function addon:START_LOOT_ROLL(id, length, ongoing)
 	local icon, name, count, quality, bop, need, greed, de, reason_need, reason_greed, reason_de, de_skill, can_transmog = GetLootRollItemInfo(id)
 	-- LootFrame.lua includes this sanity check
 	if name == nil then
@@ -1098,19 +1097,31 @@ function XLootGroup.TestSettings()
 			addon:LOOT_HISTORY_ROLL_CHANGED(...)
 		end
 
+		-- Test overrides fall through to the real API for non-fake IDs, so /xlgd can't break live rolls
+		local _GetLootRollItemInfo, _GetLootRollItemLink, _GetLootRollTimeLeft, _RollOnLoot,
+			_UnitGroupRolesAssigned, _HistoryGetItem, _HistoryGetPlayerInfo
+			= GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot,
+			UnitGroupRolesAssigned, HistoryGetItem, HistoryGetPlayerInfo
+
 		function GetLootRollItemInfo(id)
-			return unpack(FakeHistory.rolls[id])
+			if FakeHistory.rolls[id] then return unpack(FakeHistory.rolls[id]) end
+			return _GetLootRollItemInfo(id)
 		end
 
 		function GetLootRollItemLink(id)
-			return FakeHistory.links[id]
+			if FakeHistory.links[id] then return FakeHistory.links[id] end
+			return _GetLootRollItemLink(id)
 		end
 
-		function GetLootRollTimeLeft()
-			return 1
+		function GetLootRollTimeLeft(id)
+			if FakeHistory.rolls[id] then return 1 end
+			return _GetLootRollTimeLeft(id)
 		end
 
 		function RollOnLoot(rollid, rtypeid)
+			if not FakeHistory.rolls[rollid] then
+				return _RollOnLoot(rollid, rtypeid)
+			end
 			if IS_RETAIL then
 				local frame = rolls[rollid]
 				if frame then anchor:Pop(frame) end
@@ -1121,21 +1132,20 @@ function XLootGroup.TestSettings()
 		end
 
 		function UnitGroupRolesAssigned(player)
+			local real = _UnitGroupRolesAssigned(player)
+			if real and real ~= 'NONE' then return real end
 			local s = math.random(1, 3)
-			if s == 1 then
-				return "HEALER"
-			elseif s == 2 then
-				return "DAMAGER"
-			end
-			return "TANK"
+			return s == 1 and "HEALER" or s == 2 and "DAMAGER" or "TANK"
 		end
 
 		function HistoryGetItem(hid)
-			return unpack(FakeHistory.items[hid].item)
+			if FakeHistory.items[hid] then return unpack(FakeHistory.items[hid].item) end
+			return _HistoryGetItem and _HistoryGetItem(hid)
 		end
 
 		function HistoryGetPlayerInfo(hid, pid)
-			return unpack(FakeHistory.items[hid].players[pid])
+			if FakeHistory.items[hid] then return unpack(FakeHistory.items[hid].players[pid]) end
+			return _HistoryGetPlayerInfo and _HistoryGetPlayerInfo(hid, pid)
 		end
 
 		function StartFakeRoll()
@@ -1148,7 +1158,7 @@ function XLootGroup.TestSettings()
 
 			fake.item = { rollid, ilink, 5, false, nil, false }
 			fake.players = {
-				{ me, select(2, UnitClass('player')), nil, nil, false, true },
+				{ UnitName("player"), select(2, UnitClass('player')), nil, nil, false, true },
 				{ 'Player1', 'MAGE', nil, nil, false, false },
 				{ 'Player2', 'PRIEST', nil, nil, false, false },
 				{ 'Player3', 'WARRIOR', nil, nil, false, false },

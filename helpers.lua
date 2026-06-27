@@ -89,14 +89,9 @@ local dimensions = {
 	TANK = '32:48'
 }
 function XLoot.FancyPlayerName(name, class, opt)
-	local c
-	if _G.CUSTOM_CLASS_COLORS then
-		c = _G.CUSTOM_CLASS_COLORS[class]
-	elseif _G.RAID_CLASS_COLORS[class] then
-		c = _G.RAID_CLASS_COLORS[class]
-	else
-		c = white
-	end
+	local c = (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class])
+		or (_G.RAID_CLASS_COLORS and _G.RAID_CLASS_COLORS[class])
+		or white
 	-- !CLASSIC
 	local role = 'NONE'
 	if UnitGroupRolesAssigned then
@@ -120,7 +115,7 @@ local temp_list, template = {},
 [[local string_match = string.match
 return function(message)
 	local pcall_status, m1, m2, m3, m4, m5 = pcall(string_match, message, [=[^%s$]=])
-	assert(pcall_status, "Please report this on XLoot's curse page", message, [=[^%s$]=], m1)
+	assert(pcall_status, "Please report this on XLoot's GitHub issues page", message, [=[^%s$]=], m1)
 	return %s
 end]]
 
