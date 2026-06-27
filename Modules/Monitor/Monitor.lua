@@ -11,6 +11,7 @@ local table_insert, table_remove = table.insert, table.remove
 local me = UnitName("player")
 
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
+local GetDetailedItemLevelInfo = C_Item and C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo
 
 -------------------------------------------------------------------------------
 -- Settings
@@ -88,7 +89,7 @@ function addon:OnEnable()
 		anchor = { r = .4, g = .4, b = .4, a = .6, gradient = false },
 		anchor_pretty = { r = .6, g = .6, b = .6, a = .8 },
 		item = { backdrop = false, gradient = opt.gradients },
-		item_highlight = { type = "highlight", layer = "overlay" },
+		item_highlight = { type = "highlight", layer = "OVERLAY" },
 		row_highlight = { type = "highlight" }
 	})
 	-- Set up anchor
@@ -105,10 +106,9 @@ end
 local events = {}
 function events.item(player, link, num)
 	if link and link:match("|Hitem:") then -- Proper items
-		local name, _, quality, level, _, _, _, _, _, icon = GetItemInfo(link)
+		local name, _, quality, _, _, _, _, _, _, icon = GetItemInfo(link)
 		if not name or type(quality) ~= "number" then
-			print(name and "Quality is not a number" or "Name is nil")
-			return false
+			return -- item not cached yet, or malformed; not an error to report
 		end
 		if (player == me and opt.threshold_own or opt.threshold_other) > quality then
 			return -- Doesn't meet threshold requirements
@@ -126,7 +126,7 @@ function events.item(player, link, num)
 		if opt.show_totals then
 			row.timeToTotal = opt.totals_delay
 		end
-		if opt.show_ilvl and level > 1 then
+		if opt.show_ilvl and C_Item.IsEquippableItem(link) then
 			local ilvl = GetDetailedItemLevelInfo(link)
 			row.ilvl:SetText(ilvl)
 		end
@@ -139,7 +139,7 @@ function events.item(player, link, num)
 	end
 end
 
-function events.coin(coin_string, copper)
+function events.coin(player, copper)
 	if opt.show_coin then
 		addon:AddRow(C_CurrencyInfo.GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
 	end
@@ -169,7 +169,7 @@ function addon.LOOT_EVENT(event, pattern, ...)
 end
 
 local mouse_focus
-function addon:MODIFIER_STATE_CHANGED(self, modifier, state)
+function addon:MODIFIER_STATE_CHANGED()
 	if mouse_focus and MouseIsOver(mouse_focus) then
 		mouse_focus:ShowTooltip()
 	end
@@ -317,8 +317,7 @@ do
 		self.name:SetText(name and name.." " or nil)
 		self.text:SetText(text)
 		self.ilvl:SetText()
-		-- Show total after 0.5 seconds to get a valid count
-		self.total:SetText()
+		self.total:SetText(total and numberize(total) or "")
 		self.name:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		self.text:SetVertexColor(nr or 1, ng or 1, nb or 1)
 		if name then

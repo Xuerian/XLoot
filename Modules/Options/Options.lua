@@ -408,6 +408,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			return skins
 		end},
 		{ "skin_anchors", "toggle" },
+		{ "reset_defaults", "execute", confirm = true, func = function() addon:ResetProfile() end },
 		-- { "module_header", "header" },
 	}))
 	self.config.args = options
@@ -472,7 +473,7 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	local font_flag = {
-		{ "", "NONE" },
+		{ "", NONE },
 		{ "OUTLINE", "OUTLINE" },
 		{ "THICKOUTLINE", "THICKOUTLINE" },
 		{ "MONOCHROME", "MONOCHROME" }
@@ -514,7 +515,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_texts_lock", width = "double" },
 				{ "loot_buttons_auto" },
 				{ "loot_alpha", "alpha" },
-				{ "loot_icon_size", "range", 16, 64, 1, name = L.icon_size },
+				{ "loot_icon_size", "range", 16, 64, 1 },
 				{ "loot_row_height", "range", 14, 64, 1 },
 				{ "loot_padding", "header", name = L.padding },
 				{ "loot_padding_top", "range", 0, 25, 1, name = L.top },
@@ -672,53 +673,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
-	-- XLoot Master
-	if XLoot:GetModule("Master", true) then
-		-- Item quality dropdown generator
-		local item_qualities = {}
-		do
-			for i, v in ipairs({ "ITEM_QUALITY2_DESC", "ITEM_QUALITY3_DESC", "ITEM_QUALITY4_DESC", "CANCEL" }) do -- we only care for the qualities available as ML filters
-				local quality = tonumber(strmatch(v,"%d+"))
-				if quality then
-					local hex = select(4, C_Item.GetItemQualityColor(quality))
-					item_qualities[i] = { quality, ('|c%s%s'):format(hex, _G[v]) }
-				end
-			end
-		end
-		table.insert(item_qualities, 1, { -1, ALWAYS })
-		table.insert(item_qualities, { 10, NEVER })
-		local channels = {
-				{ 'AUTO', L.desc_channel_auto },
-				{ 'SAY', CHAT_MSG_SAY },
-				{ 'PARTY', CHAT_MSG_PARTY },
-				{ 'RAID', CHAT_MSG_RAID },
-				{ 'INSTANCE_CHAT', INSTANCE_CHAT},
-				{ 'RAID_WARNING', RAID_WARNING },
-				{ 'OFFICER', CHAT_MSG_OFFICER },
-				{ 'NONE', NONE },
-		}
-		addon:RegisterOptions({ name = "Master", addon =  XLootMaster }, {
-			{ "confirm_qualitythreshold", item_qualities },
-			{ "specialrecipients", "group", {
-				{ "menu_self" },
-				{ "menu_disenchant" },
-				{ "menu_disenchanters", "input", requires="menu_disenchant" },
-				{ "menu_bank" },
-				{ "menu_bankers", "input", requires="menu_bank" },
-			}},
-			{ "raidroll", "group", {
-				{ "menu_roll" },
-			}},
-			{ "awardannounce", "group", {
-				{ "award_qualitythreshold", item_qualities },
-				{ "award_channel", channels },
-				{ "award_channel_secondary", channels },
-				{ "award_guildannounce" },
-				{ "award_special" },
-			}},
-		})
-	end
-
 --[=[ 	-- Generate reset staticpopup
 	if not StaticPopupDialogs['XLOOT_RESETPROFILE'] then
 		StaticPopupDialogs['XLOOT_RESETPROFILE'] = {
@@ -785,8 +739,7 @@ function addon:Init()
 		-- On 12.0 Settings.OpenToCategory needs the numeric category ID, not the addon name
 		XLoot.option_category_id = category_id
 		panel.default = PanelDefault
-		-- panel.okay = PanelOkay
-		-- panel.cancel = PanelCancel
+		panel.OnDefault = PanelDefault -- 10.0+ Settings canvas calls OnDefault, not default
 
 		local _OnShow = panel:GetScript("OnShow")
 		local _OnHide = panel:GetScript("OnHide")
@@ -807,6 +760,7 @@ function addon:Init()
 		AceConfigRegistry:RegisterOptionsTable("XLootProfile", LibStub("AceDBOptions-3.0"):GetOptionsTable(XLoot.db))
 		XLoot.profile_panel = AceConfigDialog:AddToBlizOptions("XLootProfile", L.profile, "XLoot")
 		XLoot.profile_panel.default = PanelDefault
+		XLoot.profile_panel.OnDefault = PanelDefault
 		-- Force list to expand
 		if not Settings then
 			InterfaceAddOnsList_Update()

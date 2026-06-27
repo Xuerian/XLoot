@@ -95,7 +95,6 @@ local XLootModule = {
 		self:SetEventHandler(frame)
 	end,
 	SetEventHandler = SetEventHandler,
-	OnProfileChanged = XLoot.OnProfileChanged,
 }
 XLoot:SetDefaultModulePrototype(XLootModule)
 
