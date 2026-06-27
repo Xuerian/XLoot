@@ -328,6 +328,10 @@ function addon:OnEnable() -- Construct addon option tables here
 			opts.name = opts.name or L[module_data.name][key] or L[key] or key
 			opts.desc = opts.desc or L[module_data.name][key.."_desc"]
 
+			if opts.type == "range" or opts.type == "input" then
+				opts.desc = opts.desc and (opts.desc.."\n\n"..L.enter_to_save) or L.enter_to_save
+			end
+
 			meta.subtable, meta.subkey = opts.subtable, opts.subkey
 			opts.subtable, opts.subkey = nil, nil
 
@@ -552,6 +556,11 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "autoloot_currency", when_group, "autoloots", "currency" },
 				{ "autoloot_quest", when_group, "autoloots", "quest" },
 				{ "autoloot_tradegoods", when_group, "autoloots", "tradegoods" },
+				{ "autoloot_gear", when_group, "autoloots", "gear" },
+				{ "autoloot_gear_quality", item_qualities },
+				{ "autoloot_gear_minlevel", "range", 0, 1000, 5 },
+				{ "autoloot_value", when_group, "autoloots", "value" },
+				{ "autoloot_value_minprice", "range", 0, 100000, 1, 0, 1000, 50 },
 				{ "autoloot_all", when_group, "autoloots", "all" },
 				{ "autolooting_list", "description" },
 				{ "autoloot_list", when_group, "autoloots", "list" },
