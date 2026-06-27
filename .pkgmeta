@@ -1,13 +1,22 @@
 package-as: XLoot
 
+enable-nolib-creation: no
+
 # Ace3 libraries are vendored under Libs/ and Modules/Options/Libs/, so the packager
 # does not need to fetch externals (the old svn://svn.wowace.com URLs are dead anyway).
 
 ignore:
-	- .pkgmeta
+  - .pkgmeta
+  - .github
+  - .gitignore
+  - .gitattributes
+  - .vscode
+  - .luacheckrc
+  - README.md
+  - CHANGELOG.md
 
 move-folders:
-	XLoot/Modules/Frame: XLoot_Frame
-	XLoot/Modules/Group: XLoot_Group
-	XLoot/Modules/Monitor: XLoot_Monitor
-	XLoot/Modules/Options: XLoot_Options
+  XLoot/Modules/Frame: XLoot_Frame
+  XLoot/Modules/Group: XLoot_Group
+  XLoot/Modules/Monitor: XLoot_Monitor
+  XLoot/Modules/Options: XLoot_Options

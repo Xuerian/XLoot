@@ -6,6 +6,17 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12-3-alpha] - 2026-06-27
+
+First CurseForge release of the Midnight revival.
+
+### Features
+- Gear and value auto-loot filters: automatically loot equippable items by minimum
+  quality and item level, or any item by minimum total vendor value. Both are off by
+  default. Thanks to Lorolas for the original contribution.
+- Options you type into (sliders and text boxes) now show a "Press Enter to save" hint
+  in their tooltip.
+
 ## [12-2] - 2026-06-27
 
 ### Bug Fixes
