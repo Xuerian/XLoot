@@ -206,7 +206,7 @@ function addon:OnEnable()
 	-- Register for escape close
 	table.insert(UISpecialFrames, "XLootFrame")
 
-	-- MasterLooterFrame reattach hook removed: the global is nil on retail (master loot gone since 8.0.1)
+	-- No MasterLooterFrame reattach: retail master loot is back (12.0.5, CN-realm-only) on the new ScrollBox/MenuUtil flow, not our old hook.
 end
 
 local preview_loot = {

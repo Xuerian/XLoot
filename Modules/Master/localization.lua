@@ -10,6 +10,7 @@ local locales = {
 		BINDING_BANKER = "Set Banker",
 		BINDING_DISENCHANTER = "Set Disenchanter",
 		ITEM_AWARDED = "%s awarded: %s",
+		CANDIDATE_UNAVAILABLE = "That player is no longer eligible to receive loot.",
 	},
 	-- Possibly localized
 	ptBR = {

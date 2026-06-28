@@ -168,6 +168,7 @@ local locales = {
 			raidroll = "Special Rolls Menu",
 			awardannounce = "Announce Item Distribution",
 			confirm_qualitythreshold = "Minimum confirm quality",
+			confirm_qualitythreshold_desc = "Items at this quality or higher ask for confirmation before being assigned. Never skips the prompt for everything, including epics and legendaries.",
 			menu_roll = "Show raid roll",
 			menu_disenchant = "Show disenchanter",
 			menu_disenchanters = "Disenchant character names",

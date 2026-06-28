@@ -1,7 +1,10 @@
 # XLoot
 
+[![Version](https://img.shields.io/github/v/release/Xuerian/XLoot?color=FF2222&label=Version)](https://github.com/Xuerian/XLoot/releases) [![Downloads](https://img.shields.io/curseforge/dt/14906?color=F16436&label=Downloads&style=flat-square)](https://www.curseforge.com/wow/addons/xloot) [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/vm8K2WfQUE) ![WoW Midnight](https://img.shields.io/badge/WoW-Midnight%2012.0.7-8B0000?style=flat-square) ![WoW BCC](https://img.shields.io/badge/WoW-BCC%202.5.5-8B0000?style=flat-square) ![WoW MoP Classic](https://img.shields.io/badge/WoW-MoP%20Classic%205.5-8B0000?style=flat-square) ![WoW Classic Era](https://img.shields.io/badge/WoW-Classic%20Era%201.15.8-8B0000?style=flat-square) [![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-333333?style=flat-square)](LICENSE.txt)
+
 **XLoot is back.** After a long break, the addon has been revived and fully updated for
-retail **World of Warcraft 12.0.7 ("Midnight")**. It's live and working again.
+retail **World of Warcraft 12.0.7 ("Midnight")** — and now works across the Classic flavors
+too. It's live and working again.
 
 XLoot improves looting in WoW by replacing the default loot frames with cleaner, more
 informative, and highly configurable ones. Every module is optional and can be toggled
@@ -22,18 +25,24 @@ like any other addon.
 - **XLoot Group** — Need / Greed / Transmog / Pass roll frames with a timer, updated for
   retail. The live roll-tracking display (who rolled what, current winner) is being
   rebuilt against Blizzard's new loot-history API; the roll buttons themselves work today.
-
-> _XLoot Master has been retired — Blizzard removed master loot from retail in patch
-> 8.0.1. Its source remains in git history for a possible future Classic build._
+- **XLoot Master** — a configurable master-looter interface: assign loot from a right-click
+  menu, with class submenus, special recipients (banker, disenchanter, self), raid rolls, and
+  award announcements. Fully supported on the **Classic flavors**, where master loot has always
+  existed. Blizzard brought master loot back to **retail in 12.0.5 — but only on Chinese (CN)
+  realms** — so XLoot now includes a retail path too. ⚠️ **The retail path is experimental and
+  unverified:** none of us can log into a CN realm to test the live loot-assignment flow, so on
+  retail it's unconfirmed. CN-realm feedback (works or doesn't) is very welcome. Open its options
+  with **/xlml**.
 
 ## Using XLoot
 
 - **/xloot** — open the options (also under Game Menu → Options → AddOns → XLoot).
 - **/xlm** — toggle the Monitor anchor to drag the loot feed where you want it.
 - **/xlg** — toggle the Group anchor to position the roll frames.
+- **/xlml** — open the Master Loot options (Classic flavors; experimental on retail CN).
 
 Every option has a mouseover tooltip explaining what it does. Don't want a module?
-Disable XLoot Frame / Monitor / Group individually in the AddOns list.
+Disable XLoot Frame / Monitor / Group / Master individually in the AddOns list.
 
 ## Installing
 

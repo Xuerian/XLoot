@@ -4,4 +4,5 @@
 	
 	<Script file="localization.lua"/>
 	<Script file="Master.lua"/>
+	<Script file="Retail.lua"/>
 </Ui>

@@ -6,6 +6,19 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.5.0] - 2026-06-28
+
+### Features
+- **Master Loot is now available on retail (experimental).** Blizzard quietly brought
+  master loot back in patch 12.0.5, but only on Chinese (CN) realms — so XLoot now
+  includes a retail master-looter interface: assign loot from a right-click menu with
+  class submenus, special recipients (self, banker, disenchanter), Request and Raid
+  rolls, and chat announcements. Open its options with **/xlml**.
+  - **Unverified on CN.** Because master loot is enabled on CN realms only and we
+    can't test there, the live loot-assignment flow is experimental and unconfirmed;
+    off a CN realm it simply stays inactive. CN-realm feedback — works or doesn't — is
+    a big help.
+
 ## [12.4.1] - 2026-06-28
 
 ### Bug Fixes
