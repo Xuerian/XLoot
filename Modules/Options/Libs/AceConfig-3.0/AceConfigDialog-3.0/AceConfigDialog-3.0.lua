@@ -1,13 +1,13 @@
 --- AceConfigDialog-3.0 generates AceGUI-3.0 based windows based on option tables.
 -- @class file
 -- @name AceConfigDialog-3.0
--- @release $Id$
+-- @release $Id: AceConfigDialog-3.0.lua 1386 2025-12-11 18:25:02Z nevcairiel $
 
 local LibStub = LibStub
 local gui = LibStub("AceGUI-3.0")
-local reg = LibStub("AceConfigRegistry-3.0-ElvUI")
+local reg = LibStub("AceConfigRegistry-3.0")
 
-local MAJOR, MINOR = "AceConfigDialog-3.0-ElvUI", 96 -- based off 92
+local MAJOR, MINOR = "AceConfigDialog-3.0", 92
 local AceConfigDialog, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not AceConfigDialog then return end
@@ -15,7 +15,7 @@ if not AceConfigDialog then return end
 AceConfigDialog.OpenFrames = AceConfigDialog.OpenFrames or {}
 AceConfigDialog.Status = AceConfigDialog.Status or {}
 AceConfigDialog.frame = AceConfigDialog.frame or CreateFrame("Frame")
-AceConfigDialog.tooltip = AceConfigDialog.tooltip or CreateFrame("GameTooltip", "ElvUIAceConfigDialogTooltip", UIParent, "GameTooltipTemplate")
+AceConfigDialog.tooltip = AceConfigDialog.tooltip or CreateFrame("GameTooltip", "AceConfigDialogTooltip", UIParent, "GameTooltipTemplate")
 
 AceConfigDialog.frame.apps = AceConfigDialog.frame.apps or {}
 AceConfigDialog.frame.closing = AceConfigDialog.frame.closing or {}
@@ -24,47 +24,10 @@ AceConfigDialog.frame.closeAllOverride = AceConfigDialog.frame.closeAllOverride 
 -- Lua APIs
 local tinsert, tsort, tremove, wipe = table.insert, table.sort, table.remove, table.wipe
 local strmatch, format = string.match, string.format
+local error = error
 local pairs, next, select, type, unpack, ipairs = pairs, next, select, type, unpack, ipairs
-local tostring, tonumber, error = tostring, tonumber, error
+local tostring, tonumber = tostring, tonumber
 local math_min, math_max, math_floor = math.min, math.max, math.floor
-
-local _G = _G
-local geterrorhandler = geterrorhandler
-local C_SettingsUtil = C_SettingsUtil
-local CreateFrame = CreateFrame
-local PlaySound = PlaySound
-local Settings = Settings
-
-local NORMAL_FONT_COLOR = NORMAL_FONT_COLOR
-
---[[
-	Localization of AceConfigRegistry-3.0-ElvUI
-]]
-
-local L = {}
-
-do
-	local translations = {
-		koKR = { min = "최소값",	max = "최대값",	step = "간격" },
-		zhTW = { min = "最小值",	max = "最大值",	step = "增量" },
-		zhCN = { min = "最小值",	max = "最大值",	step = "步长" },
-		frFR = { min = "Min",		max = "Max",	step = "Pas"  },
-		ruRU = { min = "Мин",		max = "Макс",	step = "Шаг"  },
-		esES = { min = "Mín",		max = "Máx",	step = "Paso" },
-		esMX = { min = "Mín",		max = "Máx",	step = "Paso" },
-		ptBR = { min = "Mín",		max = "Máx",	step = "Passo" },
-		itIT = { min = "Min",		max = "Max",	step = "Passo" }
-	}
-
-	local LOCALE = GetLocale()
-	local data = translations[LOCALE] or {}
-
-	L["min"]	= data.min or "Min"
-	L["max"]	= data.max or "Max"
-	L["step"]	= data.step or "Step"
-end
-
--- GLOBALS: CloseSpecialWindows
 
 local emptyTbl = {}
 
@@ -94,6 +57,7 @@ Group Types
         - Grandchild groups will default to inline unless specified otherwise
 
   Select- Same as Tab but with entries in a dropdown rather than tabs
+
 
   Inline Groups
     - Will not become nodes of a select group, they will be effectivly part of thier parent group seperated by a border
@@ -201,6 +165,7 @@ local function GetOptionsMemberValue(membername, option, options, path, appName,
 	--get definition for the member
 	local inherits = isInherited[membername]
 
+
 	--get the member of the option, traversing the tree if it can be inherited
 	local member
 
@@ -243,21 +208,21 @@ local function GetOptionsMemberValue(membername, option, options, path, appName,
 		info.uiType = "dialog"
 		info.uiName = MAJOR
 
-		local a, b, c, d, e, f, g, h -- ElvUI adds e,f,g,h for default color
+		local a, b, c ,d
 		--using 4 returns for the get of a color type, increase if a type needs more
 		if type(member) == "function" then
 			--Call the function
-			a,b,c,d,e,f,g,h = member(info, ...)
+			a,b,c,d = member(info, ...)
 		else
 			--Call the method
 			if handler and handler[member] then
-				a,b,c,d,e,f,g,h = handler[member](handler, info, ...)
+				a,b,c,d = handler[member](handler, info, ...)
 			else
 				error(format("Method %s doesn't exist in handler for type %s", member, membername))
 			end
 		end
 		del(info)
-		return a,b,c,d,e,f,g,h
+		return a,b,c,d
 	else
 		--The value isnt a function to call, return it
 		return member
@@ -336,6 +301,8 @@ local function compareOptions(a,b)
 	end
 	return OrderA < OrderB
 end
+
+
 
 --builds 2 tables out of an options group
 -- keySort, sorted keys
@@ -464,6 +431,7 @@ end
 function AceConfigDialog:SelectGroup(appName, ...)
 	local path = new()
 
+
 	local app = reg:GetOptionsTable(appName)
 	if not app then
 		error(("%s isn't registed with AceConfigRegistry, unable to open config"):format(appName), 2)
@@ -533,12 +501,10 @@ local function OptionOnMouseOver(widget, event)
 	local appName = user.appName
 	local tooltip = AceConfigDialog.tooltip
 
-	-- modified by ElvUI
-	if opt.descStyle and opt.descStyle ~= "tooltip" then return end
+	tooltip:SetOwner(widget.frame, "ANCHOR_TOPRIGHT")
 
 	local tooltipHyperlink = GetOptionsMemberValue("tooltipHyperlink", opt, options, path, appName)
 	if tooltipHyperlink then
-		tooltip:SetOwner(widget.frame, "ANCHOR_TOPRIGHT")
 		tooltip:SetHyperlink(tooltipHyperlink)
 		tooltip:Show()
 		return
@@ -547,68 +513,27 @@ local function OptionOnMouseOver(widget, event)
 	local name = GetOptionsMemberValue("name", opt, options, path, appName)
 	local desc = GetOptionsMemberValue("desc", opt, options, path, appName)
 	local usage = GetOptionsMemberValue("usage", opt, options, path, appName)
+	local descStyle = opt.descStyle
 
-	local descText = type(desc) == "string"
-	local usageText = type(usage) == "string"
-	local userText = opt.type == "multiselect"
-	local softText = opt.softMin or opt.softMax
-	local bigText = opt.bigStep
-	local Min, Max, Step
+	if descStyle and descStyle ~= "tooltip" then return end
 
-	if softText then
-		Min = (opt.min and "|cFFCCCCCC"..L["min"]..":|r "..(opt.isPercent and (opt.min*100).."%" or opt.min)) or ""
-		Max = (opt.max and "|cFFCCCCCC"..L["max"]..":|r "..(opt.isPercent and (opt.max*100).."%" or opt.max)) or ""
-		softText = Min ~= "" or Max ~= ""
+	tooltip:SetText(name, 1, .82, 0, 1, true)
+
+	if opt.type == "multiselect" then
+		tooltip:AddLine(user.text, 0.5, 0.5, 0.8, true)
+	end
+	if type(desc) == "string" then
+		tooltip:AddLine(desc, 1, 1, 1, true)
+	end
+	if type(usage) == "string" then
+		tooltip:AddLine(usage, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
 	end
 
-	if bigText then
-		local dec = opt.step and format("%f", opt.step):gsub('%.?0-$','')
-		local num = dec and tonumber(dec)
-		Step = (num and num > 0 and "|cFFCCCCCC"..L["step"]..":|r "..dec) or ""
-		bigText = Step ~= ""
-	end
-
-	if opt.dragdrop then
-		tooltip:SetOwner(widget.frame, "ANCHOR_TOPRIGHT")
-		tooltip:SetText(user.title or name, 1, .82, 0, 1, true)
-
-		if user.desc then
-			tooltip:AddLine(user.desc, 1, 1, 1, true)
-		end
-
-		tooltip:Show()
-	elseif descText or usageText or userText or softText or bigText then
-		tooltip:SetOwner(widget.frame, "ANCHOR_TOPRIGHT")
-		tooltip:SetText(name, 1, .82, 0, 1, true)
-
-		if userText then
-			tooltip:AddLine(user.text, 0.5, 0.5, 0.8, true)
-		end
-		if descText then
-			tooltip:AddLine(desc, 1, 1, 1, true)
-		end
-		if usageText then
-			tooltip:AddLine(usage, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
-		end
-		if bigText or softText then
-			tooltip:AddLine(" ")
-		end
-		if bigText then
-			tooltip:AddLine(Step, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b, true)
-		end
-		if softText then
-			tooltip:AddDoubleLine(Min, Max)
-		end
-
-		tooltip:Show()
-	end
+	tooltip:Show()
 end
 
 local function OptionOnMouseLeave(widget, event)
-	if AceConfigDialog.tooltip:IsShown() then
-		AceConfigDialog.tooltip:Hide()
-		AceConfigDialog.tooltip:ClearAllPoints()
-	end
+	AceConfigDialog.tooltip:Hide()
 end
 
 local function GetFuncName(option)
@@ -658,8 +583,8 @@ do
 		local function newButton(newText)
 			local button = CreateFrame("Button", nil, frame)
 			button:SetSize(128, 21)
-			button:SetNormalFontObject(_G.GameFontNormal)
-			button:SetHighlightFontObject(_G.GameFontHighlight)
+			button:SetNormalFontObject(GameFontNormal)
+			button:SetHighlightFontObject(GameFontHighlight)
 			button:SetNormalTexture(130763) -- "Interface\\Buttons\\UI-DialogBox-Button-Up"
 			button:GetNormalTexture():SetTexCoord(0.0, 1.0, 0.0, 0.71875)
 			button:SetPushedTexture(130761) -- "Interface\\Buttons\\UI-DialogBox-Button-Down"
@@ -831,7 +756,7 @@ local function ActivateControl(widget, event, ...)
 		end
 
 		-- show validate message
-		if not group.validatePopup and user.rootframe.SetStatusText then
+		if user.rootframe.SetStatusText then
 			user.rootframe:SetStatusText(validated)
 		else
 			validationErrorPopup(validated)
@@ -914,6 +839,8 @@ local function ActivateControl(widget, event, ...)
 			safecall(func,info, ...)
 		end
 
+
+
 		local iscustom = user.rootframe:GetUserData("iscustom")
 		local basepath = user.rootframe:GetUserData("basepath") or emptyTbl
 		--full refresh of the frame, some controls dont cause this on all events
@@ -952,11 +879,6 @@ end
 local function ActivateSlider(widget, event, value)
 	local option = widget:GetUserData("option")
 	local min, max, step = option.min or (not option.softMin and 0 or nil), option.max or (not option.softMax and 100 or nil), option.step
-
-	-- checks added by elvui
-	if type(min) == 'function' then min = min() end
-	if type(max) == 'function' then max = max() end
-
 	if min then
 		if step then
 			value = math_floor((value - min) / step + 0.5) * step + min
@@ -1186,11 +1108,6 @@ local function sortTblAsStrings(x,y)
 	return tostring(x) < tostring(y) -- Support numbers as keys
 end
 
--- added by ElvUI
-local function sortTblByValue(x,y)
-	return x[2] < y[2]
-end
-
 --[[
 	options - root of the options table being fed
 	container - widget that controls will be placed in
@@ -1237,7 +1154,7 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 					local image, width, height = GetOptionsMemberValue("image",v, options, path, appName)
 
 					local iconControl = type(image) == "string" or type(image) == "number"
-					control = CreateControl(v.dialogControl or v.control, iconControl and "Icon" or "Button-ElvUI")
+					control = CreateControl(v.dialogControl or v.control, iconControl and "Icon" or "Button")
 					if iconControl then
 						if not width then
 							width = GetOptionsMemberValue("imageWidth",v, options, path, appName)
@@ -1264,29 +1181,13 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 					control:SetCallback("OnClick",ActivateControl)
 
 				elseif v.type == "input" then
-					control = CreateControl(v.dialogControl or v.control, v.multiline and "MultiLineEditBox-ElvUI" or "EditBox-ElvUI")
+					control = CreateControl(v.dialogControl or v.control, v.multiline and "MultiLineEditBox" or "EditBox")
 
 					if v.multiline and control.SetNumLines then
 						control:SetNumLines(tonumber(v.multiline) or 4)
 					end
 					control:SetLabel(name)
 					control:SetCallback("OnEnterPressed",ActivateControl)
-
-					-- ElvUI block
-					if gui.luaSyntax and control.SetSyntaxHighlightingEnabled then
-						control:SetSyntaxHighlightingEnabled(v.luaSyntax or false)
-					end
-
-					local disableButton = GetOptionsMemberValue("disableButton", v, options, path, appName)
-					if disableButton then
-						control:DisableButton(true)
-					end
-
-					control.preferSpellID = v.preferSpellID
-					control.textChanged = v.textChanged
-					control.focusSelect = v.focusSelect
-					-- End ElvUI block
-
 					local text = GetOptionsMemberValue("get",v, options, path, appName)
 					if type(text) ~= "string" then
 						text = ""
@@ -1296,11 +1197,6 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 				elseif v.type == "toggle" then
 					control = CreateControl(v.dialogControl or v.control, "CheckBox")
 					control:SetLabel(name)
-					control.textWidth = GetOptionsMemberValue("textWidth",v,options,path,appName)
-					if control.textWidth and control.frame and control.text then
-						local textWidth = control.text:GetWidth()+30
-						control.customWidth = (textWidth>=width_multiplier and textWidth<=width_multiplier*1.5) and textWidth
-					end
 					control:SetTriState(v.tristate)
 					local value = GetOptionsMemberValue("get",v, options, path, appName)
 					control:SetValue(value)
@@ -1322,7 +1218,7 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						end
 					end
 				elseif v.type == "range" then
-					control = CreateControl(v.dialogControl or v.control, "Slider-ElvUI")
+					control = CreateControl(v.dialogControl or v.control, "Slider")
 					control:SetLabel(name)
 					control:SetSliderValues(v.softMin or v.min or 0, v.softMax or v.max or 100, v.bigStep or v.step or 0)
 					control:SetIsPercent(v.isPercent)
@@ -1381,16 +1277,14 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						control:ResumeLayout()
 						control:DoLayout()
 					else
-						control = CreateControl(v.dialogControl or v.control, "Dropdown-ElvUI")
-						local sortByValue = GetOptionsMemberValue("sortByValue",v,options,path,appName)
-
+						control = CreateControl(v.dialogControl or v.control, "Dropdown")
 						local itemType = v.itemControl
 						if itemType and not gui:GetWidgetVersion(itemType) then
 							geterrorhandler()(("Invalid Custom Item Type - %s"):format(tostring(itemType)))
 							itemType = nil
 						end
 						control:SetLabel(name)
-						control:SetList(values, sorting, itemType, sortByValue)
+						control:SetList(values, sorting, itemType)
 						local value = GetOptionsMemberValue("get",v, options, path, appName)
 						if not values[value] then
 							value = nil
@@ -1402,20 +1296,14 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 				elseif v.type == "multiselect" then
 					local values = GetOptionsMemberValue("values", v, options, path, appName)
 					local disabled = CheckOptionDisabled(v, options, path, appName)
-					local sortByValue = GetOptionsMemberValue("sortByValue", v, options, path, appName)
 
 					local valuesort = new()
 					if values then
 						for value, text in pairs(values) do
-							tinsert(valuesort, (sortByValue and {value, text}) or value)
+							tinsert(valuesort, value)
 						end
 					end
-
-					if sortByValue then
-						tsort(valuesort, sortTblByValue)
-					else
-						tsort(valuesort)
-					end
+					tsort(valuesort)
 
 					local controlType = v.dialogControl or v.control
 					if controlType then
@@ -1445,95 +1333,53 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						end
 						--check:SetTriState(v.tristate)
 						for s = 1, #valuesort do
-							local key = (sortByValue and valuesort[s][1]) or valuesort[s]
+							local key = valuesort[s]
 							local value = GetOptionsMemberValue("get",v, options, path, appName, key)
 							control:SetItemValue(key,value)
 						end
 					else
-						local width = GetOptionsMemberValue("width",v,options,path,appName)
-						local dragdrop = GetOptionsMemberValue("dragdrop",v,options,path,appName)
-
 						control = gui:Create("InlineGroup")
 						control:SetLayout("Flow")
 						control:SetTitle(name)
 						control.width = "fill"
 
 						control:PauseLayout()
-
+						local width = GetOptionsMemberValue("width",v,options,path,appName)
 						for s = 1, #valuesort do
-							local value = (sortByValue and valuesort[s][1]) or valuesort[s]
+							local value = valuesort[s]
 							local text = values[value]
-							if dragdrop then
-								local button = gui:Create("Button-ElvUI")
-
-								local title = v.dragGetTitle and v.dragGetTitle(button, text, value) or nil
-								local desc = v.dragGetDesc and v.dragGetDesc(button, text, value) or nil
-								button:SetText(format("|cFF888888%d|r %s", s, title or text))
-								button:SetUserData("value", value)
-								button:SetUserData("text", text)
-								button:SetUserData("title", title)
-								button:SetUserData("desc", desc)
-								button:SetDisabled(disabled)
-
-								button.dragOnMouseDown = v.dragOnMouseDown
-								button.dragOnMouseUp = v.dragOnMouseUp
-								button.dragOnEnter = v.dragOnEnter
-								button.dragOnLeave = v.dragOnLeave
-								button.dragOnClick = v.dragOnClick
-								button.dragdrop = true
-								button.ActivateMultiControl = ActivateMultiControl
-								button.value = GetOptionsMemberValue("get",v, options, path, appName, value)
-								InjectInfo(button, options, v, path, rootframe, appName)
-								control:AddChild(button)
-								if width == "double" then
-									button:SetWidth(width_multiplier * 2)
-								elseif width == "half" then
-									button:SetWidth(width_multiplier / 2)
-								elseif (type(width) == "number") then
-									button:SetWidth(width_multiplier * width)
-								elseif width == "full" then
-									button.width = "fill"
-								else
-									button:SetWidth(width_multiplier)
-								end
+							local check = gui:Create("CheckBox")
+							check:SetLabel(text)
+							check:SetUserData("value", value)
+							check:SetUserData("text", text)
+							check:SetDisabled(disabled)
+							check:SetTriState(v.tristate)
+							check:SetValue(GetOptionsMemberValue("get",v, options, path, appName, value))
+							check:SetCallback("OnValueChanged",ActivateMultiControl)
+							InjectInfo(check, options, v, path, rootframe, appName)
+							control:AddChild(check)
+							if width == "double" then
+								check:SetWidth(width_multiplier * 2)
+							elseif width == "half" then
+								check:SetWidth(width_multiplier / 2)
+							elseif (type(width) == "number") then
+								check:SetWidth(width_multiplier * width)
+							elseif width == "full" then
+								check.width = "fill"
 							else
-								local check = gui:Create("CheckBox")
-								check:SetLabel(text)
-								check:SetUserData("value", value)
-								check:SetUserData("text", text)
-								check:SetDisabled(disabled)
-								check:SetTriState(v.tristate)
-								check:SetValue(GetOptionsMemberValue("get",v, options, path, appName, value))
-								check:SetCallback("OnValueChanged",ActivateMultiControl)
-								InjectInfo(check, options, v, path, rootframe, appName)
-								control:AddChild(check)
-
-								local customWidth = control.customWidth or GetOptionsMemberValue("customWidth",v,options,path,appName)
-								if customWidth then
-									check:SetWidth(customWidth)
-								else
-									if width == "double" then
-										check:SetWidth(width_multiplier * 2)
-									elseif width == "half" then
-										check:SetWidth(width_multiplier / 2)
-									elseif (type(width) == "number") then
-										check:SetWidth(width_multiplier * width)
-									elseif width == "full" then
-										check.width = "fill"
-									else
-										check:SetWidth(width_multiplier)
-									end
-								end
+								check:SetWidth(width_multiplier)
 							end
 						end
 						control:ResumeLayout()
 						control:DoLayout()
+
+
 					end
 
 					del(valuesort)
 
 				elseif v.type == "color" then
-					control = CreateControl(v.dialogControl or v.control, "ColorPicker-ElvUI")
+					control = CreateControl(v.dialogControl or v.control, "ColorPicker")
 					control:SetLabel(name)
 					control:SetHasAlpha(GetOptionsMemberValue("hasAlpha",v, options, path, appName))
 					control:SetColor(GetOptionsMemberValue("get",v, options, path, appName))
@@ -1557,11 +1403,11 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 
 					local fontSize = GetOptionsMemberValue("fontSize",v, options, path, appName)
 					if fontSize == "medium" then
-						control:SetFontObject(_G.GameFontHighlight)
+						control:SetFontObject(GameFontHighlight)
 					elseif fontSize == "large" then
-						control:SetFontObject(_G.GameFontHighlightLarge)
+						control:SetFontObject(GameFontHighlightLarge)
 					else -- small or invalid
-						control:SetFontObject(_G.GameFontHighlightSmall)
+						control:SetFontObject(GameFontHighlightSmall)
 					end
 
 					local imageCoords = GetOptionsMemberValue("imageCoords",v, options, path, appName)
@@ -1593,26 +1439,21 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 
 				--Common Init
 				if control then
-					local customWidth = control.customWidth or GetOptionsMemberValue("customWidth",v,options,path,appName)
-					if control.width ~= "fill" or customWidth then
-						if customWidth then
-							control:SetWidth(customWidth)
+					if control.width ~= "fill" then
+						local width = GetOptionsMemberValue("width",v,options,path,appName)
+						local relWidth = GetOptionsMemberValue("relWidth",v,options,path,appName)
+						if width == "double" then
+							control:SetWidth(width_multiplier * 2)
+						elseif width == "half" then
+							control:SetWidth(width_multiplier / 2)
+						elseif (type(width) == "number") then
+							control:SetWidth(width_multiplier * width)
+						elseif width == "relative" and relWidth then
+							control:SetRelativeWidth(relWidth)
+						elseif width == "full" then
+							control.width = "fill"
 						else
-							local width = GetOptionsMemberValue("width",v,options,path,appName)
-							local relWidth = GetOptionsMemberValue("relWidth",v,options,path,appName)
-							if width == "double" then
-								control:SetWidth(width_multiplier * 2)
-							elseif width == "half" then
-								control:SetWidth(width_multiplier / 2)
-							elseif (type(width) == "number") then
-								control:SetWidth(width_multiplier * width)
-							elseif width == "relative" and relWidth then
-								control:SetRelativeWidth(relWidth)
-							elseif width == "full" then
-								control.width = "fill"
-							else
-								control:SetWidth(width_multiplier)
-							end
+							control:SetWidth(width_multiplier)
 						end
 					end
 					if control.SetDisabled then
@@ -1640,6 +1481,7 @@ local function BuildPath(path, ...)
 	end
 end
 
+
 local function TreeOnButtonEnter(widget, event, uniquevalue, button)
 	local user = widget:GetUserDataTable()
 	if not user then return end
@@ -1664,28 +1506,27 @@ local function TreeOnButtonEnter(widget, event, uniquevalue, button)
 	local name = GetOptionsMemberValue("name", group, options, feedpath, appName)
 	local desc = GetOptionsMemberValue("desc", group, options, feedpath, appName)
 
-	if type(desc) == "string" then
-		tooltip:SetOwner(button, "ANCHOR_CURSOR")
-		tooltip:ClearAllPoints()
-
-		if widget.type == "TabGroup" then
-			tooltip:SetPoint("BOTTOM",button,"TOP")
-		else
-			tooltip:SetPoint("LEFT",button,"RIGHT")
-		end
-
-		tooltip:SetText(name, 1, .82, 0, 1, true)
-
-		tooltip:AddLine(desc, 1, 1, 1, true)
-
-		tooltip:Show()
+	tooltip:SetOwner(button, "ANCHOR_NONE")
+	tooltip:ClearAllPoints()
+	if widget.type == "TabGroup" then
+		tooltip:SetPoint("BOTTOM",button,"TOP")
+	else
+		tooltip:SetPoint("LEFT",button,"RIGHT")
 	end
+
+	tooltip:SetText(name, 1, .82, 0, 1, true)
+
+	if type(desc) == "string" then
+		tooltip:AddLine(desc, 1, 1, 1, true)
+	end
+
+	tooltip:Show()
 end
 
 local function TreeOnButtonLeave(widget, event, value, button)
 	AceConfigDialog.tooltip:Hide()
-	AceConfigDialog.tooltip:ClearAllPoints()
 end
+
 
 local function GroupExists(appName, options, path, uniquevalue)
 	if not uniquevalue then return false end
@@ -1736,6 +1577,8 @@ local function GroupSelected(widget, event, uniquevalue)
 	del(feedpath)
 end
 
+
+
 --[[
 -- INTERNAL --
 This function will feed one group, and any inline child groups into the given container
@@ -1757,6 +1600,7 @@ function AceConfigDialog:FeedGroup(appName,options,container,rootframe,path, isR
 	--follow the path to get to the curent group
 	local inline
 	local grouptype, parenttype = options.childGroups, "none"
+
 
 	for i = 1, #path do
 		local v = path[i]
@@ -1909,6 +1753,9 @@ function AceConfigDialog:FeedGroup(appName,options,container,rootframe,path, isR
 	end
 end
 
+local old_CloseSpecialWindows
+
+
 local function RefreshOnUpdate(this)
 	for appName in pairs(this.closing) do
 		if AceConfigDialog.OpenFrames[appName] then
@@ -2003,10 +1850,9 @@ end
 -- @param appName The application name as given to `:RegisterOptionsTable()`
 -- @param container An optional container frame to feed the options into
 -- @param ... The path to open after creating the options window (see `:SelectGroup` for details)
-local old_CloseSpecialWindows
 function AceConfigDialog:Open(appName, container, ...)
 	if not old_CloseSpecialWindows then
-		old_CloseSpecialWindows = _G.CloseSpecialWindows
+		old_CloseSpecialWindows = CloseSpecialWindows
 		CloseSpecialWindows = function()
 			local found = old_CloseSpecialWindows()
 			return self:CloseAll() or found

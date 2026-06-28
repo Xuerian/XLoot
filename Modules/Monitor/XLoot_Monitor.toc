@@ -1,7 +1,4 @@
-## Interface: 120001, 120005, 120007
-## Interface-Classic: 11403
-## Interface-BCC: 20502
-## Interface-WoTLK: 30401
+## Interface: 11508, 20505, 50504, 120001, 120005, 120007
 ## Title: XLoot Monitor
 ## Notes: A graphical presentation of items looted by yourself and your group
 ## Version: @project-version@

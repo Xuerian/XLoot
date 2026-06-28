@@ -683,6 +683,53 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
+	-- XLoot Master
+	if XLoot:GetModule("Master", true) then
+		-- Item quality dropdown generator
+		local item_qualities = {}
+		do
+			for i, v in ipairs({ "ITEM_QUALITY2_DESC", "ITEM_QUALITY3_DESC", "ITEM_QUALITY4_DESC", "CANCEL" }) do -- we only care for the qualities available as ML filters
+				local quality = tonumber(strmatch(v,"%d+"))
+				if quality then
+					local hex = select(4, C_Item.GetItemQualityColor(quality))
+					item_qualities[i] = { quality, ('|c%s%s'):format(hex, _G[v]) }
+				end
+			end
+		end
+		table.insert(item_qualities, 1, { -1, ALWAYS })
+		table.insert(item_qualities, { 10, NEVER })
+		local channels = {
+				{ 'AUTO', L.desc_channel_auto },
+				{ 'SAY', CHAT_MSG_SAY },
+				{ 'PARTY', CHAT_MSG_PARTY },
+				{ 'RAID', CHAT_MSG_RAID },
+				{ 'INSTANCE_CHAT', INSTANCE_CHAT},
+				{ 'RAID_WARNING', RAID_WARNING },
+				{ 'OFFICER', CHAT_MSG_OFFICER },
+				{ 'NONE', NONE },
+		}
+		addon:RegisterOptions({ name = "Master", addon =  XLootMaster }, {
+			{ "confirm_qualitythreshold", item_qualities },
+			{ "specialrecipients", "group", {
+				{ "menu_self" },
+				{ "menu_disenchant" },
+				{ "menu_disenchanters", "input", requires="menu_disenchant" },
+				{ "menu_bank" },
+				{ "menu_bankers", "input", requires="menu_bank" },
+			}},
+			{ "raidroll", "group", {
+				{ "menu_roll" },
+			}},
+			{ "awardannounce", "group", {
+				{ "award_qualitythreshold", item_qualities },
+				{ "award_channel", channels },
+				{ "award_channel_secondary", channels },
+				{ "award_guildannounce" },
+				{ "award_special" },
+			}},
+		})
+	end
+
 --[=[ 	-- Generate reset staticpopup
 	if not StaticPopupDialogs['XLOOT_RESETPROFILE'] then
 		StaticPopupDialogs['XLOOT_RESETPROFILE'] = {

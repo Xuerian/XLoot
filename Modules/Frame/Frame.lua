@@ -540,6 +540,7 @@ do
 			if IsModifiedClick() then
 				HandleModifiedItemClick(GetLootSlotLink(self.slot))
 			elseif LootButton_OnClick then
+				-- Classic master loot: feeding our row to Blizzard's handler sets LootFrame.selected* so XLoot_Master's MasterLooterFrame_Show hook can award the slot.
 				LootButton_OnClick(self, button)
 			else
 				StaticPopup_Hide("CONFIRM_LOOT_DISTRIBUTION")

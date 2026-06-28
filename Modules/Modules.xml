@@ -3,5 +3,6 @@
 	<Include file="Frame\load.xml"/>
 	<Include file="Monitor\load.xml"/>
 	<Include file="Group\load.xml"/>
+	<Include file="Master\load.xml"/>
 	<Include file="Options\load.xml"/>
 </Ui>

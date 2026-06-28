@@ -6,6 +6,23 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.4.1] - 2026-06-28
+
+### Bug Fixes
+- The options window (`/xloot`) no longer fails to open on a clean install with no
+  other addons. XLoot now bundles the standard Ace3 configuration libraries instead
+  of a variant that relied on another addon already being loaded.
+
+### Features
+- Restored the **Master Loot** module for the Classic flavors (Classic Era, Burning
+  Crusade Classic, Mists of Pandaria Classic), where master loot still exists. It is
+  off on retail, where Blizzard removed master loot in patch 8.0.1.
+
+### Improvements
+- XLoot now loads as up-to-date on every supported game version — retail, Classic
+  Era, Burning Crusade Classic, and Mists of Pandaria Classic — instead of only
+  retail.
+
 ## [12.4.0] - 2026-06-28
 
 First stable release of the Midnight revival.

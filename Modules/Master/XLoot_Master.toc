@@ -1,0 +1,10 @@
+## Interface: 11508, 20505, 50504
+## Title: XLoot Master
+## Notes: Configurable Master Looter interface
+## Version: @project-version@
+## Author: Xuerian, Dridzt
+## X-Category: Inventory
+
+## Dependencies: XLoot
+
+load.xml
