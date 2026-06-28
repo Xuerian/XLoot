@@ -8,6 +8,7 @@
 ## Author: Xuerian
 ## X-Category: Inventory
 ## X-Name: XLoot
+## X-Curse-Project-ID: 14906
 
 ## SavedVariables: XLootADB
 ## OptionalDeps: Ace3, LibStub, Masque, Pawn

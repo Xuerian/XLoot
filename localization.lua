@@ -35,6 +35,7 @@ local locales = {
 		skin_smooth = "XLoot: Smooth",
 		anchor_hide = "hide",
 		anchor_hide_desc = "Lock this module in position\nThis will hide the anchor,\nbut it can be shown again from the options",
+		discord_popup = "Join the XLoot community for help, feedback, and updates.\n\nCopy the invite below (it's pre-selected — just press Ctrl+C):",
 	},
 	-- Possibly localized
 	ptBR = {},

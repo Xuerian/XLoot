@@ -413,6 +413,7 @@ function addon:OnEnable() -- Construct addon option tables here
 		end},
 		{ "skin_anchors", "toggle" },
 		{ "reset_defaults", "execute", confirm = true, func = function() addon:ResetProfile() end },
+		{ "discord", "execute", func = function() XLoot:ShowDiscord() end },
 		-- { "module_header", "header" },
 	}))
 	self.config.args = options

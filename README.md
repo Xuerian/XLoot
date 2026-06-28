@@ -7,8 +7,8 @@ XLoot improves looting in WoW by replacing the default loot frames with cleaner,
 informative, and highly configurable ones. Every module is optional and can be toggled
 like any other addon.
 
-> _Live and working on Midnight (12.0.7) — released as **alpha** while the last pieces are
-> finished off (see Modules). Please report anything broken._
+> _Live and working on Midnight (12.0.7). A few finishing touches remain — notably the
+> Group roll-tracking display (see Modules) — so please report anything broken._
 
 ## Modules
 
@@ -50,7 +50,8 @@ mklink /J "C:\Program Files (x86)\World of Warcraft\_retail_\Interface\AddOns\XL
 ## Reporting issues
 
 Please check the [issue tracker](https://github.com/Xuerian/XLoot/issues) and open a new
-issue if your problem isn't already reported.
+issue if your problem isn't already reported. You can also join the
+[community Discord](https://discord.gg/vm8K2WfQUE) for help, feedback, and updates.
 
 ## Credit & license
 

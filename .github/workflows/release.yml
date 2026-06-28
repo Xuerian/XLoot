@@ -1,0 +1,68 @@
+name: Package and Release
+
+on:
+  push:
+    tags:
+      - "[0-9]*"
+      - "v*"
+  workflow_dispatch:  # manual runs are safe: the packaging step below is gated on a tag ref
+
+permissions:
+  contents: write   # allow the packager to create the GitHub Release for the tag
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # full history so the packager can read all tags
+
+      - name: Verify required secrets
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+        run: |
+          if [ -z "$CF_API_KEY" ]; then
+            echo "::error::CF_API_KEY secret is not set on this repository."
+            echo "Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "CF_API_KEY is present (length: ${#CF_API_KEY})."
+
+      - name: Require CurseForge project id
+        run: |
+          if ! grep -qE '^## X-Curse-Project-ID:[[:space:]]*[0-9]+' XLoot.toc; then
+            echo "::error::XLoot.toc has no numeric '## X-Curse-Project-ID:' line."
+            echo "Without it the packager silently skips CurseForge and only makes a GitHub release."
+            exit 1
+          fi
+          echo "Found $(grep -E '^## X-Curse-Project-ID:' XLoot.toc)"
+
+      - name: Show release channel
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          # The packager picks the CurseForge channel from the TAG NAME: a name
+          # containing 'alpha' -> Alpha, 'beta' -> Beta, otherwise -> Release.
+          # Annotated vs lightweight is irrelevant to the channel.
+          case "${TAG,,}" in
+            *alpha*) echo "Tag $TAG -> ALPHA channel." ;;
+            *beta*)  echo "Tag $TAG -> BETA channel." ;;
+            *)       echo "Tag $TAG -> RELEASE channel." ;;
+          esac
+
+      - name: Build per-release changelog
+        run: awk '/^## / { if (seen) exit; seen=1 } seen' CHANGELOG.md > .release_changelog.md
+
+      - name: Package and release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: BigWigsMods/packager@v2
+        env:
+          # The CurseForge project ID is read from XLoot.toc:
+          #   ## X-Curse-Project-ID: <id>
+          # NOT from .pkgmeta. If that field is blank the packager silently
+          # skips CurseForge and only creates the GitHub release.
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}

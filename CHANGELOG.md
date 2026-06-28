@@ -6,6 +6,15 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.4.0] - 2026-06-28
+
+First stable release of the Midnight revival.
+
+### Features
+- Added a **Join our Discord!** button to the options Global page — clicking it
+  shows a copyable community invite link (the game can't open a browser, so just
+  press Ctrl+C). Come say hi!
+
 ## [12-3-alpha] - 2026-06-27
 
 First CurseForge release of the Midnight revival.

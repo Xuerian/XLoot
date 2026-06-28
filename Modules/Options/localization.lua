@@ -10,6 +10,8 @@ local locales = {
 			skin_anchors_desc = "Apply skin to anchors that XLoot uses",
 			reset_defaults = "Reset to Defaults",
 			reset_defaults_desc = "Reset all XLoot settings in the current profile back to their defaults.",
+			discord = "Join our Discord!",
+			discord_desc = "Open a copyable invite link to the XLoot community Discord.",
 			module_header = "Module options",
 		},
 		Frame = {

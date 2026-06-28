@@ -13,6 +13,38 @@ local defaults = {
 	}
 }
 
+XLoot.DISCORD_URL = "https://discord.gg/vm8K2WfQUE"
+
+StaticPopupDialogs["XLOOT_DISCORD"] = {
+	text = L.discord_popup,
+	button1 = CLOSE,
+	hasEditBox = true,
+	editBoxWidth = 220,
+	OnShow = function(self)
+		local eb = self.editBox or self.EditBox
+		if eb then
+			eb:SetText(XLoot.DISCORD_URL)
+			eb:HighlightText()
+			eb:SetFocus()
+			eb:SetScript("OnEscapePressed", function(b) b:GetParent():Hide() end)
+			eb:SetScript("OnTextChanged", function(b)
+				if b:GetText() ~= XLoot.DISCORD_URL then
+					b:SetText(XLoot.DISCORD_URL)
+					b:HighlightText()
+				end
+			end)
+		end
+	end,
+	timeout = 0,
+	whileDead = true,
+	hideOnEscape = true,
+	preferredIndex = 3,
+}
+
+function XLoot:ShowDiscord()
+	StaticPopup_Show("XLOOT_DISCORD")
+end
+
 -------------------------------------------------------------------------------
 -- Module helpers
 
