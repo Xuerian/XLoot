@@ -554,6 +554,8 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "autolooting", "group", {
 				{ "autolooting_text", "description" },
+				{ "speedy_autoloot", "toggle", width = "double" },
+				{ "speedy_autoloot_respect_filters", "toggle", width = "double", requires = "speedy_autoloot" },
 				{ "autoloot_currency", when_group, "autoloots", "currency" },
 				{ "autoloot_quest", when_group, "autoloots", "quest" },
 				{ "autoloot_tradegoods", when_group, "autoloots", "tradegoods" },

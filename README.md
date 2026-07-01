@@ -19,7 +19,9 @@ like any other addon.
   "link all" to chat, extensive appearance/skin options, and rule-based auto-looting:
   filter by category (currency, quest items, trade goods), by gear (minimum quality and
   item level), by total vendor value, by a custom item list, or just grab everything —
-  each rule applying solo, in groups, always, or never.
+  each rule applying solo, in groups, always, or never. **Speedy auto-loot** can instead
+  vacuum a corpse instantly with no loot window (paced to avoid the fast-loot disconnect
+  on big pulls), optionally limited to only your filtered items.
 - **XLoot Monitor** — a "toaster" loot feed for items you and others loot, so you can
   watch drops at a glance or move loot spam out of your chat box entirely.
 - **XLoot Group** — Need / Greed / Transmog / Pass roll frames with a timer, updated for

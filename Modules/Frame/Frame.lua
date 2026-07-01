@@ -158,6 +158,9 @@ local defaults = {
 		autoloot_gear_minlevel = 0,
 		autoloot_value_minprice = 0, -- Gold; sellPrice is copper (x10000)
 
+		speedy_autoloot = false,
+		speedy_autoloot_respect_filters = false,
+
 		frame_draggable = true,
 
 		linkall_threshold = 2, -- Quality from 0 - 6, Poor - Artifact
@@ -192,6 +195,7 @@ end
 
 function addon:OnEnable()
 	-- Register events
+	XLootFrame:RegisterEvent("LOOT_READY")
 	XLootFrame:RegisterEvent("LOOT_OPENED")
 	XLootFrame:RegisterEvent("LOOT_CLOSED")
 	XLootFrame:RegisterEvent("LOOT_SLOT_CLEARED")
@@ -1153,11 +1157,98 @@ local function BoPRefresh()
 	XLootFrame:Update(false, true)
 end
 
+local tremove = table.remove
+local MASTER_LOOT = Enum and Enum.LootMethod and Enum.LootMethod.Masterlooter
+local speedy = { queue = {}, ticker = nil, leftover = nil, lastcount = nil, vacuum = false }
+
+-- Enum.LootMethod is absent on some flavors, so fall through to the string API before trusting the enum.
+local function SpeedyMasterLoot()
+	if MASTER_LOOT and C_PartyInfo and C_PartyInfo.GetLootMethod then
+		return C_PartyInfo.GetLootMethod() == MASTER_LOOT
+	end
+	if GetLootMethod and GetLootMethod() == 'master' then
+		return true
+	end
+	return GetMasterLootCandidate and GetMasterLootCandidate(1, 1) ~= nil or false
+end
+
+-- Never vacuum under master loot (would grab assignable drops) or while the auto-loot modifier is held.
+local function SpeedyAllowed()
+	return not IsModifiedClick('AUTOLOOTTOGGLE') and not SpeedyMasterLoot()
+end
+
+local function SpeedyStop()
+	if speedy.ticker then
+		speedy.ticker:Cancel()
+		speedy.ticker = nil
+	end
+	if speedy.leftover then
+		speedy.leftover:Cancel()
+		speedy.leftover = nil
+	end
+end
+
+-- Bags filling mid-vacuum strand loot in the suppressed window; reveal whatever is left once draining stops.
+local function SpeedyLeftovers()
+	speedy.leftover = nil
+	for slot = 1, GetNumLootItems() do
+		if LootSlotHasItem(slot) then
+			BoPRefresh()
+			return
+		end
+	end
+end
+
+local function SpeedyDrain()
+	local slot = tremove(speedy.queue)
+	if slot and LootSlotHasItem(slot) then
+		LootSlot(slot)
+	end
+	if #speedy.queue == 0 then
+		SpeedyStop()
+		if speedy.vacuum and C_Timer and C_Timer.NewTimer then
+			speedy.leftover = C_Timer.NewTimer(0.3, SpeedyLeftovers)
+		end
+	end
+end
+
+local function SpeedyStart()
+	if speedy.ticker or #speedy.queue == 0 then return end
+	if C_Timer and C_Timer.NewTicker then
+		-- One slot per tick, never a tight loop: a rapid-loot burst trips the server disconnect on big piles.
+		speedy.ticker = C_Timer.NewTicker(0.03, SpeedyDrain)
+	else
+		while #speedy.queue > 0 do
+			SpeedyDrain()
+		end
+	end
+end
+
+-- lastcount dedups the shared LOOT_READY/LOOT_OPENED pass; a real count change rebuilds the queue.
+local function SpeedyVacuum()
+	local n = GetNumLootItems()
+	if n == 0 or speedy.lastcount == n then return end
+	speedy.lastcount = n
+	speedy.vacuum = true
+	SpeedyStop()
+	wipe(speedy.queue)
+	for slot = 1, n do
+		speedy.queue[slot] = slot
+	end
+	SpeedyStart()
+end
+
 local _bag_slots, GetItemBindType = {}, XLoot.GetItemBindType
 function XLootFrame:Update(no_snap, is_refresh)
 	local numloot = GetNumLootItems()
 	if numloot == 0 then return nil end
 	local max = math.max
+	local speedy_paced = not is_refresh and opt.speedy_autoloot
+		and opt.speedy_autoloot_respect_filters and SpeedyAllowed()
+	if speedy_paced then
+		speedy.vacuum = false
+		wipe(speedy.queue)
+	end
 
 	-- Construct frame
 	if not self.built then
@@ -1276,8 +1367,12 @@ function XLootFrame:Update(no_snap, is_refresh)
 				end
 
 				if autoloot then
-					need_refresh = true
-					LootSlot(slot)
+					if speedy_paced then
+						speedy.queue[#speedy.queue + 1] = slot
+					else
+						need_refresh = true
+						LootSlot(slot)
+					end
 				end
 			end
 
@@ -1307,6 +1402,10 @@ function XLootFrame:Update(no_snap, is_refresh)
 		end
 	end
 
+	if speedy_paced then
+		SpeedyStart()
+	end
+
 	if not is_refresh and need_refresh then
 		C_Timer.After(0.8, BoPRefresh)
 	end
@@ -1327,6 +1426,10 @@ function XLootFrame:Update(no_snap, is_refresh)
 end
 
 function addon:LOOT_CLOSED()
+	SpeedyStop()
+	wipe(speedy.queue)
+	speedy.lastcount = nil
+	speedy.vacuum = false
 	if type(XLootFrame.rows) == 'table' then
 		for i, row in pairs(XLootFrame.rows) do
 			clear(row)
@@ -1340,7 +1443,23 @@ function addon:LOOT_CLOSED()
 	end
 end
 
+-- LOOT_READY fires before LOOT_OPENED; vacuum here so looting starts a frame earlier.
+function addon:LOOT_READY()
+	if opt.speedy_autoloot and not opt.speedy_autoloot_respect_filters
+		and SpeedyAllowed() and GetNumLootItems() > 0 then
+		SpeedyVacuum()
+	end
+end
+
 function addon:LOOT_OPENED()
+	if opt.speedy_autoloot and not opt.speedy_autoloot_respect_filters
+		and SpeedyAllowed() and GetNumLootItems() > 0 then
+		if not XLootFrame:IsShown() and IsFishingLoot() then
+			PlaySound(SOUNDKIT.FISHING_REEL_IN)
+		end
+		SpeedyVacuum()
+		return
+	end
 	if GetNumLootItems() > 0 then
 		if not XLootFrame:IsShown() and IsFishingLoot() then
 			PlaySound(SOUNDKIT.FISHING_REEL_IN)

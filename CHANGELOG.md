@@ -6,6 +6,19 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.6.0] - 2026-06-30
+
+### Features
+- **Speedy auto-loot** — a new option that vacuums a corpse the instant its loot is
+  available, one item per server tick, without ever opening the loot window. The steady
+  pacing avoids the "looting too fast" disconnect on big AoE pulls. Off by default; turn
+  it on under **/xloot → Loot Frame → Auto-looting**.
+  - A **"Only speedy-loot filtered items"** sub-option keeps the same instant, no-window
+    behavior but grabs only the items your auto-loot rules match, leaving everything else
+    in the loot window.
+  - Hold your auto-loot modifier (Shift by default) while looting to skip Speedy for a
+    single corpse, and it never runs under master loot.
+
 ## [12.5.0] - 2026-06-28
 
 ### Features
