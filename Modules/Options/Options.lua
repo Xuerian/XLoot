@@ -518,6 +518,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_highlight", width = "double", },
 				{ "loot_collapse" },
 				{ "loot_texts_lock", width = "double" },
+				{ "loot_texts_sell" },
 				{ "loot_buttons_auto" },
 				{ "loot_alpha", "alpha" },
 				{ "loot_icon_size", "range", 16, 64, 1 },
@@ -680,6 +681,9 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "font_size_ilvl", "range", 4, 26, 1 },
 			}},
 			{ "colors", "group", {
+				{ "quality_color", width = "full" },
+				{ "monitor_color_border", "color", requires_inverse = "quality_color" },
+				{ "color_all_rows", requires_inverse = "quality_color" },
 				{ "gradients", must_reload_ui = true },
 			}, name = L.Frame.colors },
 		})

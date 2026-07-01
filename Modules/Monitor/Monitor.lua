@@ -31,6 +31,9 @@ local defaults = {
 		},
 		name_width = 50,
 		gradients = false,
+		quality_color = true,
+		monitor_color_border = { .5, .5, .5, 1 },
+		color_all_rows = false,
 
 		threshold_own = 2,
 		threshold_other = 3,
@@ -103,6 +106,12 @@ function addon:ApplyOptions()
 	addon:Restack()
 end
 
+local function set_row_border(row)
+	local c = opt.monitor_color_border
+	row:SetBorderColor(c[1], c[2], c[3], c[4])
+	row.icon_frame:SetBorderColor(c[1], c[2], c[3], c[4])
+end
+
 local events = {}
 function events.item(player, link, num)
 	if link and link:match("|Hitem:") then -- Proper items
@@ -121,6 +130,9 @@ function events.item(player, link, num)
 			player = nil
 		end
 		local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
+		if not opt.quality_color then
+			set_row_border(row)
+		end
 		local num = tonumber(num) or 1
 		row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, nil, nr, ng, nb)
 		if opt.show_totals then
@@ -141,7 +153,11 @@ end
 
 function events.coin(player, copper)
 	if opt.show_coin then
-		addon:AddRow(C_CurrencyInfo.GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5):SetTexts(nil, CopperToString(copper))
+		local row = addon:AddRow(C_CurrencyInfo.GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5)
+		if not opt.quality_color and opt.color_all_rows then
+			set_row_border(row)
+		end
+		row:SetTexts(nil, CopperToString(copper))
 	end
 end
 
@@ -151,7 +167,11 @@ function events.currency(id, num)
 		local num = tonumber(num) or 1
 		local c = C_CurrencyInfo.GetCurrencyInfo(id)
 		if c then
-			addon:AddRow(c.iconFileID, opt.fade_own, 1, 1, 1, 1, 1, 1):SetTexts(nil,  num > 1 and ("%s x%d"):format(c.name, num) or c.name, c.quantity)
+			local row = addon:AddRow(c.iconFileID, opt.fade_own, 1, 1, 1, 1, 1, 1)
+			if not opt.quality_color and opt.color_all_rows then
+				set_row_border(row)
+			end
+			row:SetTexts(nil,  num > 1 and ("%s x%d"):format(c.name, num) or c.name, c.quantity)
 		end
 	end
 end

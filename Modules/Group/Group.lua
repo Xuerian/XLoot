@@ -7,8 +7,10 @@ local opt, anchor, alert_anchor, mouse_focus, Skinner
 local rolls = {}
 local GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string_format
 	= GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string.format
-local HistoryGetItem, HistoryGetPlayerInfo, HistoryGetNumItems
-	= C_LootHistory.GetItem, C_LootHistory.GetPlayerInfo, C_LootHistory.GetNumItems
+-- C_LootHistory is nil on some Classic builds; indexing it at file load would crash the module.
+local HistoryGetItem = C_LootHistory and C_LootHistory.GetItem
+local HistoryGetPlayerInfo = C_LootHistory and C_LootHistory.GetPlayerInfo
+local HistoryGetNumItems = C_LootHistory and C_LootHistory.GetNumItems
 local CanEquipItem, IsItemUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.IsItemUpgrade, XLoot.FancyPlayerName
 local RollFramePrototype
 
@@ -106,7 +108,7 @@ function addon:OnEnable()
 	if IS_RETAIL then
 		eframe:RegisterEvent('CANCEL_LOOT_ROLL')
 		eframe:RegisterEvent('CANCEL_ALL_LOOT_ROLLS')
-	else
+	elseif C_LootHistory then
 		eframe:RegisterEvent('LOOT_HISTORY_ROLL_CHANGED')
 		eframe:RegisterEvent('LOOT_HISTORY_ROLL_COMPLETE')
 		eframe:RegisterEvent('LOOT_ROLLS_COMPLETE')
@@ -221,6 +223,8 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 		else
 			length = 180000
 		end
+		-- Reload only knows remaining time; the assumed total can't be less than it
+		if start > length then length = start end
 	end
 	length, start = length/1000, start/1000
 
@@ -410,8 +414,8 @@ function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 	-- Update post-player-roll status text
 	if frame.have_rolled then
 		local rtype = rtype == 'disenchant' and 'greed' or rtype
-		-- Roll of leading type or higher
-		if rweights[rtype] >= rweights[frame.lead_type] then
+		-- Roll of leading type or higher (rtype is nil until a player picks)
+		if rtype and rweights[rtype] >= rweights[frame.lead_type] then
 			frame.lead_type = rtype
 			local bracket, mtype = 0, nil
 			for i=1, players do
@@ -820,7 +824,7 @@ do
 	end
 
 	-- Status bar update
-	local max = math.max
+	local max, min = math.max, math.min
 	function RollFramePrototype:OnBarUpdate()
 		local parent = self.parent
 		if parent.over then
@@ -848,7 +852,8 @@ do
 			anchor:Pop(parent)
 		else
 			local now, length = max(remaining, -1), self.length
-			self.spark:SetPoint('CENTER', self, 'LEFT', (now / length) * self:GetWidth(), 0)
+			local fraction = max(0, min(now / length, 1))
+			self.spark:SetPoint('CENTER', self, 'LEFT', fraction * self:GetWidth(), 0)
 			self:SetValue(now)
 			self.spark:Show()
 			if opt.show_time_remaining then

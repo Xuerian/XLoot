@@ -6,6 +6,30 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.7.0] - 2026-07-01
+
+### Features
+- **Vendor sell price on loot rows.** A new option shows each item's total vendor value
+  right on its row in the loot window. Off by default; turn it on under
+  **/xloot → Loot Frame → Loot slots**.
+- **Loot Monitor color options.** The Monitor can now match your class colors like the
+  Loot Frame. Turn off **Color rows by item quality** to use your own **Row border
+  color**, and optionally enable **Color all rows** to extend that color to coin and
+  currency rows too. Unchanged by default.
+
+### Bug Fixes
+- Fixed a Lua error on every normal loot click on Burning Crusade and other Classic
+  clients, where the retail-only `EventRegistry` does not exist.
+- Fixed **XLoot Group** erroring at load on Classic clients that lack `C_LootHistory`.
+  Roll windows continue to work as before.
+- Fixed the roll-timer spark sliding past the end of the bar after a `/reload` in the
+  middle of a roll.
+- Fixed a "compare number with nil" error when a roll update arrived for a player who
+  had not yet chosen a roll type.
+
+### Improvements
+- Added a mouseover tooltip explaining the Loot Monitor **Gradients** option.
+
 ## [12.6.0] - 2026-06-30
 
 ### Features

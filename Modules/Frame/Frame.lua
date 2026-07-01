@@ -107,6 +107,7 @@ local defaults = {
 		loot_texts_info = true,
 		loot_texts_bind  = true,
 		loot_texts_lock = true,
+		loot_texts_sell = false,
 
 		loot_buttons_auto = true,
 
@@ -461,6 +462,7 @@ do
 	---@field text_quantity FontString
 	---@field text_bind FontString
 	---@field text_locked FontString
+	---@field text_sell FontString
 	---@field text_button_auto FontString
 	---@field button_auto Button
 	---@field frame_item Frame
@@ -549,7 +551,7 @@ do
 			else
 				StaticPopup_Hide("CONFIRM_LOOT_DISTRIBUTION")
 				LootSlot(self.slot)
-				EventRegistry:TriggerEvent("LootFrame.ItemLooted")
+				if EventRegistry then EventRegistry:TriggerEvent("LootFrame.ItemLooted") end
 			end
 		end
 	end
@@ -607,6 +609,7 @@ do
 		-- Text
 		self.text_name:SetFont(opt.font, opt.font_size_loot)
 		self.text_info:SetFont(opt.font, opt.font_size_info)
+		self.text_sell:SetFont(opt.font, opt.font_size_info, opt.font_flag)
 		self.text_quantity:SetFont(opt.font, opt.font_size_quantity, opt.font_flag)
 		self.text_bind:SetFont(opt.font, 8, opt.font_flag)
 		self.text_locked:SetFont(opt.font, 9, opt.font_flag)
@@ -697,6 +700,11 @@ do
 		self.text_info:SetText(text_info)
 		self.text_bind:SetText(text_bind)
 		self.text_quantity:SetText(slotData.quantity > 1 and slotData.quantity or nil)
+		if opt.loot_texts_sell and slotData.slotType == LOOT_SLOT_ITEM and slotData.sellPrice and slotData.sellPrice > 0 then
+			self.text_sell:SetText(XLoot.CopperToString(slotData.sellPrice * slotData.quantity))
+		else
+			self.text_sell:SetText()
+		end
 		if slotData.questID or slotData.isQuestItem then
 			self.text_info:SetTextColor(1, .8, .1)
 		else
@@ -751,7 +759,12 @@ do
 
 		self:Show()
 
-		return max(self.text_info:GetStringWidth() + 2, name_width)
+		local info_width = self.text_info:GetStringWidth() + 2
+		local sell_width = self.text_sell:GetStringWidth()
+		if sell_width > 0 then
+			info_width = info_width + sell_width + 8
+		end
+		return max(info_width, name_width)
 	end
 
 	-- Factory
@@ -785,12 +798,14 @@ do
 		local quantity = item:CreateFontString()
 		local locked = item:CreateFontString()
 		local auto = button_auto:CreateFontString()
+		local sell = row:CreateFontString()
 		row.text_name = name
 		row.text_info = info
 		row.text_bind = bind
 		row.text_locked = locked
 		row.text_quantity = quantity
 		row.text_button_auto = auto
+		row.text_sell = sell
 
 		-- Setup fontstrings
 		smalltext(name)
@@ -799,9 +814,12 @@ do
 		smalltext(locked)
 		smalltext(quantity)
 		smalltext(auto)
+		smalltext(sell)
 		name:SetPoint('RIGHT', row, 'RIGHT', -6, 0)
 		info:SetPoint('TOPLEFT', name, 'BOTTOMLEFT', 8, 0)
 		info:SetPoint('RIGHT', row, 'RIGHT', -4, 0)
+		sell:SetPoint('BOTTOMRIGHT', row, 'BOTTOMRIGHT', -6, 3)
+		sell:SetJustifyH('RIGHT')
 		textpoints(name, item, row, 2)
 		textpoints(info, item, row, 8)
 		info:SetPoint('TOP', name, 'BOTTOM')
