@@ -17,13 +17,17 @@ like any other addon.
 
 - **XLoot Frame** — replaces the loot window. Quality borders, item level, one-click
   "link all" to chat, extensive appearance/skin options, and rule-based auto-looting:
-  filter by category (currency, quest items, trade goods), by gear (minimum quality and
-  item level), by total vendor value, by a custom item list, or just grab everything —
-  each rule applying solo, in groups, always, or never. **Speedy auto-loot** can instead
+  filter by category (currency, quest items, trade goods), by rarity (everything at or
+  above a quality you choose), by gear (minimum quality and item level), by total vendor
+  value, by a custom item list, or just grab everything — each rule applying solo, in
+  groups, always, or never. **Speedy auto-loot** can instead
   vacuum a corpse instantly with no loot window (paced to avoid the fast-loot disconnect
   on big pulls), optionally limited to only your filtered items.
 - **XLoot Monitor** — a "toaster" loot feed for items you and others loot, so you can
-  watch drops at a glance or move loot spam out of your chat box entirely.
+  watch drops at a glance or move loot spam out of your chat box entirely. Shows item
+  level, stack counts, quality coloring, and vendor sell price; can hide Blizzard's own
+  loot pop-ups so they don't pile up, and lets you right-click a row to dismiss it, with
+  adjustable fade times.
 - **XLoot Group** — Need / Greed / Transmog / Pass roll frames with a timer, updated for
   retail. The live roll-tracking display (who rolled what, current winner) is being
   rebuilt against Blizzard's new loot-history API; the roll buttons themselves work today.
@@ -45,6 +49,11 @@ like any other addon.
 
 Every option has a mouseover tooltip explaining what it does. Don't want a module?
 Disable XLoot Frame / Monitor / Group / Master individually in the AddOns list.
+
+After an update, XLoot can show a short **What's New** summary — as a popup, a quiet
+clickable chat link, or nothing at all (your choice under **/xloot → After an update**).
+New features ship **off by default**, so an update never changes how your looting behaves
+until you turn something on.
 
 ## Installing
 

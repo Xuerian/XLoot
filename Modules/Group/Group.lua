@@ -22,6 +22,22 @@ local HAS_TRANSMOG = IS_RETAIL
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local GetDetailedItemLevelInfo = C_Item and C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo
 
+local ENUM_LOOT_GROUP = Enum and Enum.LootMethod and Enum.LootMethod.Group
+local ENUM_LOOT_NEEDBEFOREGREED = Enum and Enum.LootMethod and Enum.LootMethod.Needbeforegreed
+
+-- The string GetLootMethod() global is gone on modern Classic/retail builds; prefer the C_PartyInfo enum, fall back to the global.
+local function RollBasedLootMethod()
+	if ENUM_LOOT_GROUP and C_PartyInfo and C_PartyInfo.GetLootMethod then
+		local method = C_PartyInfo.GetLootMethod()
+		return method == ENUM_LOOT_GROUP or method == ENUM_LOOT_NEEDBEFOREGREED
+	end
+	if GetLootMethod then
+		local method = GetLootMethod()
+		return method == 'group' or method == 'needbeforegreed'
+	end
+	return false
+end
+
 -------------------------------------------------------------------------------
 -- Settings
 
@@ -181,7 +197,7 @@ function addon:OnEnable()
 	end
 
 	-- Find and show active rolls
-	if IsInGroup() and (IS_RETAIL or GetLootMethod() == 'group' or GetLootMethod() == 'needbeforegreed') then
+	if IsInGroup() and (IS_RETAIL or RollBasedLootMethod()) then
 		for i=1,300 do
 			local time = GetLootRollTimeLeft(i)
 			if time > 0 and time <  300000 then

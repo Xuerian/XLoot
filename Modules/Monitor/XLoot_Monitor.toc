@@ -1,4 +1,4 @@
-## Interface: 11508, 20505, 50504, 120001, 120005, 120007
+## Interface: 11508, 20505, 50504, 120100, 120007, 120005
 ## Title: XLoot Monitor
 ## Notes: A graphical presentation of items looted by yourself and your group
 ## Version: @project-version@

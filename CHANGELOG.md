@@ -6,6 +6,19 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.8.1] - 2026-07-03
+
+### Bug Fixes
+- Fixed a Lua error in **XLoot Group** when joining a group on Burning Crusade and other
+  Classic clients, where the removed global `GetLootMethod` was called without a guard.
+  XLoot now reads the loot method through `C_PartyInfo.GetLootMethod` and falls back to the
+  old global. Thanks to Kai for the report.
+
+### Features
+- **Chat-link update notices.** After an update you can now get the What's New summary as a
+  quiet, clickable link in chat instead of a popup — or turn notices off entirely. Choose
+  under **/xloot → After an update** (Popup window / Chat link / None).
+
 ## [12.8.0] - 2026-07-02
 
 ### Features

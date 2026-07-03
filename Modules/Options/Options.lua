@@ -402,6 +402,11 @@ function addon:OnEnable() -- Construct addon option tables here
 	end
 
 	local skins = {}
+	local whatsnew_modes = {
+		{ "popup", L.whatsnew_mode_popup },
+		{ "chat", L.whatsnew_mode_chat },
+		{ "none", L.whatsnew_mode_none },
+	}
 	local options = Finalize({ name = "Core", addon =  XLoot, OnChanged = OnCoreChanged }, BetterOptions.Compile({
 		{ "details", "description" },
 		{ "skin", "select", values = function()
@@ -412,7 +417,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			return skins
 		end},
 		{ "skin_anchors", "toggle" },
-		{ "whatsnew", "toggle" },
+		{ "whatsnew_mode", whatsnew_modes },
 		{ "whatsnew_show", "execute", func = function() XLoot:ShowWhatsNew() end },
 		{ "reset_defaults", "execute", confirm = true, func = function() addon:ResetProfile() end },
 		{ "discord", "execute", func = function() XLoot:ShowDiscord() end },

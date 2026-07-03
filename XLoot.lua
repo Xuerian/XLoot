@@ -10,10 +10,11 @@ local defaults = {
 	profile = {
 		skin = "smooth",
 		skin_anchors = false,
-		whatsnew = true,
+		whatsnew_mode = "popup",
 	},
 	global = {
 		whatsnew_seen = "",
+		whatsnew_announced = "",
 	}
 }
 
