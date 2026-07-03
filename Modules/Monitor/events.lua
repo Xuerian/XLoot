@@ -1,4 +1,4 @@
-local lib = LibStub:NewLibrary("LootEvents", "1.2")
+local lib = LibStub:NewLibrary("LootEvents", "2")
 if not lib then return nil end
 local print = print
 
@@ -10,6 +10,8 @@ local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 		event: 'item'
 			player_name, item_link, num_items
 		event: 'coin'
+			player_name, total_copper, coin_string
+		event: 'systemcoin'
 			player_name, total_copper, coin_string
 		event: 'currency'
 			currency, num_currency
@@ -76,7 +78,7 @@ end
 
 local Deformat = XLoot.Deformat
 
-local loot_patterns, group_patterns, unsortedloot, currentsort
+local loot_patterns, group_patterns, unsortedloot, currentsort, system_patterns
 
 -- Chatmsg handler
 local sort, group = table.sort
@@ -106,6 +108,19 @@ local function Handler(text)
 				current_pattern = v[1]
 				return v[2](m1, m2, m3, m4)
 			end
+		end
+	end
+end
+
+-- Whitelist-only; never route SYSTEM through Handler (LOOT_MONEY inverts to "(.-) loots (.-)" and would cross-match arbitrary system spam).
+local function SystemHandler(text)
+	if not need_loot then return end
+	if not text:find('%d') then return end
+	for i, v in ipairs(system_patterns) do
+		local m1 = Deformat(text, v[1])
+		if m1 then
+			current_pattern = v[1]
+			return v[2](m1)
 		end
 	end
 end
@@ -142,6 +157,7 @@ end
 event("CHAT_MSG_LOOT", Handler)
 event("CHAT_MSG_MONEY", Handler)
 event("CHAT_MSG_CURRENCY", Handler)
+event("CHAT_MSG_SYSTEM", SystemHandler)
 
 -- Incriment and deincement rolls to only match while there is a roll happening
 event("START_LOOT_ROLL", function()
@@ -229,6 +245,33 @@ do
 
 end
 
+system_patterns = { }
+do
+	local function handler(str, func)
+		if _G[str] then -- absent on some flavors/locales; skip cleanly
+			table.insert(system_patterns, { _G[str], func, str })
+		end
+	end
+
+	-- Reward gold ("Received %s.") is word-form on some flavors and coin-texture markup on others; handle both.
+	local function ParseCoinTexture(str)
+		local g = tonumber(str:match("(%d+)%s*|T[^|]-Gold")) or 0
+		local s = tonumber(str:match("(%d+)%s*|T[^|]-Silver")) or 0
+		local c = tonumber(str:match("(%d+)%s*|T[^|]-Copper")) or 0
+		return g*10000 + s*100 + c
+	end
+
+	local function system_coin(str)
+		local copper = ParseCoinString(str)
+		if copper == 0 then copper = ParseCoinTexture(str) end
+		if copper > 0 then -- "Received %s." also matches non-money lines; those parse to 0
+			trigger_loot('systemcoin', player, copper, str)
+		end
+	end
+
+	handler('ERR_QUEST_REWARD_MONEY_S', system_coin)
+end
+
 
 --// GROUP PATTERNS
 group_patterns = { }
@@ -304,6 +347,31 @@ XLoot:SetSlashCommand("xe", function(msg)
 		Handler((LOOT_ITEM_SELF):format(select(2, GetItemInfo(items[random(1, #items)][1]))))
 	end
 	Handler((YOU_LOOT_MONEY):format("1 Gold, 2 Silver, 3 Copper"))
+end)
+
+XLoot:SetSlashCommand("xesys", function(msg)
+	if not ERR_QUEST_REWARD_MONEY_S then return end
+	SystemHandler((ERR_QUEST_REWARD_MONEY_S):format((msg ~= "" and msg) or "5 Gold, 40 Silver, 3 Copper"))
+	if GetCoinTextureString then
+		SystemHandler((ERR_QUEST_REWARD_MONEY_S):format(GetCoinTextureString(1234567)))
+	end
+end)
+
+-- Toggle a raw dump of every CHAT_MSG_SYSTEM line, to capture the exact live reward-gold message
+local syscap, syscap_on
+XLoot:SetSlashCommand("xesyscap", function()
+	if not syscap then
+		syscap = CreateFrame("Frame")
+		syscap:SetScript("OnEvent", function(_, _, m) print("|cff00ff00SYS:|r", m) end)
+	end
+	syscap_on = not syscap_on
+	if syscap_on then
+		syscap:RegisterEvent("CHAT_MSG_SYSTEM")
+		print("XLoot: system-message capture ON")
+	else
+		syscap:UnregisterEvent("CHAT_MSG_SYSTEM")
+		print("XLoot: system-message capture OFF")
+	end
 end)
 
 local locales = {

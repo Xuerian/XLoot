@@ -118,6 +118,7 @@ local defaults = {
 		font_size_bottombuttons = 10,
 		font_size_button_auto = 8,
 		font_flag = "OUTLINE",
+		font_flag_loot = "",
 
 		loot_icon_size = 34,
 		loot_row_height = 30,
@@ -149,6 +150,7 @@ local defaults = {
 			quest = 'never',
 			gear = 'never',
 			value = 'never',
+			quality = 'never',
 			list = 'solo',
 			all = 'never',
 		},
@@ -158,6 +160,7 @@ local defaults = {
 		autoloot_gear_quality = 0, -- Quality 0 - 6, Poor - Artifact
 		autoloot_gear_minlevel = 0,
 		autoloot_value_minprice = 0, -- Gold; sellPrice is copper (x10000)
+		autoloot_quality_min = 2, -- Quality 0 - 6; inert until the 'quality' when-state leaves 'never'
 
 		speedy_autoloot = false,
 		speedy_autoloot_respect_filters = false,
@@ -607,8 +610,8 @@ do
 
 
 		-- Text
-		self.text_name:SetFont(opt.font, opt.font_size_loot)
-		self.text_info:SetFont(opt.font, opt.font_size_info)
+		self.text_name:SetFont(opt.font, opt.font_size_loot, opt.font_flag_loot)
+		self.text_info:SetFont(opt.font, opt.font_size_info, opt.font_flag_loot)
 		self.text_sell:SetFont(opt.font, opt.font_size_info, opt.font_flag)
 		self.text_quantity:SetFont(opt.font, opt.font_size_quantity, opt.font_flag)
 		self.text_bind:SetFont(opt.font, 8, opt.font_flag)
@@ -1169,8 +1172,10 @@ local function clear(slot)
 end
 
 local function BoPRefresh()
-	for i, row in pairs(XLootFrame.rows) do
-		clear(row)
+	if type(XLootFrame.rows) == 'table' then
+		for i, row in pairs(XLootFrame.rows) do
+			clear(row)
+		end
 	end
 	XLootFrame:Update(false, true)
 end
@@ -1346,6 +1351,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 					auto.all
 					or (auto.list and auto_items[name])
 					or (auto.tradegoods and slotData.isCraftingReagent)
+					or (auto.quality and slotType == LOOT_SLOT_ITEM and (slotData.quality or 0) >= opt.autoloot_quality_min)
 					or (auto.gear
 						and slotData.equipLoc and slotData.equipLoc ~= ''
 						and (slotData.quality or 0) >= opt.autoloot_gear_quality

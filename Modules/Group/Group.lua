@@ -1190,11 +1190,21 @@ end
 XLoot:SetSlashCommand('xlgd', XLootGroup.TestSettings)
 
 --@do-not-package@
+-- The pre-Legion *_ShowAlert globals are gone; drive the modern alert-system objects directly.
 local function alert()
 	local _, link = GetItemInfo(preview_loot[random(1, #preview_loot)][1])
-	LootWonAlertFrame_ShowAlert(link, random(1, 4), random(1, 4)-1, random(1, 100))
-	LootUpgradeFrame_ShowAlert(link, random(1, 4), 1, random(1,4)-1)
-	MoneyWonAlertFrame_ShowAlert(random(1, 100000))
+	local function try(name, ...)
+		local sys = _G[name]
+		if sys and sys.AddAlert then
+			local ok, err = pcall(sys.AddAlert, sys, ...)
+			if not ok then print('XLoot /xlga', name, err) end
+		else
+			print('XLoot /xlga: missing', name)
+		end
+	end
+	try('LootAlertSystem', link, 1)
+	try('LootUpgradeAlertSystem', link, 1, nil, 3, false, true)
+	try('MoneyWonAlertSystem', random(1, 100000))
 end
 
 XLoot:SetSlashCommand('xlga', alert)

@@ -20,6 +20,7 @@ skins.lua
 SKIN_TWEAKS.lua
 stacks.lua
 helpers.lua
+whatsnew.lua
 
 #@do-not-package@
 Modules\Modules.xml

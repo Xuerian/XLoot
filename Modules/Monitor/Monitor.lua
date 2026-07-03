@@ -38,6 +38,7 @@ local defaults = {
 		threshold_own = 2,
 		threshold_other = 3,
 		show_coin = false,
+		show_system_coin = false,
 		show_currency = true,
 		show_crafted = false,
 
@@ -48,6 +49,8 @@ local defaults = {
 
 		fade_own = 10,
 		fade_other = 5,
+		rightclick_dismiss = false,
+		suppress_loot_toasts = false,
 
 		font = STANDARD_TEXT_FONT,
 		font_size_loot = 12,
@@ -69,6 +72,27 @@ local numberize = function(v)
 	elseif v >= 10000 then
 		local value = string.format("%.0fk", v/1000)
 		return value
+	end
+end
+
+local suppress_toasts = false
+local hooked_alert_systems = {}
+local loot_alert_systems = { "LootAlertSystem", "MoneyWonAlertSystem", "LootUpgradeAlertSystem", "LegendaryItemAlertSystem" }
+-- Install a permanent passthrough wrapper (never restore the original) so toggling off can't clobber another addon's later hook.
+-- LegendaryItemAlertSystem is retail-only; MoP routes legendaries through LootAlertSystem (already covered).
+local function ApplyLootToastSuppression(suppress)
+	suppress_toasts = suppress
+	if not suppress then return end
+	for _, name in ipairs(loot_alert_systems) do
+		local system = _G[name]
+		if system and system.AddAlert and not hooked_alert_systems[name] then
+			hooked_alert_systems[name] = true
+			local original = system.AddAlert
+			system.AddAlert = function(...)
+				if suppress_toasts then return end
+				return original(...)
+			end
+		end
 	end
 end
 
@@ -98,11 +122,13 @@ function addon:OnEnable()
 	-- Set up anchor
 	anchor = XLoot.Stack:CreateStaticStack(self.CreateRow, L.anchor, opt.anchor)
 	self:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
+	ApplyLootToastSuppression(opt.suppress_loot_toasts)
 end
 
 function addon:ApplyOptions()
 	opt = self.opt
 	anchor:UpdateSVData(opt.anchor)
+	ApplyLootToastSuppression(opt.suppress_loot_toasts)
 	addon:Restack()
 end
 
@@ -151,13 +177,23 @@ function events.item(player, link, num)
 	end
 end
 
+local function add_coin_row(copper)
+	local row = addon:AddRow(C_CurrencyInfo.GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5)
+	if not opt.quality_color and opt.color_all_rows then
+		set_row_border(row)
+	end
+	row:SetTexts(nil, CopperToString(copper))
+end
+
 function events.coin(player, copper)
 	if opt.show_coin then
-		local row = addon:AddRow(C_CurrencyInfo.GetCoinIcon(copper), opt.fade_own, .5, .5, .5, .5, .5, .5)
-		if not opt.quality_color and opt.color_all_rows then
-			set_row_border(row)
-		end
-		row:SetTexts(nil, CopperToString(copper))
+		add_coin_row(copper)
+	end
+end
+
+function events.systemcoin(player, copper)
+	if opt.show_system_coin then
+		add_coin_row(copper)
 	end
 end
 
@@ -270,6 +306,7 @@ function addon:AddRow(icon, fade_time, ir, ig, ib, rr, rg, rb)
 	row.expires = timer + fade_time
 	row.started = timer
 	row.item = nil
+	row.timeToTotal = nil -- a right-click-dismissed row can be pooled mid-countdown; clear it so the reused row doesn't tick GetItemCount(nil)
 
 	-- Anchor
 	anchor:AnchorChild(row)
@@ -324,7 +361,9 @@ do
 	end
 
 	local function OnClick(self, button)
-		if IsModifiedClick() and self.item then
+		if button == "RightButton" and opt.rightclick_dismiss and not IsModifiedClick() then
+			addon:RemoveRow(self)
+		elseif IsModifiedClick() and self.item then
 			HandleModifiedItemClick(self.item)
 		end
 	end

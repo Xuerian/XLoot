@@ -412,6 +412,8 @@ function addon:OnEnable() -- Construct addon option tables here
 			return skins
 		end},
 		{ "skin_anchors", "toggle" },
+		{ "whatsnew", "toggle" },
+		{ "whatsnew_show", "execute", func = function() XLoot:ShowWhatsNew() end },
 		{ "reset_defaults", "execute", confirm = true, func = function() addon:ResetProfile() end },
 		{ "discord", "execute", func = function() XLoot:ShowDiscord() end },
 		-- { "module_header", "header" },
@@ -565,6 +567,8 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "autoloot_gear_minlevel", "range", 0, 1000, 5 },
 				{ "autoloot_value", when_group, "autoloots", "value" },
 				{ "autoloot_value_minprice", "range", 0, 100000, 1, 0, 1000, 50 },
+				{ "autoloot_quality", when_group, "autoloots", "quality" },
+				{ "autoloot_quality_min", item_qualities },
 				{ "autoloot_all", when_group, "autoloots", "all" },
 				{ "autolooting_list", "description" },
 				{ "autoloot_list", when_group, "autoloots", "list" },
@@ -573,6 +577,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "font", "group", {
 				{ "font", fonts },
+				{ "font_flag_loot", font_flag },
 				{ "font_flag", font_flag },
 				{ "font_sizes", "header" },
 				{ "font_size_loot", "range", 4, 26, 1 },
@@ -658,19 +663,24 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "filters", "group", {
 				{ "show_coin", name = MONEY },
+				{ "show_system_coin" },
 				{ "show_currency", name = CURRENCY },
 				{ "show_crafted" },
 			}, name = FILTERS },
 			{ "fading", "group", {
-				{ "fade_own", "range", 1, 30, 1, name = L.items_own },
-				{ "fade_other", "range", 1, 30, 1, name = L.items_others },
+				{ "fade_own", "range", 1, 10800, 1, 1, 60, 1, name = L.items_own },
+				{ "fade_other", "range", 1, 10800, 1, 1, 60, 1, name = L.items_others },
 			}},
 			{ "details", "group", {
+				{ "rightclick_dismiss", width = "double" },
 				{ "show_totals", width = "double" },
 				{ "use_altoholic", requires = "show_totals" },
 				{ "totals_delay", "range", 0.1, 1.0, 0.1 },
 				{ "name_width", "range", 25, 200, 5 },
 				{ "show_ilvl", name = L.Group.text_ilvl },
+			}},
+			{ "blizzard_alerts", "group", {
+				{ "suppress_loot_toasts", width = "double" },
 			}},
 			{ "font", "group", {
 				{ "font", fonts },
