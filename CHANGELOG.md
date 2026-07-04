@@ -6,6 +6,14 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.8.2] - 2026-07-04
+
+### Bug Fixes
+- Fixed a Lua error ("attempt to index a secret string value") that could appear during
+  instanced encounters on Midnight (12.0), such as the Midsummer Fire Festival boss. The
+  Loot Monitor's message parser now detects the game's new protected "secret" values and
+  skips them instead of erroring. Thanks to 40P3 for the report.
+
 ## [12.8.1] - 2026-07-03
 
 ### Bug Fixes

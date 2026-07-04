@@ -4,6 +4,8 @@ local buffer, print = {}, print
 
 local table_insert, table_concat, string_format = table.insert, table.concat, string.format
 
+local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
+
 local coin_table = {
 	{ GOLD_AMOUNT, 0, "ffd700" },
 	{ SILVER_AMOUNT, 0, "c7c7cf" },
@@ -151,6 +153,7 @@ end
 -- Match string against a pattern, caching the inverted pattern
 local invert_cache = {}
 function XLoot.Deformat(str, pattern)
+	if issecret and issecret(str) then return end
 	local func = invert_cache[pattern]
 	if not func then
 		local inverted, arglist = invert(pattern)

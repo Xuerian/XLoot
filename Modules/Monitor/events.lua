@@ -4,6 +4,8 @@ local print = print
 
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 
+local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
+
 --[[// Usage
 	Callbacks recieve (event, chat_event, ...)
 	LootEvents:RegisterLootCallback(func)
@@ -87,6 +89,7 @@ local function sort_func(a, b)
 end
 
 local function Handler(text)
+	if issecret and issecret(text) then return end
 	if need_group and activerolls > 0 then
 		-- Move through the patterns one by one, match against the message
 		for k, v in ipairs(group_patterns) do
@@ -114,6 +117,7 @@ end
 
 -- Whitelist-only; never route SYSTEM through Handler (LOOT_MONEY inverts to "(.-) loots (.-)" and would cross-match arbitrary system spam).
 local function SystemHandler(text)
+	if issecret and issecret(text) then return end
 	if not need_loot then return end
 	if not text:find('%d') then return end
 	for i, v in ipairs(system_patterns) do
