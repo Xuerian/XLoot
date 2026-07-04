@@ -55,6 +55,7 @@ local LOOT_SLOT_CURRENCY = LOOT_SLOT_CURRENCY or Enum.LootSlotType.Currency
 
 local GetContainerNumFreeSlots = C_Container and C_Container.GetContainerNumFreeSlots or GetContainerNumFreeSlots
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
+local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
 
 -- Chat output
 local print, wprint = print, print
@@ -336,7 +337,7 @@ do
 			if GetLootSlotType(i) == LOOT_SLOT_ITEM then
 				local _, _, quantity, _, rarity = GetLootSlotInfo(i)
 				local link = GetLootSlotLink(i)
-				if rarity >= linkthreshold then
+				if not (issecret and issecret(link)) and rarity >= linkthreshold then
 					reached = true
 					buffer = sf('%s%s%s', (output[key] and output[key].." " or ""), (quantity > 1 and quantity.."x" or ""), link)
 					if strlen(buffer) > 255 then
@@ -561,6 +562,7 @@ do
 
 	function RowPrototype:Auto_OnClick(button)
 		self:Hide()
+		if issecret and issecret(self.parent.item_name) then return end
 		if opt.autoloot_item_list ~= '' then
 			opt.autoloot_item_list = opt.autoloot_item_list .. ',' .. self.parent.item_name
 		else
@@ -695,7 +697,7 @@ do
 		-- Currency
 		else
 			r, g, b = .4, .4, .4
-			text_name = slotData.name:gsub('\n', ', ')
+			text_name = slotData.secret and slotData.name or slotData.name:gsub('\n', ', ')
 		end
 
 		-- Strings
@@ -746,7 +748,7 @@ do
 		end
 
 		-- Autoloot button
-		if opt.loot_buttons_auto and (self.owner.fake or (opt.autoloots.list ~= 'never' and slotData.slotType == LOOT_SLOT_ITEM and not self.owner.auto_items[slotData.name])) then
+		if opt.loot_buttons_auto and (self.owner.fake or (opt.autoloots.list ~= 'never' and slotData.slotType == LOOT_SLOT_ITEM and not slotData.secret and not self.owner.auto_items[slotData.name])) then
 			self.button_auto:Show()
 			name_width = name_width + self.button_auto:GetWidth() - 6
 		else
@@ -1307,11 +1309,12 @@ function XLootFrame:Update(no_snap, is_refresh)
 			end
 
 		else
-			local autoloot = false
+			local autoloot, secret = false, false
 			local slotType, slotData = GetLootSlotType(slot)
 			if slotType == LOOT_SLOT_ITEM then
 				local link = GetLootSlotLink(slot)
-				slotData = GetItemInfoTable(link)
+				secret = issecret and issecret(link) or false
+				slotData = not secret and GetItemInfoTable(link) or nil
 				-- Item not in client cache yet: render from loot-slot data, refresh shortly
 				if not slotData then
 					slotData = { name = name, icon = icon, quality = quality, link = link, stackCount = 1, bindType = 0 }
@@ -1323,6 +1326,7 @@ function XLootFrame:Update(no_snap, is_refresh)
 				slotData.isQuestItem = isQuestItem
 				slotData.questID = questID
 				slotData.startsQuest = startsQuest
+				if secret then slotData.secret, slotData.quality, slotData.quantity, slotData.locked, slotData.isQuestItem, slotData.questID, slotData.startsQuest = true, nil, 1, nil, nil, nil, nil end
 			else
 				slotData = {
 					name = name,
@@ -1336,10 +1340,11 @@ function XLootFrame:Update(no_snap, is_refresh)
 					-- startsQuest = startsQuest,
 					bindType = 0
 				}
+				if issecret and issecret(name) then slotData.secret, slotData.quality, slotData.quantity, slotData.locked = true, nil, 1, nil end
 			end
 
 			-- There's no reason to try to autoloot when refreshing the frame
-			if not is_refresh then
+			if not is_refresh and not secret then
 				-- Autolooting currency
 				if (auto.all or auto.currency) and (slotType == LOOT_SLOT_MONEY or slotType == LOOT_SLOT_CURRENCY) then
 					autoloot = true

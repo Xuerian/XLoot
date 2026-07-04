@@ -59,6 +59,7 @@ function XLoot.GetItemBindType(link)
 end
 
 function XLoot.CanEquipItem(link)
+	if issecret and issecret(link) then return false end
 	if not C_Item.IsEquippableItem(link) then
 		return false
 	end

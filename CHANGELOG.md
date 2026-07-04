@@ -6,6 +6,15 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.8.3] - 2026-07-04
+
+### Bug Fixes
+- Extended the 12.8.2 secret-value protection to the loot window and the need/greed roll UI. During
+  instanced encounters on Midnight (12.0), item links and their details can be "secret," and reading
+  them (to compare, measure, or list) would throw a Lua error. The loot list, auto-loot filters,
+  "Link All," and roll windows now detect secret values and degrade gracefully — a secret item still
+  shows and is lootable, just without the extra detail. No effect on normal loot or on Classic clients.
+
 ## [12.8.2] - 2026-07-04
 
 ### Bug Fixes

@@ -21,6 +21,7 @@ local HAS_TRANSMOG = IS_RETAIL
 
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local GetDetailedItemLevelInfo = C_Item and C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo
+local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
 
 local ENUM_LOOT_GROUP = Enum and Enum.LootMethod and Enum.LootMethod.Group
 local ENUM_LOOT_NEEDBEFOREGREED = Enum and Enum.LootMethod and Enum.LootMethod.Needbeforegreed
@@ -224,8 +225,8 @@ local rtypes = { [0] = 'pass', 'need', 'greed', 'disenchant' } -- Tekkub. Writin
 
 function addon:START_LOOT_ROLL(id, length, ongoing)
 	local icon, name, count, quality, bop, need, greed, de, reason_need, reason_greed, reason_de, de_skill, can_transmog = GetLootRollItemInfo(id)
-	-- LootFrame.lua includes this sanity check
-	if name == nil then
+	-- LootFrame.lua includes this sanity check (== nil is a blocked op on a secret name; not is allowed)
+	if not name then
 		print('XLoot Group: Ignoring START_LOOT_ROLL with no name')
 		return
 	end
@@ -234,7 +235,7 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 
 	local start = length
 	if ongoing then
-		if quality == 2 then
+		if not (issecret and issecret(quality)) and quality == 2 then
 			length = 60000
 		else
 			length = 180000
@@ -305,7 +306,7 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 
 	frame.text_bind:SetText(bop and '|cffff4422BoP' or '')
 	frame.text_loot:SetText(name)
-	local ilvl = GetDetailedItemLevelInfo(link)
+	local ilvl = not (issecret and issecret(link)) and GetDetailedItemLevelInfo(link)
 	frame.text_ilvl:SetText(ilvl and ilvl > 1 and ilvl or nil)
 
 	frame.text_loot:SetVertexColor(r, g, b)
