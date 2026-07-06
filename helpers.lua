@@ -84,6 +84,107 @@ function XLoot.IsItemUpgrade(link)
 	end
 	return false
 end
+
+-- No single "do I own this appearance" API (no help from blizzard here lol): PlayerHasTransmog* is per-source, so OR the collected state across every source.
+local C_TC = _G.C_TransmogCollection
+local TC_GetItemInfo = C_TC and C_TC.GetItemInfo
+local TC_GetAllSources = C_TC and C_TC.GetAllAppearanceSources
+local TC_PlayerHasSource = C_TC and C_TC.PlayerHasTransmogItemModifiedAppearance
+local GetItemInfoInstant = (C_Item and C_Item.GetItemInfoInstant) or GetItemInfoInstant
+if TC_GetItemInfo and TC_GetAllSources and TC_PlayerHasSource and GetItemInfoInstant then
+	local CLASS_WEAPON, CLASS_ARMOR = 2, 4
+	local CACHE_CAP = 256
+	local appearance_cache, cache_count = {}, 0
+	local invalidator
+	local function ensure_invalidator()
+		if invalidator then return end
+		invalidator = CreateFrame('Frame')
+		invalidator:RegisterEvent('TRANSMOG_COLLECTION_SOURCE_ADDED')
+		invalidator:RegisterEvent('TRANSMOG_COLLECTION_SOURCE_REMOVED')
+		invalidator:SetScript('OnEvent', function() wipe(appearance_cache); cache_count = 0 end)
+	end
+	function XLoot.IsNewAppearance(link)
+		if not link then return false end
+		local classID = select(6, GetItemInfoInstant(link))
+		if classID ~= CLASS_WEAPON and classID ~= CLASS_ARMOR then return false end
+		local appearanceID, sourceID = TC_GetItemInfo(link)
+		if not appearanceID or not sourceID or sourceID == 0 then return false end
+		-- false is a real cached verdict, so test presence with ~= nil
+		local cached = appearance_cache[sourceID]
+		if cached ~= nil then return cached end
+		local sources = TC_GetAllSources(appearanceID)
+		if not sources then return false end -- transient nil: bail without caching a guess
+		ensure_invalidator()
+		local isNew = true
+		for i = 1, #sources do
+			if TC_PlayerHasSource(sources[i]) then
+				isNew = false
+				break
+			end
+		end
+		if cache_count >= CACHE_CAP then wipe(appearance_cache); cache_count = 0 end
+		appearance_cache[sourceID] = isNew
+		cache_count = cache_count + 1
+		return isNew
+	end
+else
+	function XLoot.IsNewAppearance() return false end
+end
+
+-- Equip location -> the inventory slot(s) it competes with; multi-slot types (rings/trinkets/1H weapons) win if they beat any one.
+local UPGRADE_SLOTS = {
+	INVTYPE_HEAD = { INVSLOT_HEAD },
+	INVTYPE_NECK = { INVSLOT_NECK },
+	INVTYPE_SHOULDER = { INVSLOT_SHOULDER },
+	INVTYPE_CHEST = { INVSLOT_CHEST },
+	INVTYPE_ROBE = { INVSLOT_CHEST },
+	INVTYPE_WAIST = { INVSLOT_WAIST },
+	INVTYPE_LEGS = { INVSLOT_LEGS },
+	INVTYPE_FEET = { INVSLOT_FEET },
+	INVTYPE_WRIST = { INVSLOT_WRIST },
+	INVTYPE_HAND = { INVSLOT_HAND },
+	INVTYPE_FINGER = { INVSLOT_FINGER1, INVSLOT_FINGER2 },
+	INVTYPE_TRINKET = { INVSLOT_TRINKET1, INVSLOT_TRINKET2 },
+	INVTYPE_CLOAK = { INVSLOT_BACK },
+	INVTYPE_WEAPON = { INVSLOT_MAINHAND, INVSLOT_OFFHAND },
+	INVTYPE_2HWEAPON = { INVSLOT_MAINHAND },
+	INVTYPE_WEAPONMAINHAND = { INVSLOT_MAINHAND },
+	INVTYPE_WEAPONOFFHAND = { INVSLOT_OFFHAND },
+	INVTYPE_HOLDABLE = { INVSLOT_OFFHAND },
+	INVTYPE_SHIELD = { INVSLOT_OFFHAND },
+	INVTYPE_RANGED = { INVSLOT_MAINHAND },
+	INVTYPE_RANGEDRIGHT = { INVSLOT_MAINHAND },
+}
+local GetDetailedItemLevelInfo = (C_Item and C_Item.GetDetailedItemLevelInfo) or GetDetailedItemLevelInfo
+local GetInventoryItemLink = GetInventoryItemLink
+local RequestLoadItemDataByID = C_Item and C_Item.RequestLoadItemDataByID
+if GetDetailedItemLevelInfo and GetItemInfoInstant and GetInventoryItemLink then
+	local CLASS_WEAPON, CLASS_ARMOR = 2, 4
+	function XLoot.IsIlvlUpgrade(link)
+		if not link then return false end
+		local itemID, _, _, equipLoc, _, classID, subclassID = GetItemInfoInstant(link)
+		if classID ~= CLASS_WEAPON and classID ~= CLASS_ARMOR then return false end
+		local slots = equipLoc and UPGRADE_SLOTS[equipLoc]
+		if not slots then return false end
+		local lootedIlvl = GetDetailedItemLevelInfo(link)
+		if not lootedIlvl or lootedIlvl == 0 then
+			-- ilvl not cached yet; warm it and skip this pass rather than risk a wrong tag
+			if itemID and RequestLoadItemDataByID then RequestLoadItemDataByID(itemID) end
+			return false
+		end
+		-- Only when an equipped slot holds the SAME weapon/armor subtype at lower ilvl: proves the player can use it, so no false tag on unusable gear.
+		for i = 1, #slots do
+			local equipped = GetInventoryItemLink('player', slots[i])
+			if equipped and select(7, GetItemInfoInstant(equipped)) == subclassID then
+				local equippedIlvl = GetDetailedItemLevelInfo(equipped)
+				if equippedIlvl and lootedIlvl > equippedIlvl then return true end
+			end
+		end
+		return false
+	end
+else
+	function XLoot.IsIlvlUpgrade() return false end
+end
 -- Tack role icon on to player name and return class colors
 local white = { r = 1, g = 1, b = 1 }
 local dimensions = {

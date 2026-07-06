@@ -10,6 +10,7 @@ local defaults = {
 	profile = {
 		skin = "smooth",
 		skin_anchors = false,
+		tooltip_sell = false,
 		whatsnew_mode = "popup",
 	},
 	global = {

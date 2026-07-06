@@ -1086,7 +1086,6 @@ function XLootGroup.TestSettings()
 	local schedule = {}
 	local type_index = { 'need', 'greed', 'disenchant', [0] = 'pass' }
 	if not init then
-		print(L.debug_warning)
 		init = true
 		local tick = 0
 		deframe:SetScript('OnUpdate', function(self, elapsed)
@@ -1201,7 +1200,9 @@ function XLootGroup.TestSettings()
 		end
 
 	end
-	StartFakeRoll()
+	for _ = 1, #preview_loot do
+		StartFakeRoll()
+	end
 end
 
 XLoot:SetSlashCommand('xlgd', XLootGroup.TestSettings)

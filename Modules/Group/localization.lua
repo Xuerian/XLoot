@@ -4,7 +4,6 @@ local locales = {
 		anchor = "Group Rolls",
 		alert_anchor = "Loot Popups",
 		undecided = "Undecided",
-		debug_warning = "|c22ff0000XLoot Group: Entering debugging mode. THIS BREAKS LOOTING UNTIL YOU RELOG OR /RELOAD.",
 	},
 	-- Possibly localized
 	ptBR = {

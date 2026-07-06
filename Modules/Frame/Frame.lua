@@ -109,6 +109,8 @@ local defaults = {
 		loot_texts_bind  = true,
 		loot_texts_lock = true,
 		loot_texts_sell = false,
+		loot_texts_newlook = false,
+		loot_texts_upgrade = false,
 
 		loot_buttons_auto = true,
 
@@ -258,6 +260,7 @@ function addon:ApplyOptions(in_options)
 			else
 				t.quantity = 1
 				t.slotType = LOOT_SLOT_ITEM
+				t.preview_upgrade = (i == #preview_loot) -- force the (upgrade) demo tag on one preview row
 				slot = slot + 1
 				local row = Fake.rows[slot]
 				row.item = t.link
@@ -666,6 +669,9 @@ do
 		-- account = 'BoA'
 	}
 
+	local NEW_LOOK = (' |cff66ccff%s|r'):format(L.new_look)
+	local UPGRADE = (' |cff1eff00%s|r'):format(L.upgrade)
+
 	-- Update slot with loot
 	function RowPrototype:Update(slotData)
 		local r, g, b, hex
@@ -680,6 +686,14 @@ do
 			r, g, b, hex = C_Item.GetItemQualityColor(slotData.quality or 0)
 
 			text_name = ('|c%s%s|r'):format(hex, slotData.name)
+
+			if opt.loot_texts_newlook and not slotData.secret and slotData.link and XLoot.IsNewAppearance(slotData.link) then
+				text_name = text_name..NEW_LOOK
+			end
+
+			if opt.loot_texts_upgrade and (slotData.preview_upgrade or (not slotData.secret and slotData.link and XLoot.IsIlvlUpgrade(slotData.link))) then
+				text_name = text_name..UPGRADE
+			end
 
 			if opt.loot_texts_info then -- This is a bit gnarly
 				local equip = slotData.typeName == ENCHSLOT_WEAPON and ENCHSLOT_WEAPON or slotData.equipLoc ~= '' and _G[slotData.equipLoc] or ''

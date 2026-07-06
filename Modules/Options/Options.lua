@@ -3,6 +3,13 @@ Options are preferrably defined as "BetterOptions" tables, which functionally re
 
 The point of this abstraction layer is that I (Xuerian) wanted to use AceDB/AceConfig to present a more standard configuration dialog to users. I am, however, not satisfied with the conventions and limitations of it, so this is a attempt to provide both a more concise format (BetterOptions), and a more featureful intermediate options format (Finalize(...)) to support it.
 
+--Follow up to Xuerian's comment above:
+--(wheelbarrel00, current maintainer) I kept all of this. Ace is still the de facto
+--standard, so users get a config dialog they already know how to use, and the
+--BetterOptions/Finalize layer hides almost all of AceConfig's boilerplate and quirks.
+--It has also aged well: when 10.0 replaced the old interface panel with the Settings
+--canvas, this abstraction absorbed most of the churn and the module option tables
+--below never had to change.
 
 Methods:
 Finalize(module_data, option_table)
@@ -417,6 +424,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			return skins
 		end},
 		{ "skin_anchors", "toggle" },
+		{ "tooltip_sell", "toggle", hidden = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE },
 		{ "whatsnew_mode", whatsnew_modes },
 		{ "whatsnew_show", "execute", func = function() XLoot:ShowWhatsNew() end },
 		{ "reset_defaults", "execute", confirm = true, func = function() addon:ResetProfile() end },
@@ -526,6 +534,8 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "loot_collapse" },
 				{ "loot_texts_lock", width = "double" },
 				{ "loot_texts_sell" },
+				{ "loot_texts_newlook" },
+				{ "loot_texts_upgrade" },
 				{ "loot_buttons_auto" },
 				{ "loot_alpha", "alpha" },
 				{ "loot_icon_size", "range", 16, 64, 1 },
@@ -609,6 +619,9 @@ function addon:OnEnable() -- Construct addon option tables here
 	-- XLoot Group
 	if XLoot:GetModule("Group", true) then
 		addon:RegisterOptions({ name = "Group", addon =  XLootGroup }, {
+			{ "testing", "group", {
+				{ "test_settings", "execute", func = XLootGroup.TestSettings }
+			}},
 			{ "anchors", "group", {
 				{ "roll_anchor_visible", "toggle", "roll_anchor", "visible", set = set_anchor },
 			}},

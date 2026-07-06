@@ -6,6 +6,36 @@ local XLoot = select(2, ...)
 -- Newest first; array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.9.0",
+		date = "2026-07-05",
+		changes = {
+			{
+				label = "New-appearance \"(new look)\" tag",
+				type = "feature",
+				option = "Loot Frame > Loot slots",
+				description = "Marks looted weapons and armor whose transmog appearance you haven't collected yet, so you never vendor or disenchant a fresh look by mistake.",
+			},
+			{
+				label = "Upgrade \"(upgrade)\" tag",
+				type = "feature",
+				option = "Loot Frame > Loot slots",
+				description = "Marks looted gear with a higher item level than what you already have equipped in that slot.",
+			},
+			{
+				label = "Vendor sell price in tooltips",
+				type = "feature",
+				option = "Global options",
+				description = "On the Classic flavors, item tooltips can show the vendor sell price, including a stack's full value.",
+			},
+			{
+				label = "Test button for Group Loot",
+				type = "feature",
+				option = "Group Loot > Testing",
+				description = "Preview roll frames while you adjust their look, like the Loot Monitor's test button.",
+			},
+		},
+	},
+	{
 		version = "12.8.1",
 		date = "2026-07-03",
 		notes = "|cffffd100Sorry for the popup!|r\nI wanted to make sure everyone sees this: you can now get these update notes as a quiet, clickable link in chat instead of a popup. Switch it under |cffffffff/xloot|r > |cffffffffAfter an update|r (choose |cffffffffChat link|r), or tick \"Don't show these again\" below to turn them off.",
@@ -173,7 +203,7 @@ local function build()
 	local releases = unseen_releases()
 
 	local f = CreateFrame("Frame", "XLootWhatsNewFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
-	f:SetSize(520, 470)
+	f:SetSize(520, 490)
 	f:SetPoint("CENTER")
 	-- Above the options window's DIALOG strata so it isn't hidden behind it.
 	f:SetFrameStrata("FULLSCREEN_DIALOG")
@@ -191,20 +221,20 @@ local function build()
 		tile = true, tileSize = 16, edgeSize = 14,
 		insets = { left = 4, right = 4, top = 4, bottom = 4 },
 	})
-	f:SetBackdropColor(0.03, 0.03, 0.03, 0.97)
+	f:SetBackdropColor(0.03, 0.03, 0.03, 1)
 
 	f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 	f.title:SetPoint("TOPLEFT", 16, -14)
 	f.title:SetText(#releases > 1 and POPUP_TITLE or (POPUP_TITLE.." "..releases[1].version))
 
 	f.byline = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	f.byline:SetPoint("BOTTOMRIGHT", -14, 54)
+	f.byline:SetPoint("BOTTOMRIGHT", -14, 74)
 	f.byline:SetJustifyH("RIGHT")
-	f.byline:SetText("|cff808080Maintained by Wheelbarrel00|r")
+	f.byline:SetText("|cff808080Maintained by Wheelbarrel00 · originally by Xuerian|r")
 
 	local scroll = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
 	scroll:SetPoint("TOPLEFT", 14, -44)
-	scroll:SetPoint("BOTTOMRIGHT", -34, 78)
+	scroll:SetPoint("BOTTOMRIGHT", -34, 94)
 	local body = CreateFrame("Frame", nil, scroll)
 	body:SetSize(scroll:GetWidth(), 1)
 	scroll:SetScrollChild(body)

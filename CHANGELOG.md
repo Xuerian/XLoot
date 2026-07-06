@@ -6,6 +6,26 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.9.0] - 2026-07-05
+
+### Features
+- **"New look" tag for uncollected appearances.** Looted weapons and armor whose transmog
+  appearance you haven't collected from any source yet get a cyan **(new look)** tag on the loot
+  row, so you never vendor or disenchant a fresh appearance by mistake. Off by default (retail),
+  under **/xloot → Loot Frame → Loot slots**.
+- **"Upgrade" tag for higher item level.** Looted gear with a higher item level than what you
+  already have equipped in that slot gets a green **(upgrade)** tag. Off by default, under
+  **/xloot → Loot Frame → Loot slots**.
+- **Vendor sell price in item tooltips.** On the Classic flavors (where the game doesn't show it),
+  item tooltips can display the vendor sell price, including a stack's full value. Off by default,
+  under **/xloot → Global options**. Retail already shows sell price, so the option is hidden there.
+- **Test button for Group Loot.** The Group Loot options now have a Test button that spawns sample
+  roll frames so you can preview them while adjusting, matching the Loot Monitor's test button.
+
+### Bug Fixes
+- **What's New popup.** Fixed the footer so the "Don't show these again" checkbox no longer overlaps
+  the maintainer byline, and made the background fully opaque so it is easier to read.
+
 ## [12.8.3] - 2026-07-04
 
 ### Bug Fixes

@@ -8,6 +8,8 @@ local locales = {
 			skin_desc = "Select skin to use. Includes Masque skins",
 			skin_anchors = "Apply to anchors",
 			skin_anchors_desc = "Apply skin to anchors that XLoot uses",
+			tooltip_sell = "Vendor sell price in tooltips",
+			tooltip_sell_desc = "Add a vendor sell-price line to item tooltips, including the full value of a stack (e.g. 20 x 6s). Applies everywhere item tooltips appear.",
 			whatsnew_show = "Show What's New now",
 			whatsnew_show_desc = "Reopen the What's New summary for the current version.",
 			whatsnew_mode = "After an update",
@@ -81,6 +83,10 @@ local locales = {
 			loot_texts_lock = "Show locked status",
 			loot_texts_sell = "Show vendor sell price",
 			loot_texts_sell_desc = "Display each item's total vendor sell value on the loot row",
+			loot_texts_newlook = "Show new-appearance tag",
+			loot_texts_newlook_desc = "Tag gear whose transmog appearance you haven't collected from any source yet with a cyan (new look). Retail only.",
+			loot_texts_upgrade = "Show upgrade tag",
+			loot_texts_upgrade_desc = "Tag looted weapons and armor with a green (upgrade) when their item level beats what you have equipped in that slot (same weapon/armor type).",
 			loot_buttons_auto = "Autoloot shortcut",
 			loot_buttons_auto_desc = "A button to add any item to your auto-looting list (See below)\nOnly shown when the item would be autolooted",
 			font_size_info = "Loot information",
@@ -112,6 +118,7 @@ local locales = {
 		Group = {
 			panel_title = "Group Loot",
 			-- Group labels
+			testing = "Testing",
 			anchors = "Anchors",
 			rolls = "Roll frames",
 			other_frames = "Other frames",
@@ -123,6 +130,7 @@ local locales = {
 			expiration = "Expiration (in seconds)",
 
 			-- Option labels
+			test_settings = "Click to test settings",
 			text_outline = "Outline text",
 			text_outline_desc = "Draws a dark outline around text on roll frames",
 			text_time = "Show time remaining",
