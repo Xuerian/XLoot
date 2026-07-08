@@ -4,6 +4,9 @@ local locales = {
 		anchor = "Group Rolls",
 		alert_anchor = "Loot Popups",
 		undecided = "Undecided",
+		auto_roll_saved = "XLoot: auto-%s set for %s",
+		auto_roll_removed = "XLoot: auto-roll cleared for %s",
+		auto_roll_none = "No rules yet. Shift-click Need, Greed, or Pass on a roll to add one.",
 	},
 	-- Possibly localized
 	ptBR = {

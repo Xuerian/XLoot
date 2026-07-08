@@ -6,6 +6,27 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.10.0] - 2026-07-07
+
+### Features
+- **Roll-frame highlight.** The Group Loot roll window can recolor its border to show why a drop
+  matters: green when the item is an item-level upgrade for you, blue when it's an appearance you
+  haven't collected yet. Off by default, under **/xloot → Group Loot → Details**.
+- **Per-item auto-roll.** Shift-click Need, Greed, or Pass on a roll window to set a rule for that
+  item, and matching drops then roll for you automatically, including auto-confirming bind-on-pickup
+  prompts. Auto-Need is behind its own opt-in so a rule can never Need for you without your say-so.
+  Off by default, under **/xloot → Group Loot → Auto Roll**.
+
+### Bug Fixes
+- Fixed the loot window not appearing when Blizzard auto loot and XLoot's own auto-loot were both
+  enabled, which stranded items that still needed the window (bind-on-pickup confirmations and
+  read-only master-loot drops). Thanks to Kai for the detailed report and repro.
+- Guarded the removed `DoMasterLootRoll` API so the master-loot "Request Roll" menu item no longer
+  errors on the Classic flavors. Thanks to RoadBlock for spotting it.
+
+### Improvements
+- Consolidated the cross-flavor loot-method and chat API shims into a single place. Thanks to RoadBlock.
+
 ## [12.9.0] - 2026-07-05
 
 ### Features

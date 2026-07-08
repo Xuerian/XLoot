@@ -357,13 +357,16 @@ function addon.ShowAssignMenu(row)
 		end
 
 		local rolls = root:CreateButton(L.SPECIALROLLS or "Special Rolls")
-		rolls:CreateButton(REQUEST_ROLL or "Request Roll", function()
-			if addon.testing then
-				xprint(("[test] would request roll on slot %d."):format(slot))
-			else
-				DoMasterLootRoll(slot)
-			end
-		end)
+		-- DoMasterLootRoll was removed from every client flavor in 12.x with no replacement, so drop the item when it is gone.
+		if DoMasterLootRoll then
+			rolls:CreateButton(REQUEST_ROLL or "Request Roll", function()
+				if addon.testing then
+					xprint(("[test] would request roll on slot %d."):format(slot))
+				else
+					DoMasterLootRoll(slot)
+				end
+			end)
+		end
 		if raid and opt.menu_roll then
 			rolls:CreateButton(L.ML_RANDOM or "Raid Roll", function()
 				RaidRoll(slot, candidates, link, quality)

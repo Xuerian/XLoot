@@ -214,6 +214,39 @@ function XLoot.FancyPlayerName(name, class, opt)
 	return name, c.r, c.g, c.b
 end
 
+-- Loot method: the string GetLootMethod() global is gone on modern Classic/retail and Enum.LootMethod is absent on some older flavors, so probe the C_PartyInfo enum first and fall back to the global. Both return method, masterlooterPartyID, masterlooterRaidID.
+local MASTER_LOOT = Enum and Enum.LootMethod and Enum.LootMethod.Masterlooter
+local C_GetLootMethod = C_PartyInfo and C_PartyInfo.GetLootMethod
+local function MasterLootInfo()
+	if MASTER_LOOT and C_GetLootMethod then
+		local method, party_id, raid_id = C_GetLootMethod()
+		return method == MASTER_LOOT, party_id, raid_id
+	end
+	if GetLootMethod then
+		local method, party_id, raid_id = GetLootMethod()
+		return method == 'master', party_id, raid_id
+	end
+	-- Last resort while a loot window is open: a candidate list only exists under master loot.
+	return GetMasterLootCandidate and GetMasterLootCandidate(1, 1) ~= nil or false
+end
+
+function XLoot.GroupUsesMasterLoot()
+	return (MasterLootInfo()) and true or false
+end
+
+function XLoot.IsMasterLooter()
+	local isMaster, party_id, raid_id = MasterLootInfo()
+	if not isMaster then return false end
+	if raid_id then
+		return UnitIsUnit('player', 'raid'..raid_id)
+	elseif party_id then
+		return party_id == 0
+	end
+	return false
+end
+
+XLoot.SendChatMessage = (C_ChatInfo and C_ChatInfo.SendChatMessage) or SendChatMessage
+
 
 local temp_list, template = {},
 [[local string_match = string.match

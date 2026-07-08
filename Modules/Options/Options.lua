@@ -643,6 +643,9 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "role_icon" },
 				{ "win_icon" },
 				{ "text_ilvl" },
+				{ "roll_highlight", width = "double" },
+				{ "roll_highlight_upgrade", requires = "roll_highlight" },
+				{ "roll_highlight_newlook", requires = "roll_highlight" },
 			}},
 			{ "font", "group", {
 				{ "font", fonts },
@@ -656,6 +659,12 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "expiration", "header" },
 				{ "expire_won", "range", 5, 30, 1 },
 				{ "expire_lost", "range", 5, 30, 1 },
+			}},
+			{ "autoroll", "group", {
+				{ "auto_roll", width = "double" },
+				{ "auto_roll_need", requires = "auto_roll" },
+				{ "auto_roll_rules_display", "description", name = function() return XLootGroup.AutoRollRulesText() end },
+				{ "auto_roll_clear", "execute", requires = "auto_roll", confirm = true, func = function() XLootGroup.ClearAutoRollRules() end },
 			}},
 		})
 	end

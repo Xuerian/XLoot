@@ -1197,23 +1197,11 @@ local function BoPRefresh()
 end
 
 local tremove = table.remove
-local MASTER_LOOT = Enum and Enum.LootMethod and Enum.LootMethod.Masterlooter
 local speedy = { queue = {}, ticker = nil, leftover = nil, lastcount = nil, vacuum = false }
-
--- Enum.LootMethod is absent on some flavors, so fall through to the string API before trusting the enum.
-local function SpeedyMasterLoot()
-	if MASTER_LOOT and C_PartyInfo and C_PartyInfo.GetLootMethod then
-		return C_PartyInfo.GetLootMethod() == MASTER_LOOT
-	end
-	if GetLootMethod and GetLootMethod() == 'master' then
-		return true
-	end
-	return GetMasterLootCandidate and GetMasterLootCandidate(1, 1) ~= nil or false
-end
 
 -- Never vacuum under master loot (would grab assignable drops) or while the auto-loot modifier is held.
 local function SpeedyAllowed()
-	return not IsModifiedClick('AUTOLOOTTOGGLE') and not SpeedyMasterLoot()
+	return not IsModifiedClick('AUTOLOOTTOGGLE') and not XLoot.GroupUsesMasterLoot()
 end
 
 local function SpeedyStop()
@@ -1278,7 +1266,7 @@ local function SpeedyVacuum()
 end
 
 local _bag_slots, GetItemBindType = {}, XLoot.GetItemBindType
-function XLootFrame:Update(no_snap, is_refresh)
+function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 	local numloot = GetNumLootItems()
 	if numloot == 0 then return nil end
 	local max = math.max
@@ -1357,8 +1345,8 @@ function XLootFrame:Update(no_snap, is_refresh)
 				if issecret and issecret(name) then slotData.secret, slotData.quality, slotData.quantity, slotData.locked = true, nil, 1, nil end
 			end
 
-			-- There's no reason to try to autoloot when refreshing the frame
-			if not is_refresh and not secret then
+			-- Skip our autoloot on refresh/secret/locked slots, or when the game is already auto-looting: it grabs the free items, so we just show the window for what is left (BoP confirms, read-only master-loot drops) instead of double-looting and stranding them.
+			if not is_refresh and not secret and not locked and not game_autoloot then
 				-- Autolooting currency
 				if (auto.all or auto.currency) and (slotType == LOOT_SLOT_MONEY or slotType == LOOT_SLOT_CURRENCY) then
 					autoloot = true
@@ -1494,7 +1482,7 @@ function addon:LOOT_READY()
 	end
 end
 
-function addon:LOOT_OPENED()
+function addon:LOOT_OPENED(autoLoot)
 	if opt.speedy_autoloot and not opt.speedy_autoloot_respect_filters
 		and SpeedyAllowed() and GetNumLootItems() > 0 then
 		if not XLootFrame:IsShown() and IsFishingLoot() then
@@ -1507,7 +1495,8 @@ function addon:LOOT_OPENED()
 		if not XLootFrame:IsShown() and IsFishingLoot() then
 			PlaySound(SOUNDKIT.FISHING_REEL_IN)
 		end
-		XLootFrame:Update()
+		-- Normalize the LOOT_OPENED autoLoot arg: some older Classic clients pass 0/1, and 0 is truthy in Lua.
+		XLootFrame:Update(nil, nil, autoLoot and autoLoot ~= 0)
 	else
 		PlaySound(SOUNDKIT.LOOT_WINDOW_OPEN_EMPTY)
 		CloseLoot()

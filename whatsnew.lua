@@ -6,6 +6,29 @@ local XLoot = select(2, ...)
 -- Newest first; array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.10.0",
+		date = "2026-07-07",
+		changes = {
+			{
+				label = "Highlight upgrades and new looks on roll frames",
+				type = "feature",
+				option = "Group Loot > Details",
+				description = "The roll window border can turn green when a drop is an item-level upgrade for you, or blue when it's an appearance you haven't collected yet, so you can tell at a glance whether to roll.",
+			},
+			{
+				label = "Per-item auto-roll",
+				type = "feature",
+				option = "Group Loot > Auto Roll",
+				description = "Shift-click Need, Greed, or Pass on a roll window to set a rule for that item, and matching drops then roll for you automatically, bind-on-pickup prompts included. Auto-Need is behind its own opt-in.",
+			},
+			{
+				label = "Loot window no longer vanishes with double auto-loot",
+				type = "bugfix",
+				description = "When Blizzard auto loot and XLoot's own auto-loot were both on, the loot window could fail to appear for items that still needed it, like bind-on-pickup confirmations. Thanks to Kai for the report and repro.",
+			},
+		},
+	},
+	{
 		version = "12.9.0",
 		date = "2026-07-05",
 		changes = {

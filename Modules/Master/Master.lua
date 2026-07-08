@@ -153,8 +153,9 @@ function addon.GiveLoot(frame, special)
 	CloseDropDownMenus()
 end
 
+-- DoMasterLootRoll was removed from every client flavor in 12.x with no replacement, so guard the call.
 function addon.SpawnRoll(frame)
-	DoMasterLootRoll(frame.value)
+	if DoMasterLootRoll then DoMasterLootRoll(frame.value) end
 end
 
 function addon.RaidRoll(frame, players)
@@ -319,10 +320,12 @@ function addon.BuildMenuSpecialRolls(level)
 			info.value = slot
 			info.notCheckable = 1
 			info.hasArrow = nil
-			info.text = REQUEST_ROLL
-			info.func = addon.SpawnRoll
-			info.icon = "Interface\\Buttons\\UI-GroupLoot-Dice-Up"
-			UIDropDownMenu_AddButton(info,level)
+			if DoMasterLootRoll then
+				info.text = REQUEST_ROLL
+				info.func = addon.SpawnRoll
+				info.icon = "Interface\\Buttons\\UI-GroupLoot-Dice-Up"
+				UIDropDownMenu_AddButton(info,level)
+			end
 			
 			if IsInRaid() and next(randoms) and opt.menu_roll then
 				info.colorCode = "|cffffffff"
