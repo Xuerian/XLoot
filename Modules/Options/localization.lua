@@ -105,8 +105,10 @@ local locales = {
 			linkall_channel_secondary = "Secondary chat link channel",
 			linkall_show = "Link button visibility",
 			linkall_first_only = "Only link top item",
+			linkall_auto = "Announce loot on open",
+			linkall_auto_desc = "Automatically link loot to the default chat link channel when a loot window opens, using the quality threshold above. Each loot source is only announced once.",
 
-			autolooting_text = "XLoot's autolooting features act separately from the default UI. As such, if both are enabled, you may recieve warnings like 'that object is busy'. They are safe to ignore, but can be resolved by picking one autoloot method to use exclusively.",
+			autolooting_text = "Everything in this section is XLoot's own auto-loot, a separate system from Blizzard's built-in Auto Loot (the game's own setting, in Esc > Options). XLoot can vacuum a whole corpse instantly (Speedy auto-loot) or auto-grab only the items matching your filters below. Avoid running it alongside Blizzard's Auto Loot: two systems looting the same corpse causes harmless 'that object is busy' warnings. Pick one to do your looting.",
 
 			autolooting_list = "To automatically loot specific items, list them below.\n  Example: Linen Cloth,Ashbringer,Copper Ore",
 
@@ -142,6 +144,8 @@ local locales = {
 			roll_highlight_upgrade_desc = "Use a green border when the item's item level beats what you have equipped.",
 			roll_highlight_newlook = "Uncollected appearances",
 			roll_highlight_newlook_desc = "Use a blue border when you have not collected the item's appearance yet (retail only).",
+			roll_urgency = "Urgent timer color",
+			roll_urgency_desc = "Turns the roll countdown bar increasingly red as time runs out.",
 			auto_roll = "Roll automatically",
 			auto_roll_desc = "Automatically Need, Greed, or Pass on items you have a rule for. Shift-click a roll button on the roll window to set or clear that item's rule.",
 			auto_roll_need = "Allow auto-Need",

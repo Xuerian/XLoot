@@ -13,7 +13,7 @@ local HistoryGetItem = C_LootHistory and C_LootHistory.GetItem
 local HistoryGetPlayerInfo = C_LootHistory and C_LootHistory.GetPlayerInfo
 local HistoryGetNumItems = C_LootHistory and C_LootHistory.GetNumItems
 local CanEquipItem, IsItemUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.IsItemUpgrade, XLoot.FancyPlayerName
-local IsIlvlUpgrade, IsNewAppearance = XLoot.IsIlvlUpgrade, XLoot.IsNewAppearance
+local IsIlvlUpgrade, IsNewAppearance, TimeFractionColor = XLoot.IsIlvlUpgrade, XLoot.IsNewAppearance, XLoot.TimeFractionColor
 local RollFramePrototype
 
 local BUILD_NUMBER = select(4, GetBuildInfo())
@@ -53,6 +53,7 @@ local defaults = {
 		show_undecided = false,
 		show_time_remaining = false,
 		text_ilvl = false,
+		roll_urgency = false,
 
 		roll_highlight = false,
 		roll_highlight_upgrade = true,
@@ -355,6 +356,8 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 	frame.overlay:SetBorderColor(br, bg, bb)
 	frame.icon_frame:SetBorderColor(br, bg, bb)
 	bar:SetStatusBarColor(r, g, b, .7)
+	bar.base_r, bar.base_g, bar.base_b = r, g, b
+	bar.base_br, bar.base_bg, bar.base_bb = br, bg, bb
 	frame.icon:SetTexture(icon)
 
 	bar:SetMinMaxValues(0, length)
@@ -968,6 +971,14 @@ do
 		else
 			local now, length = max(remaining, -1), self.length
 			local fraction = max(0, min(now / length, 1))
+			if opt.roll_urgency and self.base_r then
+				local ur, ug, ub = TimeFractionColor(fraction, self.base_r, self.base_g, self.base_b)
+				self:SetStatusBarColor(ur, ug, ub, .7)
+				-- The fill shrinks as time runs out, so redden the always-full row border too, ramping from the highlight color it started at.
+				local pr, pg, pb = TimeFractionColor(fraction, self.base_br, self.base_bg, self.base_bb)
+				self.parent.overlay:SetBorderColor(pr, pg, pb)
+				self.parent.icon_frame:SetBorderColor(pr, pg, pb)
+			end
 			self.spark:SetPoint('CENTER', self, 'LEFT', fraction * self:GetWidth(), 0)
 			self:SetValue(now)
 			self.spark:Show()
@@ -1095,6 +1106,13 @@ do
 		self:SetWidth(opt.roll_width)
 
 		-- Status bar is reskinned with SkinUpdate
+
+		-- Drop any urgency tint so turning the option off mid-roll restores the quality fill and highlight border.
+		if self.bar.base_r then
+			self.bar:SetStatusBarColor(self.bar.base_r, self.bar.base_g, self.bar.base_b, .7)
+			self.overlay:SetBorderColor(self.bar.base_br, self.bar.base_bg, self.bar.base_bb)
+			self.icon_frame:SetBorderColor(self.bar.base_br, self.bar.base_bg, self.bar.base_bb)
+		end
 
 		self.need:ApplyOptions()
 		self.greed:ApplyOptions()

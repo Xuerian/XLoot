@@ -6,6 +6,30 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.11.0] - 2026-07-08
+
+### Features
+- **Announce loot on open.** The Loot Frame can automatically link a loot window's contents to your chat
+  channel the moment it opens, using the same quality threshold as the Link all button. Each loot source
+  is announced only once, so reopening a partially-looted corpse never repeats it. Off by default, under
+  **/xloot → Loot Frame → Link all button**.
+- **Urgent roll timer.** The Group Loot roll countdown can ramp to red as time runs out, reddening the
+  whole row border (not just the draining bar) so a roll about to expire is easy to catch at a glance.
+  Off by default, under **/xloot → Group Loot → Details**.
+
+### Bug Fixes
+- Fixed What's New notices comparing versions as text, which sorted "12.10.0" below "12.9.0" and could
+  show or skip the wrong release notes. Versions now compare numerically, and the seen state never moves
+  backward, so a downgrade neither re-notifies you nor forgets newer notes.
+- Fixed the item-scanning tooltip being parented into the main UI, which kept the game's tooltip refresh
+  loop perpetually re-processing items with dynamic tooltips (weapon enchants, temporary buffs, tradeable
+  timers). It now lives on the WorldFrame, off that refresh path. Thanks to RoadBlock for the report.
+
+### Improvements
+- Reworded the auto-loot options help text to make clear that section is XLoot's own auto-loot, separate
+  from Blizzard's built-in Auto Loot, and that running both at once can cause "that object is busy"
+  warnings. Thanks to RoadBlock for flagging the confusing wording.
+
 ## [12.10.0] - 2026-07-07
 
 ### Features

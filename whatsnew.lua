@@ -3,8 +3,42 @@
 
 local XLoot = select(2, ...)
 
--- Newest first; array order is the display order, so we never sort version strings.
+-- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
+	{
+		version = "12.11.0",
+		date = "2026-07-08",
+		changes = {
+			{
+				label = "Announce loot on open",
+				type = "feature",
+				option = "Loot Frame > Link all button",
+				description = "Automatically link a loot window's contents to your chat channel when it opens, using the same quality threshold as the Link all button. Each loot source is announced only once, so reopening a corpse won't repeat it.",
+			},
+			{
+				label = "Urgent roll timer",
+				type = "feature",
+				option = "Group Loot > Details",
+				description = "The roll countdown can ramp to red as time runs out, reddening the whole row border so a roll about to expire is easy to catch at a glance.",
+			},
+			{
+				label = "Clearer, more reliable What's New notices",
+				type = "bugfix",
+				description = "Version notices now compare numerically, so 12.10.0 no longer sorts below 12.9.0, and they never re-notify or forget notes after a downgrade.",
+			},
+			{
+				label = "Scanning-tooltip refresh fix",
+				type = "bugfix",
+				description = "Stopped a tooltip refresh loop that could perpetually re-process items with dynamic tooltips like weapon enchants and temporary buffs. Thanks to RoadBlock.",
+			},
+			{
+				label = "Clearer auto-loot help text",
+				type = "improvement",
+				option = "Loot Frame > Auto-looting",
+				description = "The auto-loot section now makes clear it is XLoot's own auto-loot, separate from Blizzard's built-in Auto Loot, and that running both can cause \"that object is busy\" warnings.",
+			},
+		},
+	},
 	{
 		version = "12.10.0",
 		date = "2026-07-07",
@@ -124,12 +158,14 @@ local POPUP_FOOTER = HEADING.."Thanks for using XLoot!"..STOP.."\n"
 
 local function unseen_releases()
 	local seen = XLoot.db and XLoot.db.global and XLoot.db.global.whatsnew_seen
-	if not seen then
-		return { updates[1] }  -- fresh install: latest only, not the whole backlog
+	-- The AceDB default is an empty string, so both nil and "" mean a fresh install: latest only, not the whole backlog.
+	if not seen or seen == "" then
+		return { updates[1] }
 	end
 	local out = {}
+	-- Ordered compare, not an exact match: a downgrade or a pruned entry would otherwise dump the whole backlog.
 	for _, release in ipairs(updates) do
-		if release.version == seen then break end
+		if XLoot.CompareVersions(release.version, seen) <= 0 then break end
 		out[#out + 1] = release
 	end
 	if #out == 0 then
@@ -175,23 +211,32 @@ local function build_body(releases)
 	return table.concat(blocks, "\n\n")
 end
 
+-- Seen means seen this version OR NEWER, and marking never moves backward, so a downgrade neither re-notifies nor forgets the newer notes.
 local function already_seen()
-	return XLoot.db and XLoot.db.global and XLoot.db.global.whatsnew_seen == WHATSNEW_VERSION
+	local seen = XLoot.db and XLoot.db.global and XLoot.db.global.whatsnew_seen
+	return seen ~= nil and XLoot.CompareVersions(seen, WHATSNEW_VERSION) >= 0
 end
 
 local function mark_seen()
 	if XLoot.db and XLoot.db.global then
-		XLoot.db.global.whatsnew_seen = WHATSNEW_VERSION
+		local seen = XLoot.db.global.whatsnew_seen
+		if not seen or XLoot.CompareVersions(WHATSNEW_VERSION, seen) > 0 then
+			XLoot.db.global.whatsnew_seen = WHATSNEW_VERSION
+		end
 	end
 end
 
 local function already_announced()
-	return XLoot.db and XLoot.db.global and XLoot.db.global.whatsnew_announced == WHATSNEW_VERSION
+	local announced = XLoot.db and XLoot.db.global and XLoot.db.global.whatsnew_announced
+	return announced ~= nil and XLoot.CompareVersions(announced, WHATSNEW_VERSION) >= 0
 end
 
 local function mark_announced()
 	if XLoot.db and XLoot.db.global then
-		XLoot.db.global.whatsnew_announced = WHATSNEW_VERSION
+		local announced = XLoot.db.global.whatsnew_announced
+		if not announced or XLoot.CompareVersions(WHATSNEW_VERSION, announced) > 0 then
+			XLoot.db.global.whatsnew_announced = WHATSNEW_VERSION
+		end
 	end
 end
 

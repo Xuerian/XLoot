@@ -55,6 +55,7 @@ local LOOT_SLOT_CURRENCY = LOOT_SLOT_CURRENCY or Enum.LootSlotType.Currency
 
 local GetContainerNumFreeSlots = C_Container and C_Container.GetContainerNumFreeSlots or GetContainerNumFreeSlots
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
+local SendChatMessage = XLoot.SendChatMessage
 local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
 
 -- Chat output
@@ -175,6 +176,7 @@ local defaults = {
 		linkall_channel_secondary = 'NONE',
 		linkall_show = 'group',
 		linkall_first_only = false,
+		linkall_auto = 'never',
 
 		old_close_button = false,
 
@@ -324,7 +326,7 @@ local IsGroupState = {
 local LinkLoot, LinkDropdown
 do
 	local output = { }
-	function LinkLoot(channel, isExtraChannel)
+	function LinkLoot(channel, silent)
 		local output, key, buffer = output, 1
 		local sf = string.format
 
@@ -357,7 +359,9 @@ do
 		end
 
 		if not reached then
-			xprint(L.linkall_threshold_missed)
+			if not silent then
+				xprint(L.linkall_threshold_missed)
+			end
 			return false
 		end
 		if (channel == 'RAID' or channel == 'RAID_WARNING') and not IsInRaid() and IsInGroup() then
@@ -400,6 +404,39 @@ do
 			info.notCheckable = 1
 			UIDropDownMenu_AddButton(info, 1)
 		end
+	end
+end
+
+-- Reopening a partially looted corpse fires LOOT_OPENED again, so remember every source GUID and only auto-announce windows that contain a new one.
+local HasNewLootSources
+do
+	local announced, count = {}, 0
+	local function MarkSources(...)
+		local fresh = false
+		for i = 1, select('#', ...), 2 do
+			local guid = select(i, ...)
+			if guid and not (issecret and issecret(guid)) and not announced[guid] then
+				if count >= 1000 then
+					wipe(announced)
+					count = 0
+				end
+				announced[guid] = true
+				count = count + 1
+				fresh = true
+			end
+		end
+		return fresh
+	end
+
+	function HasNewLootSources()
+		if not GetLootSourceInfo then return true end
+		local fresh = false
+		for slot = 1, GetNumLootItems() do
+			if MarkSources(GetLootSourceInfo(slot)) then
+				fresh = true
+			end
+		end
+		return fresh
 	end
 end
 
@@ -1483,6 +1520,10 @@ function addon:LOOT_READY()
 end
 
 function addon:LOOT_OPENED(autoLoot)
+	local announce_when = IsGroupState[opt.linkall_auto]
+	if announce_when and announce_when() and GetNumLootItems() > 0 and HasNewLootSources() then
+		LinkLoot(opt.linkall_channel, true)
+	end
 	if opt.speedy_autoloot and not opt.speedy_autoloot_respect_filters
 		and SpeedyAllowed() and GetNumLootItems() > 0 then
 		if not XLootFrame:IsShown() and IsFishingLoot() then

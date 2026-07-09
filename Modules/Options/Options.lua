@@ -548,6 +548,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			}},
 			{ "link_button", "group", {
 				{ "linkall_show", when_group },
+				{ "linkall_auto", when_group },
 				{ "linkall_threshold", item_qualities },
 				{ "linkall_channel", {
 					{ "SAY", CHAT_MSG_SAY },
@@ -646,6 +647,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "roll_highlight", width = "double" },
 				{ "roll_highlight_upgrade", requires = "roll_highlight" },
 				{ "roll_highlight_newlook", requires = "roll_highlight" },
+				{ "roll_urgency" },
 			}},
 			{ "font", "group", {
 				{ "font", fonts },

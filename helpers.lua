@@ -30,9 +30,10 @@ function XLoot.CopperToString(copper)
 	return table_concat(buffer, ", ")
 end
 
-XLootTooltip = CreateFrame('GameTooltip', 'XLootTooltip', UIParent, 'GameTooltipTemplate')
+-- Scanning tooltip must live outside the UIParent tree, or the tooltip refresh cycle perpetually re-processes dynamic content (weapon imbues, temp buffs, tradeable timers).
+XLootTooltip = CreateFrame('GameTooltip', 'XLootTooltip', nil, 'GameTooltipTemplate')
 local tooltip = XLootTooltip
-tooltip:SetOwner(UIParent, "ANCHOR_NONE")
+tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
 local bind_types = {
 	[ITEM_BIND_ON_PICKUP] = 'pickup',
@@ -185,6 +186,15 @@ if GetDetailedItemLevelInfo and GetItemInfoInstant and GetInventoryItemLink then
 else
 	function XLoot.IsIlvlUpgrade() return false end
 end
+local URGENCY_START, URGENCY_FULL = 0.3, 0.1
+local URGENT_R, URGENT_G, URGENT_B = 1, 0.15, 0.15
+function XLoot.TimeFractionColor(fraction, r, g, b)
+	if fraction >= URGENCY_START then return r, g, b end
+	local t = fraction <= URGENCY_FULL and 1
+		or (URGENCY_START - fraction) / (URGENCY_START - URGENCY_FULL)
+	return r + (URGENT_R - r) * t, g + (URGENT_G - g) * t, b + (URGENT_B - b) * t
+end
+
 -- Tack role icon on to player name and return class colors
 local white = { r = 1, g = 1, b = 1 }
 local dimensions = {
@@ -246,6 +256,19 @@ function XLoot.IsMasterLooter()
 end
 
 XLoot.SendChatMessage = (C_ChatInfo and C_ChatInfo.SendChatMessage) or SendChatMessage
+
+-- Numeric segment-by-segment compare, since a string compare sorts "12.10.0" below "12.9.0". Returns 1, -1, or 0.
+function XLoot.CompareVersions(a, b)
+	local ai, bi = tostring(a or ""):gmatch("%d+"), tostring(b or ""):gmatch("%d+")
+	while true do
+		local a_part, b_part = ai(), bi()
+		if not a_part and not b_part then return 0 end
+		local an, bn = tonumber(a_part) or 0, tonumber(b_part) or 0
+		if an ~= bn then
+			return an > bn and 1 or -1
+		end
+	end
+end
 
 
 local temp_list, template = {},
