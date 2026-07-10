@@ -4,6 +4,8 @@
 ## Version: @project-version@
 ## Author: Xuerian
 ## X-Category: Inventory
+## Category: Loot
+## IconTexture: Interface\Icons\INV_Misc_Coin_01
 ## X-Name: XLoot
 ## X-Curse-Project-ID: 14906
 

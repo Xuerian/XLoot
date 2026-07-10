@@ -6,6 +6,22 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.11.1] - 2026-07-10
+
+### Bug Fixes
+- Fixed Group Loot roll frames not appearing on Classic when the rolled item was not cached yet, such as
+  zoning into a dungeon with rolls already in progress. The roll now waits for the item to finish loading
+  and retries, instead of being dropped until a reload. Thanks to RoadBlock for the diagnosis, the
+  item-load retry, and testing it in a live raid.
+- Fixed the Group Loot test preview drawing no frames on Classic, where its sample items only existed on
+  retail. It now uses items present on Classic clients. Thanks to RoadBlock for the replacement set.
+- Fixed Blizzard's default loot roll frames showing alongside XLoot's after a reload or zone-in during an
+  active roll. XLoot now hides the default container directly rather than only unregistering its event.
+
+### Improvements
+- Added an AddOns list category and icon so XLoot and its modules group together in the game's addon list.
+  Thanks to RoadBlock for the suggestion.
+
 ## [12.11.0] - 2026-07-08
 
 ### Features

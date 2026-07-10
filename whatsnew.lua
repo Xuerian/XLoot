@@ -6,6 +6,32 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.11.1",
+		date = "2026-07-10",
+		changes = {
+			{
+				label = "Roll frames now appear on Classic zone-ins",
+				type = "bugfix",
+				description = "Group Loot roll frames could go missing when an item was not cached yet, like zoning into a dungeon with rolls already in progress. The roll now waits for the item to load and retries instead of being dropped until a reload. Thanks to RoadBlock for the fix and testing.",
+			},
+			{
+				label = "Group Loot test preview works on Classic",
+				type = "bugfix",
+				description = "The roll test button drew nothing on Classic because its sample items only existed on retail. It now uses items that exist on Classic clients. Thanks to RoadBlock for the item set.",
+			},
+			{
+				label = "No more doubled default roll frames",
+				type = "bugfix",
+				description = "Blizzard's own loot roll frames no longer show up next to XLoot's after a reload or zone-in during an active roll.",
+			},
+			{
+				label = "AddOns list category and icon",
+				type = "improvement",
+				description = "XLoot and its modules now group together under a category with an icon in the game's addon list. Thanks to RoadBlock for the suggestion.",
+			},
+		},
+	},
+	{
 		version = "12.11.0",
 		date = "2026-07-08",
 		changes = {

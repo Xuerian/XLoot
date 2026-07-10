@@ -6,6 +6,7 @@ XLootGroup = addon
 local opt, anchor, alert_anchor, mouse_focus, Skinner
 local rolls = {}
 local auto_rolled = {}
+local pending_rolls = {}
 local GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string_format
 	= GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string.format
 -- C_LootHistory is nil on some Classic builds; indexing it at file load would crash the module.
@@ -129,6 +130,24 @@ function addon:OnInitialize()
 	XLoot:SetSlashCommand("xlg", self.SlashHandler)
 end
 
+-- The default GroupLootContainer rebuilds itself on reload/zone-in (not via START_LOOT_ROLL), so the UIParent unregister below can't reach it. Hide the container and its frames directly.
+local default_ui_hooked = false
+local function SuppressDefaultRollUI()
+	local c = GroupLootContainer
+	if c then
+		c:UnregisterAllEvents()
+		c:Hide()
+		if not default_ui_hooked then
+			default_ui_hooked = true
+			hooksecurefunc(c, "Show", function(self) self:Hide() end)
+		end
+	end
+	for i = 1, 4 do
+		local f = _G["GroupLootFrame"..i]
+		if f then f:UnregisterAllEvents(); f:Hide() end
+	end
+end
+
 function addon:OnEnable()
 	-- Register events
 	eframe:RegisterEvent('START_LOOT_ROLL')
@@ -147,6 +166,8 @@ function addon:OnEnable()
 	-- Disable default frame
 	UIParent:UnregisterEvent("START_LOOT_ROLL")
 	UIParent:UnregisterEvent("CANCEL_LOOT_ROLL")
+	SuppressDefaultRollUI()
+	eframe:RegisterEvent('PLAYER_ENTERING_WORLD')
 
 	-- Set up skins
 	Skinner = {}
@@ -254,7 +275,17 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 	local icon, name, count, quality, bop, need, greed, de, reason_need, reason_greed, reason_de, de_skill, can_transmog = GetLootRollItemInfo(id)
 	-- LootFrame.lua includes this sanity check (== nil is a blocked op on a secret name; not is allowed)
 	if not name then
-		print('XLoot Group: Ignoring START_LOOT_ROLL with no name')
+		-- a secret value (tainted 12.0 roll) can't be built, so bail. A plain nil name just means the item is not cached yet, so wait for it and retry instead of dropping the roll until a reload
+		local link = GetLootRollItemLink(id)
+		local itemid = link and not (issecret and issecret(link)) and GetItemInfoInstant(link)
+		if itemid and pending_rolls[id] ~= itemid and Item then
+			pending_rolls[id] = itemid
+			Item:CreateFromItemID(itemid):ContinueOnItemLoad(function()
+				local remaining = GetLootRollTimeLeft(id)
+				if remaining > 0 then addon:START_LOOT_ROLL(id, remaining, true) end
+				pending_rolls[id] = nil
+			end)
+		end
 		return
 	end
 	local link = GetLootRollItemLink(id)
@@ -369,6 +400,7 @@ end
 
 function addon:CANCEL_LOOT_ROLL(id)
 	auto_rolled[id] = nil
+	pending_rolls[id] = nil
 	local frame = rolls[id]
 	if frame then
 		anchor:Pop(frame)
@@ -377,9 +409,14 @@ end
 
 function addon:CANCEL_ALL_LOOT_ROLLS()
 	wipe(auto_rolled)
+	wipe(pending_rolls)
 	for _, frame in pairs(rolls) do
 		anchor:Pop(frame)
 	end
+end
+
+function addon:PLAYER_ENTERING_WORLD()
+	SuppressDefaultRollUI()
 end
 
 -- Rules change from shift-clicks outside the options dialog, so nudge AceConfig to redraw the live list.
@@ -1181,7 +1218,7 @@ end
 ---------------------------------------------------------------------------
 -- Test rolls
 ---------------------------------------------------------------------------
-local preview_loot = {
+local preview_loot = IS_RETAIL and {
 	{ 249288, true, true, true, true },
 	{ 258412, true, true, true, true },
 	{ 193701, false, true, true, true },
@@ -1190,6 +1227,13 @@ local preview_loot = {
 	{ 260188, true, true, true, true },
 	{ 249659, true, true, true, false },
 	{ 249626, false, true, true, true }
+} or {
+	-- Low classic-safe IDs with a spread of quality and item types
+	{ 17204, true, true, true, true },
+	{ 2244, false, true, true, true },
+	{ 69818, false, false, true, false },
+	{ 18332, false, true, false, true },
+	{ 14256, false, false, true, true }
 }
 -- Activate items
 for i, t in ipairs(preview_loot) do
