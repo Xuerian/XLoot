@@ -75,27 +75,6 @@ local numberize = function(v)
 	end
 end
 
-local suppress_toasts = false
-local hooked_alert_systems = {}
-local loot_alert_systems = { "LootAlertSystem", "MoneyWonAlertSystem", "LootUpgradeAlertSystem", "LegendaryItemAlertSystem" }
--- Install a permanent passthrough wrapper (never restore the original) so toggling off can't clobber another addon's later hook.
--- LegendaryItemAlertSystem is retail-only; MoP routes legendaries through LootAlertSystem (already covered).
-local function ApplyLootToastSuppression(suppress)
-	suppress_toasts = suppress
-	if not suppress then return end
-	for _, name in ipairs(loot_alert_systems) do
-		local system = _G[name]
-		if system and system.AddAlert and not hooked_alert_systems[name] then
-			hooked_alert_systems[name] = true
-			local original = system.AddAlert
-			system.AddAlert = function(...)
-				if suppress_toasts then return end
-				return original(...)
-			end
-		end
-	end
-end
-
 -------------------------------------------------------------------------------
 -- Module init
 
@@ -122,13 +101,13 @@ function addon:OnEnable()
 	-- Set up anchor
 	anchor = XLoot.Stack:CreateStaticStack(self.CreateRow, L.anchor, opt.anchor)
 	self:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
-	ApplyLootToastSuppression(opt.suppress_loot_toasts)
+	XLoot.SuppressLootToasts("Monitor", opt.suppress_loot_toasts)
 end
 
 function addon:ApplyOptions()
 	opt = self.opt
 	anchor:UpdateSVData(opt.anchor)
-	ApplyLootToastSuppression(opt.suppress_loot_toasts)
+	XLoot.SuppressLootToasts("Monitor", opt.suppress_loot_toasts)
 	addon:Restack()
 end
 

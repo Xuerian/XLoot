@@ -6,6 +6,16 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.12.2] - 2026-07-12
+
+### Bug Fixes
+- Loot toasts no longer show a duplicate next to Blizzard's own loot pop-up. When XLoot's Loot Toasts are
+  enabled they now hide Blizzard's default loot toast so you see only one, controlled by a new "Hide
+  Blizzard's duplicate loot toast" option that is on while toasts are enabled. Non-loot alerts such as
+  achievements, recipes, pets, and mounts are left alone. Reported by HOPE.
+- Loot toasts now sit above other interface widgets instead of being covered by them, by raising the toast
+  display layer. Reported by HOPE.
+
 ## [12.12.1] - 2026-07-12
 
 ### Bug Fixes

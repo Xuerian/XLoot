@@ -231,6 +231,7 @@ local locales = {
 			anchor = "Anchor",
 			filtering = "What to show",
 			behavior = "Behavior",
+			blizzard = "Blizzard alerts",
 			mouse = "Mouse",
 			font = "Font",
 			-- Option labels
@@ -252,6 +253,8 @@ local locales = {
 			vfx_desc = "Play the glow and shine flourish when a toast appears. Turn off for a plain fade in.",
 			sfx = "Sound",
 			sfx_desc = "Play a sound when a toast appears, with a distinct one for legendaries.",
+			hide_blizzard = "Hide Blizzard's duplicate loot toast",
+			hide_blizzard_desc = "Suppress Blizzard's default loot toast pop-ups so you do not see a duplicate next to XLoot's, the ones that slide in when you loot an item, coin, upgrade, or legendary. On by default while loot toasts are enabled. Non-loot alerts such as achievements, recipes, pets, mounts, and PvP honor are left alone. Takes effect immediately, no reload needed.",
 			mouse_hover = "Tooltip on hover",
 			mouse_hover_desc = "Show the item tooltip when you mouse over a toast, and pause its fade while hovered.",
 			mouse_click_mode = "Clicks",

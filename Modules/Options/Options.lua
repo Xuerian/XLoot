@@ -761,6 +761,9 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "vfx", width = "double" },
 				{ "sfx", width = "double" },
 			}},
+			{ "blizzard", "group", {
+				{ "hide_blizzard", width = "double" },
+			}},
 			{ "mouse", "group", {
 				{ "mouse_hover", width = "double" },
 				{ "mouse_click_mode", click_modes, width = "double" },

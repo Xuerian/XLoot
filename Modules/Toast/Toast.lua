@@ -25,6 +25,7 @@ local SOUND_LEGENDARY = (SOUNDKIT and SOUNDKIT.UI_LEGENDARY_LOOT_TOAST) or 63971
 local defaults = {
 	profile = {
 		enabled = false,
+		hide_blizzard = true,
 		anchor = {
 			direction = "down",
 			alignment = "left",
@@ -107,6 +108,7 @@ function addon:OnEnable()
 		icon_highlight = { type = "highlight", layer = "OVERLAY" },
 	})
 	anchor = XLoot.Stack:CreateStaticStack(self.CreateToast, L.anchor, opt.anchor)
+	anchor:SetFrameStrata("HIGH")
 	anchor:SetFrameLevel(6)
 	self:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
 	addon.anchor = anchor
@@ -123,6 +125,7 @@ function addon:ApplyState()
 			eframe:RegisterEvent("MODIFIER_STATE_CHANGED")
 		end
 	end
+	XLoot.SuppressLootToasts("Toast", opt.enabled and opt.hide_blizzard)
 	self:UpdateAnchors()
 end
 
@@ -402,6 +405,7 @@ do
 	function addon.CreateToast()
 		local frame = CreateFrame("Button", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate")
 		frame:SetSize(TOAST_W, TOAST_H)
+		frame:SetFrameStrata("HIGH")
 		frame:SetFrameLevel(anchor:GetFrameLevel() + 2)
 		addon:Skin(frame)
 		frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
