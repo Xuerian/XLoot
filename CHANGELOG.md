@@ -6,6 +6,23 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.12.1] - 2026-07-12
+
+### Bug Fixes
+- Fixed a crash while looting in a raid encounter with loot auto-announce enabled. XLoot prefixed the
+  announcement with the target's name, which is a protected "secret value" during a boss encounter, and
+  errored trying to read it. The announcement now drops any value it cannot read and posts the loot
+  normally, and no longer carries a stale mob name onto a later announcement.
+- Fixed a blocked-action error when a loot toast was built during combat, which is exactly when most raid
+  loot arrives. The toast's click-through mouse setup uses a function Blizzard protects in combat, so it is
+  now skipped under combat lockdown; only the click-through-until-Shift mode is briefly affected, and it
+  self-corrects once combat ends.
+- Hardened several more loot, roll, and master-loot paths against the same secret-value protection so they
+  cannot error during instanced encounters: the loot-window item name, the auto-announce quality and
+  quantity checks, the Group Loot roll build, and the retail master-loot raid roll.
+- Loot toasts now clear their hover highlight and tooltip if they are hidden while the mouse is over them,
+  such as hiding the interface with Alt-Z. Suggested by RoadBlock.
+
 ## [12.12.0] - 2026-07-11
 
 ### Features

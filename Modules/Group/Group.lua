@@ -281,7 +281,7 @@ end
 function addon:START_LOOT_ROLL(id, length, ongoing)
 	local icon, name, count, quality, bop, need, greed, de, reason_need, reason_greed, reason_de, de_skill, can_transmog = GetLootRollItemInfo(id)
 	-- LootFrame.lua includes this sanity check (== nil is a blocked op on a secret name; not is allowed)
-	if not name then
+	if not name or (issecret and issecret(name)) then
 		-- a secret value (tainted 12.0 roll) can't be built, so bail. A plain nil name just means the item is not cached yet, so wait for it and retry instead of dropping the roll until a reload
 		local link = GetLootRollItemLink(id)
 		local itemid = link and not (issecret and issecret(link)) and GetItemInfoInstant(link)
@@ -1191,7 +1191,7 @@ function addon:SkinUpdate()
 		bar:SetPoint('LEFT', bar.parent.icon_frame, 'RIGHT', -padding, 0)
 		bar:SetStatusBarTexture(skin.bar_texture)
 		local link = bar.parent.link
-		if link then
+		if link and not (issecret and issecret(link)) then
 			local r, g, b = C_Item.GetItemQualityColor(select(3, GetItemInfo(link)))
 			local br, bg, bb = RollBorderColor(link, r, g, b)
 			bar.parent.overlay:SetBorderColor(br, bg, bb)

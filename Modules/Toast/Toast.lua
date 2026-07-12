@@ -289,6 +289,12 @@ end
 
 local mouse_focus
 
+-- SetPassThroughButtons is protected under combat lockdown, so skip it in combat.
+local function set_passthrough(toast, ...)
+	if not toast.SetPassThroughButtons or InCombatLockdown() then return end
+	toast:SetPassThroughButtons(...)
+end
+
 local function apply_mouse(toast)
 	if not toast.SetMouseClickEnabled then
 		toast:EnableMouse(opt.mouse_click_mode ~= "never" or opt.mouse_hover)
@@ -298,22 +304,20 @@ local function apply_mouse(toast)
 	-- Modifier mode needs motion on to detect the hover even when the tooltip is off.
 	toast:SetMouseMotionEnabled(opt.mouse_hover or mode == "modifier")
 	toast:SetMouseClickEnabled(mode ~= "never")
-	if toast.SetPassThroughButtons then
-		-- Modifier mode keeps right-click for dismiss and lets left pass through until Shift is held.
-		if mode == "modifier" then
-			toast:SetPassThroughButtons("LeftButton")
-		else
-			toast:SetPassThroughButtons()
-		end
+	-- Modifier mode keeps right-click for dismiss and lets left pass through until Shift is held.
+	if mode == "modifier" then
+		set_passthrough(toast, "LeftButton")
+	else
+		set_passthrough(toast)
 	end
 end
 
 local function update_modifier_click(toast)
 	if toast and toast.SetPassThroughButtons and opt.mouse_click_mode == "modifier" then
 		if IsShiftKeyDown() then
-			toast:SetPassThroughButtons()
+			set_passthrough(toast)
 		else
-			toast:SetPassThroughButtons("LeftButton")
+			set_passthrough(toast, "LeftButton")
 		end
 	end
 end
@@ -354,9 +358,18 @@ do
 		self.icon_frame:HideHighlight()
 		GameTooltip:Hide()
 		if opt.mouse_click_mode == "modifier" and self.SetPassThroughButtons then
-			self:SetPassThroughButtons("LeftButton")
+			set_passthrough(self, "LeftButton")
 		end
 		if self.active then self:RestartFade() end
+	end
+
+	-- A parent hide (Alt-Z, cinematics) hides the toast without firing OnLeave, so clear the hover state it would otherwise strand.
+	local function OnHide(self)
+		if mouse_focus == self then
+			mouse_focus = nil
+			self.icon_frame:HideHighlight()
+			GameTooltip:Hide()
+		end
 	end
 
 	local function OnClick(self, button)
@@ -395,6 +408,7 @@ do
 		frame:SetScript("OnClick", OnClick)
 		frame:SetScript("OnEnter", OnEnter)
 		frame:SetScript("OnLeave", OnLeave)
+		frame:SetScript("OnHide", OnHide)
 
 		local icon_frame = CreateFrame("Frame", nil, frame, BackdropTemplateMixin and "BackdropTemplate")
 		icon_frame:SetSize(ICON, ICON)

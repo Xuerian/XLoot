@@ -344,9 +344,13 @@ do
 	function LinkLoot(channel, silent)
 		local output, key, buffer = output, 1
 		local sf = string.format
+		wipe(output)
 
 		if UnitExists('target') then
-			output[1] = sf('%s:', UnitName('target'))
+			local target_name = UnitName('target')
+			if not (issecret and issecret(target_name)) then
+				output[1] = sf('%s:', target_name)
+			end
 		end
 
 		local linkthreshold, reached = opt.linkall_threshold
@@ -357,7 +361,7 @@ do
 			if GetLootSlotType(i) == LOOT_SLOT_ITEM then
 				local _, _, quantity, _, rarity = GetLootSlotInfo(i)
 				local link = GetLootSlotLink(i)
-				if not (issecret and issecret(link)) and rarity >= linkthreshold then
+				if not (issecret and (issecret(link) or issecret(rarity) or issecret(quantity))) and rarity >= linkthreshold then
 					reached = true
 					buffer = sf('%s%s%s', (output[key] and output[key].." " or ""), (quantity > 1 and quantity.."x" or ""), link)
 					if strlen(buffer) > 255 then
@@ -734,7 +738,7 @@ do
 		if slotData.slotType == LOOT_SLOT_ITEM then
 			r, g, b, hex = C_Item.GetItemQualityColor(slotData.quality or 0)
 
-			text_name = ('|c%s%s|r'):format(hex, slotData.name)
+			text_name = slotData.secret and slotData.name or ('|c%s%s|r'):format(hex, slotData.name)
 
 			if opt.loot_texts_newlook and not slotData.secret and slotData.link and XLoot.IsNewAppearance(slotData.link) then
 				text_name = text_name..NEW_LOOK

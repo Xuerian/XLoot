@@ -28,6 +28,7 @@ local defaults = {
 local opt
 local eframe = CreateFrame("Frame")
 local me
+local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
 
 function addon:OnInitialize()
 	self:InitializeModule(defaults, eframe)
@@ -307,6 +308,7 @@ function addon.ShowAssignMenu(row)
 	local candidates = CollectCandidates(slot)
 	if #candidates == 0 then return end
 	local link = addon.testing and "[Test Item]" or GetLootSlotLink(slot)
+	if issecret and issecret(link) then link = nil end
 	local quality = row.quality or 0
 	local raid = InRaidMode()
 	local special = raid and ResolveSpecial(candidates) or nil
