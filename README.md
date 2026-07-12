@@ -15,8 +15,9 @@ like any other addon.
 
 ## Modules
 
-- **XLoot Frame** — replaces the loot window. Quality borders, item level, one-click
-  "link all" to chat, extensive appearance/skin options, and rule-based auto-looting:
+- **XLoot Frame** — replaces the loot window. Quality borders, item level, an optional
+  per-item vendor sell price (as text or gold/silver/copper coin icons), one-click "link
+  all" to chat, extensive appearance/skin options, and rule-based auto-looting:
   filter by category (currency, quest items, trade goods), by rarity (everything at or
   above a quality you choose), by gear (minimum quality and item level), by total vendor
   value, by a custom item list, or just grab everything — each rule applying solo, in
@@ -28,6 +29,12 @@ like any other addon.
   level, stack counts, quality coloring, and vendor sell price; can hide Blizzard's own
   loot pop-ups so they don't pile up, and lets you right-click a row to dismiss it, with
   adjustable fade times.
+- **XLoot Toast** _(new)_ — a Blizzard-style pop-up toast for notable loot as you receive
+  it: item icon, quality-colored name, item level, and a counting-up quantity, with same-item
+  pickups coalescing onto one "+N" toast. Configurable quality threshold, max on screen, fade
+  time, spawn animation, sound, coloring, font, a movable anchor, and how toasts respond to the
+  mouse (fully clickable, click-through, or click-through until Shift is held). Off by default;
+  **/xltd** previews it. Uses the Monitor's loot detection, so keep Monitor enabled for toasts.
 - **XLoot Group** — Need / Greed / Transmog / Pass roll frames with a timer, updated for
   retail. The live roll-tracking display (who rolled what, current winner) is being
   rebuilt against Blizzard's new loot-history API; the roll buttons themselves work today.
@@ -48,7 +55,7 @@ like any other addon.
 - **/xlml** — open the Master Loot options (Classic flavors; experimental on retail CN).
 
 Every option has a mouseover tooltip explaining what it does. Don't want a module?
-Disable XLoot Frame / Monitor / Group / Master individually in the AddOns list.
+Disable XLoot Frame / Monitor / Toast / Group / Master individually in the AddOns list.
 
 After an update, XLoot can show a short **What's New** summary — as a popup, a quiet
 clickable chat link, or nothing at all (your choice under **/xloot → After an update**).
