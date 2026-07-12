@@ -6,6 +6,34 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.12.0",
+		date = "2026-07-11",
+		changes = {
+			{
+				label = "Loot toasts",
+				type = "feature",
+				option = "Loot Toasts",
+				description = "A new optional module pops a Blizzard-style toast when you receive notable loot, with the icon, name, count, and quality border. Plenty to tune - quality threshold, item level, how many show at once, time on screen, sound and animation, and how they respond to the mouse. Off by default. Try /xltd to preview. Thanks to HOPE for the request.",
+			},
+			{
+				label = "Item values as coin icons",
+				type = "feature",
+				option = "XLoot options",
+				description = "Item values can show as gold, silver, and copper coin icons instead of plain text, on the loot row sell price and the Classic tooltip. Off by default. Thanks to 1Holy-Z for the request.",
+			},
+			{
+				label = "Bonus Roll restored on retail",
+				type = "bugfix",
+				description = "The retail Bonus Roll (coin-spin) frame was being hidden by XLoot's roll-frame suppression. It shows again. Thanks to Itamae and RoadBlock.",
+			},
+			{
+				label = "Auto-announce channel fix",
+				type = "bugfix",
+				description = "Announcing loot to a Raid Warning channel outside a raid could silently fail. XLoot now downgrades or skips channels you cannot post to. Thanks to Itamae.",
+			},
+		},
+	},
+	{
 		version = "12.11.1",
 		date = "2026-07-10",
 		changes = {

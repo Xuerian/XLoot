@@ -6,6 +6,32 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.12.0] - 2026-07-11
+
+### Features
+- **Loot toasts.** A new optional module pops a Blizzard-style toast when you receive notable loot, with
+  the item icon, name, count, and quality border. Plenty to tune: quality threshold, quest items, item
+  level, how many show at once, time on screen, sound and spawn animation, quality coloring, font, a
+  movable anchor, and how toasts respond to the mouse (always clickable, click-through, or click-through
+  until Shift is held). Off by default; `/xltd` previews it. Requested by HOPE.
+- **Item values as coin icons.** The loot row sell price and the Classic tooltip sell line can show values
+  as gold, silver, and copper coin icons instead of text. Off by default, under the Global settings.
+  Requested by 1Holy-Z.
+
+### Bug Fixes
+- Fixed the retail Bonus Roll (coin-spin) frame being hidden by XLoot's roll-frame suppression. XLoot no
+  longer touches the container that bonus rolls anchor into, so they appear again. Reported by Itamae;
+  diagnosed and narrowed with RoadBlock and Itamae.
+- Fixed auto-announce silently failing when set to a Raid Warning channel outside a raid, which tripped
+  Blizzard's privilege guard. Channels you cannot currently post to are now downgraded or skipped. Thanks
+  to Itamae.
+- Hardened the default roll-frame suppression so its hide-hook cannot be skipped if Blizzard's roll frames
+  had not been created yet the first time XLoot ran.
+
+### Improvements
+- Relaid out the "Announce Item Distribution" (Loot Master) and "Link button" (Loot Frame) channel and
+  quality dropdowns so their labels no longer overlap, moving the detail into mouseover tooltips.
+
 ## [12.11.1] - 2026-07-10
 
 ### Bug Fixes

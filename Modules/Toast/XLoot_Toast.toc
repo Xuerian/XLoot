@@ -1,0 +1,10 @@
+## Interface: 11508, 20505, 50504, 120100, 120007, 120005
+## Title: XLoot Toast
+## Notes: Blizzard-style toast pop-ups for notable loot you receive
+## Version: @project-version@
+## Author: Wheelbarrel00
+## X-Category: Inventory
+
+## Dependencies: XLoot
+
+load.xml

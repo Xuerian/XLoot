@@ -28,3 +28,4 @@ move-folders:
   XLoot/Modules/Master: XLoot_Master
   XLoot/Modules/Monitor: XLoot_Monitor
   XLoot/Modules/Options: XLoot_Options
+  XLoot/Modules/Toast: XLoot_Toast

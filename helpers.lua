@@ -30,6 +30,14 @@ function XLoot.CopperToString(copper)
 	return table_concat(buffer, ", ")
 end
 
+local GetCoinTextureString = GetCoinTextureString
+function XLoot.MoneyString(copper, icons)
+	if icons and GetCoinTextureString then
+		return GetCoinTextureString(copper)
+	end
+	return XLoot.CopperToString(copper)
+end
+
 -- Scanning tooltip must live outside the UIParent tree, or the tooltip refresh cycle perpetually re-processes dynamic content (weapon imbues, temp buffs, tradeable timers).
 XLootTooltip = CreateFrame('GameTooltip', 'XLootTooltip', nil, 'GameTooltipTemplate')
 local tooltip = XLootTooltip

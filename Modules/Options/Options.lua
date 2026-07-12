@@ -425,6 +425,7 @@ function addon:OnEnable() -- Construct addon option tables here
 		end},
 		{ "skin_anchors", "toggle" },
 		{ "tooltip_sell", "toggle", hidden = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE },
+		{ "value_coin_icons", "toggle" },
 		{ "whatsnew_mode", whatsnew_modes },
 		{ "whatsnew_show", "execute", func = function() XLoot:ShowWhatsNew() end },
 		{ "reset_defaults", "execute", confirm = true, func = function() addon:ResetProfile() end },
@@ -549,7 +550,7 @@ function addon:OnEnable() -- Construct addon option tables here
 			{ "link_button", "group", {
 				{ "linkall_show", when_group },
 				{ "linkall_auto", when_group },
-				{ "linkall_threshold", item_qualities },
+				{ "linkall_threshold", item_qualities, width = "double" },
 				{ "linkall_channel", {
 					{ "SAY", CHAT_MSG_SAY },
 					{ "PARTY", CHAT_MSG_PARTY },
@@ -558,7 +559,7 @@ function addon:OnEnable() -- Construct addon option tables here
 					{ "RAID", CHAT_MSG_RAID },
 					{ "RAID_WARNING", RAID_WARNING },
 					{ 'INSTANCE_CHAT', INSTANCE_CHAT},
-				}},
+				}, width = "double" },
 				{ "linkall_channel_secondary", {
 					{ "SAY", CHAT_MSG_SAY },
 					{ "PARTY", CHAT_MSG_PARTY },
@@ -568,7 +569,7 @@ function addon:OnEnable() -- Construct addon option tables here
 					{ "RAID_WARNING", RAID_WARNING },
 					{ 'INSTANCE_CHAT', INSTANCE_CHAT},
 					{ 'NONE', NONE },
-				}},
+				}, width = "double" },
 				{ "linkall_first_only" }
 			}},
 			{ "autolooting", "group", {
@@ -728,6 +729,56 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
+	-- XLoot Toast
+	if XLoot:GetModule("Toast", true) then
+		local click_modes = {
+			{ "always", L.Toast.click_always },
+			{ "modifier", L.Toast.click_modifier },
+			{ "never", L.Toast.click_never },
+		}
+		addon:RegisterOptions({ name = "Toast", addon =  XLootToast.addon }, {
+			{ "enabled", width = "double" },
+			{ "testing", "group", {
+				{ "test_settings", "execute", func = XLootToast.TestSettings }
+			}},
+			{ "anchor", "group", {
+				{ "visible", set = set_anchor, width = "double" },
+				{ "scale", "scale" },
+				{ "direction", directions, name = L.growth_direction },
+				{ "alignment", leftright, name = L.alignment },
+				{ "offsets", "header", name = '' },
+				{ "spacing", "range", -25, 25, 1, name = L.spacing, subtable = "anchor" },
+				{ "offset", "range", -25, 25, 1, name = L.offset, subtable = "anchor" },
+			}, defaults = { subtable = "anchor" } },
+			{ "filtering", "group", {
+				{ "threshold", item_qualities },
+				{ "quest", width = "double" },
+				{ "ilvl", width = "double" },
+			}},
+			{ "behavior", "group", {
+				{ "max_active", "range", 1, 20, 1 },
+				{ "fadeout_delay", "range", 1, 10, 0.5 },
+				{ "vfx", width = "double" },
+				{ "sfx", width = "double" },
+			}},
+			{ "mouse", "group", {
+				{ "mouse_hover", width = "double" },
+				{ "mouse_click_mode", click_modes, width = "double" },
+			}},
+			{ "colors", "group", {
+				{ "color_border", width = "double" },
+				{ "color_icon_border", width = "double" },
+				{ "color_name", width = "double" },
+				{ "color_threshold", item_qualities },
+			}, name = L.Frame.colors },
+			{ "font", "group", {
+				{ "font", fonts },
+				{ "font_flag", font_flag },
+				{ "font_size", "range", 6, 24, 1 },
+			}},
+		})
+	end
+
 	-- XLoot Master
 	if XLoot:GetModule("Master", true) then
 		-- Item quality dropdown generator
@@ -766,11 +817,11 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "menu_roll" },
 			}},
 			{ "awardannounce", "group", {
-				{ "award_qualitythreshold", item_qualities },
-				{ "award_channel", channels },
-				{ "award_channel_secondary", channels },
-				{ "award_guildannounce" },
-				{ "award_special" },
+				{ "award_qualitythreshold", item_qualities, width = "double" },
+				{ "award_channel", channels, width = "double" },
+				{ "award_channel_secondary", channels, width = "double" },
+				{ "award_guildannounce", width = "double" },
+				{ "award_special", width = "double" },
 			}},
 		})
 	end

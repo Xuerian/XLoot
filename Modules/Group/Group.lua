@@ -130,22 +130,29 @@ function addon:OnInitialize()
 	XLoot:SetSlashCommand("xlg", self.SlashHandler)
 end
 
--- The default GroupLootContainer rebuilds itself on reload/zone-in (not via START_LOOT_ROLL), so the UIParent unregister below can't reach it. Hide the container and its frames directly.
-local default_ui_hooked = false
+-- GroupLootFrame1..N are UIParent frames only anchored into GroupLootContainer, so hiding the container never suppressed them and only collided with bonus rolls, which anchor into that same container. Hide the roll frames directly and catch any re-show. A reload or zone-in during a roll rebuilds them via frame:Show outside START_LOOT_ROLL, which the frame hook catches.
+local function HideRollFrame(frame)
+	frame:Hide()
+	-- Route through RemoveFrame so the invisible layout container self-collapses, without ever hooking its Show.
+	if GroupLootContainer and GroupLootContainer_RemoveFrame then
+		GroupLootContainer_RemoveFrame(GroupLootContainer, frame)
+	end
+end
+
+local roll_ui_hooked = false
 local function SuppressDefaultRollUI()
-	local c = GroupLootContainer
-	if c then
-		c:UnregisterAllEvents()
-		c:Hide()
-		if not default_ui_hooked then
-			default_ui_hooked = true
-			hooksecurefunc(c, "Show", function(self) self:Hide() end)
+	for i = 1, (NUM_GROUP_LOOT_FRAMES or 4) do
+		local f = _G["GroupLootFrame"..i]
+		if f then
+			f:UnregisterAllEvents()
+			HideRollFrame(f)
+			if not roll_ui_hooked then
+				hooksecurefunc(f, "Show", HideRollFrame)
+			end
 		end
 	end
-	for i = 1, 4 do
-		local f = _G["GroupLootFrame"..i]
-		if f then f:UnregisterAllEvents(); f:Hide() end
-	end
+	-- Only mark hooked once the frames exist, or a call before Blizzard creates them would skip hooking for good.
+	if _G["GroupLootFrame1"] then roll_ui_hooked = true end
 end
 
 function addon:OnEnable()

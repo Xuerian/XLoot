@@ -6,7 +6,7 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
 local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
 local GetItemInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
 local GetContainerItemInfo = C_Container and C_Container.GetContainerItemInfo
-local CopperToString = XLoot.CopperToString
+local MoneyString = XLoot.MoneyString
 local SELL_LABEL = _G.SELL_PRICE or "Sell"
 
 local function tip_link(tooltip)
@@ -38,10 +38,11 @@ local function add_sell(tooltip)
 	if not link or (issecret and issecret(link)) then return end
 	local sell = select(11, GetItemInfo(link))
 	if not sell or sell == 0 then return end
+	local icons = XLoot.opt.value_coin_icons
 	if count and count > 1 then
-		tooltip:AddDoubleLine(SELL_LABEL, ('%s |cff808080(%d x %s)|r'):format(CopperToString(sell * count), count, CopperToString(sell)))
+		tooltip:AddDoubleLine(SELL_LABEL, ('%s |cff808080(%d x %s)|r'):format(MoneyString(sell * count, icons), count, MoneyString(sell, icons)))
 	else
-		tooltip:AddDoubleLine(SELL_LABEL, CopperToString(sell))
+		tooltip:AddDoubleLine(SELL_LABEL, MoneyString(sell, icons))
 	end
 end
 

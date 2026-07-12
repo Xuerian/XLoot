@@ -11,6 +11,7 @@ local defaults = {
 		skin = "smooth",
 		skin_anchors = false,
 		tooltip_sell = false,
+		value_coin_icons = false,
 		whatsnew_mode = "popup",
 	},
 	global = {
