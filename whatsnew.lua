@@ -6,6 +6,23 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.13.0",
+		date = "2026-07-16",
+		changes = {
+			{
+				label = "Roll results on retail",
+				type = "feature",
+				option = "Group Loot > What rolls to show",
+				description = "The Group Loot roll window can show who rolled and who won again on retail. Roll counts build on the Need, Greed, and Transmog buttons, then the window names the winner in their class color, or shows Pass: All if nobody wanted it. Retail closes your roll the moment you choose but does not decide it until everyone has rolled, so the window now waits for the result and shows the current leader while it waits. Off by default. Try /xlgd to preview.",
+			},
+			{
+				label = "Retail roll timer bars start full",
+				type = "bugfix",
+				description = "Fresh retail roll windows could start with a partly filled timer bar. XLoot was reading a value in Blizzard's roll event as its own resumed-roll flag, which replaced the roll's real length with an assumed one.",
+			},
+		},
+	},
+	{
 		version = "12.12.0",
 		date = "2026-07-11",
 		changes = {

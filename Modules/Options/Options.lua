@@ -655,7 +655,8 @@ function addon:OnEnable() -- Construct addon option tables here
 				{ "font_flag", font_flag },
 			}},
 			{ "roll_tracking", "group", {
-				{ "track_all", width = "double" },
+				{ "roll_status", width = "double", hidden = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE },
+				{ "track_all" },
 				{ "track_player_roll", requires_inverse = "track_all" },
 				{ "track_by_threshold", requires_inverse = "track_all", width = "double" },
 				{ "track_threshold", item_qualities, requires = "track_by_threshold", name = L.minimum_quality },

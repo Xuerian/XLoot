@@ -6,6 +6,26 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.13.0] - 2026-07-16
+
+### Features
+- **Roll results on retail.** The Group Loot roll window can show who rolled and who won again. Roll counts
+  build up on the Need, Greed, and Transmog buttons as your group rolls, then the window names the winner in
+  their class color with the winning roll type's icon, or shows "Pass: All" when nobody wanted it. Retail
+  closes your roll the moment you choose but does not decide it until everyone has rolled, so the window now
+  waits for the result instead of disappearing, showing the current leader while it waits. Off by default,
+  under Group Loot > What rolls to show. Classic already had this and is unchanged. `/xlgd` previews it.
+
+### Bug Fixes
+- Fixed retail roll windows starting with a partly filled timer bar instead of a full one. XLoot was reading
+  a value Blizzard passes with the roll event as its own "roll resumed after a reload" flag, which replaced
+  the roll's real length with an assumed one. Rolls longer than three minutes happened to mask it.
+
+### Improvements
+- The Group Loot roll tracking options now describe themselves on mouseover: "Track all rolls", "Track items
+  you roll on", "Track items by minimum quality", and the two expiration sliders. The "Track all rolls"
+  tooltip also no longer appears far off to the side of the option.
+
 ## [12.12.2] - 2026-07-12
 
 ### Bug Fixes
