@@ -6,6 +6,18 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.13.1] - 2026-07-23
+
+### Bug Fixes
+- The `/xlgd` roll preview no longer shows its test items in place of real loot rolls. The preview handed its
+  fake rolls low ids that could collide with real loot-roll ids, so after previewing, a real drop whose id
+  matched could display a test item instead of the real drop and not roll. The preview now uses ids far
+  outside the real range and clears each one when its frame closes. Reported by RoadBlock.
+
+### Improvements
+- The "What's New" popup now has a solid background instead of a see-through one.
+- TOC bumps for Classic Era 1.15.9 and TBC 2.5.6.
+
 ## [12.13.0] - 2026-07-16
 
 ### Features

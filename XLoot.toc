@@ -1,4 +1,4 @@
-## Interface: 11508, 20505, 50504, 120100, 120007, 120005
+## Interface: 11509, 20506, 50504, 120100, 120007, 120005
 ## Title: XLoot
 ## Notes: Core module for Loot and Looting-related UI improvements. Thank you to J.N., A.J.C., R.L., E.V., B.Y., J.C., R.P., R.R., and K.K. for your donations over the years.
 ## Version: @project-version@

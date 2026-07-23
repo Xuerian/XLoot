@@ -355,7 +355,8 @@ local function build()
 	f:Hide()
 
 	f:SetBackdrop({
-		bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+		-- Solid fill, the tooltip background texture stays see-through even at full backdrop alpha
+		bgFile = "Interface\\Buttons\\WHITE8X8",
 		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
 		tile = true, tileSize = 16, edgeSize = 14,
 		insets = { left = 4, right = 4, top = 4, bottom = 4 },

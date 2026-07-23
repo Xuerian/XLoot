@@ -1,4 +1,4 @@
-## Interface: 11508, 20505, 50504, 120100, 120007, 120005
+## Interface: 11509, 20506, 50504, 120100, 120007, 120005
 ## Title: XLoot Options
 ## Notes: Configuration interface for XLoot
 ## Version: @project-version@

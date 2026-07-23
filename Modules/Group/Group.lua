@@ -8,6 +8,8 @@ local rolls = {}
 local auto_rolled = {}
 local pending_rolls = {}
 local drop_to_roll = {}
+local FakeHistory
+local fake_seq = 0
 local GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string_format
 	= GetLootRollItemInfo, GetLootRollItemLink, GetLootRollTimeLeft, RollOnLoot, UnitGroupRolesAssigned, print, string.format
 -- C_LootHistory is nil on some Classic builds, so indexing it at file load would crash the module.
@@ -1254,8 +1256,13 @@ do
 
 	function RollFramePrototype:Popped()
 		rolls[self.rollid] = nil
+		if FakeHistory then
+			FakeHistory.rolls[self.rollid] = nil
+			FakeHistory.links[self.rollid] = nil
+		end
 		if self.drop_key then
 			drop_to_roll[self.drop_key] = nil
+			if FakeHistory then FakeHistory.drops[self.drop_key] = nil end
 			self.drop_key = nil
 		end
 	end
@@ -1474,7 +1481,6 @@ local deframe = CreateFrame('Frame')
 
 -- Currently only debugs one roll at a time.
 function XLootGroup.TestSettings()
-	local FakeHistory
 	local schedule = {}
 	local type_index = { 'need', 'greed', 'disenchant', [0] = 'pass' }
 	if not init then
@@ -1582,7 +1588,9 @@ function XLootGroup.TestSettings()
 			local item = preview_loot[index or random(1, #preview_loot)]
 			local iname, ilink, iquality, _, _, _, _, _, _, itex = GetItemInfo(item[1])
 
-			local rollid = #FakeHistory.rolls + 1
+			-- count up from a high base so fake ids never collide with real loot-roll ids
+			fake_seq = fake_seq + 1
+			local rollid = 1000000 + fake_seq
 
 			fake.item = { rollid, ilink, 5, false, nil, false }
 			fake.players = {
