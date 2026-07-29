@@ -19,9 +19,6 @@ local GLOW = [[Interface\AchievementFrame\UI-Achievement-Alert-Glow]]
 local SOUND_LOOT = (SOUNDKIT and SOUNDKIT.UI_EPICLOOT_TOAST) or 31578
 local SOUND_LEGENDARY = (SOUNDKIT and SOUNDKIT.UI_LEGENDARY_LOOT_TOAST) or 63971
 
--------------------------------------------------------------------------------
--- Settings
-
 local defaults = {
 	profile = {
 		enabled = false,
@@ -56,9 +53,6 @@ local defaults = {
 	}
 }
 
--------------------------------------------------------------------------------
--- Animated counter (lerps a displayed number toward its target)
-
 local animating, count_ticker = {}
 local function count_tick()
 	for fs, target in pairs(animating) do
@@ -86,9 +80,6 @@ local function set_count(fs, target, skip)
 		if not count_ticker then count_ticker = C_Timer.NewTicker(0.05, count_tick) end
 	end
 end
-
--------------------------------------------------------------------------------
--- Module init
 
 function addon:OnInitialize()
 	eframe = CreateFrame("Frame")
@@ -159,9 +150,6 @@ function addon:OnOptionsHide()
 	addon.config_preview = nil
 	self:UpdateAnchors()
 end
-
--------------------------------------------------------------------------------
--- Loot intake
 
 function addon.LOOT_EVENT(event, _, ...)
 	if opt.enabled and event == "item" then
@@ -239,9 +227,6 @@ function addon:BuildToast(link, num)
 	self:Spawn(toast)
 end
 
--------------------------------------------------------------------------------
--- Queue / stacking
-
 function addon:Reflow()
 	for i, t in ipairs(active) do
 		anchor:AnchorChild(t, i > 1 and active[i - 1] or nil)
@@ -286,9 +271,6 @@ function addon:ReleaseToast(toast)
 	end
 	self:Reflow()
 end
-
--------------------------------------------------------------------------------
--- Toast frame
 
 local mouse_focus
 
@@ -464,7 +446,6 @@ do
 		shine:SetAlpha(0)
 		frame.shine = shine
 
-		-- Spawn flourish: glow pulses, shine sweeps across
 		local glowag = frame:CreateAnimationGroup()
 		glowag:SetToFinalAlpha(true)
 		local a1 = glowag:CreateAnimation("Alpha"); a1:SetChildKey("glow"); a1:SetOrder(1)
@@ -479,7 +460,6 @@ do
 		s3:SetFromAlpha(1); s3:SetToAlpha(0); s3:SetStartDelay(0.35); s3:SetDuration(0.5)
 		frame.AnimGlow = glowag
 
-		-- Coalesce blink: the "+N" pops above the icon
 		local blinkag = frame:CreateAnimationGroup()
 		blinkag:SetToFinalAlpha(true)
 		local b1 = blinkag:CreateAnimation("Alpha"); b1:SetChildKey("blinktext"); b1:SetOrder(1)
@@ -502,9 +482,6 @@ do
 		return frame
 	end
 end
-
--------------------------------------------------------------------------------
--- preview / test
 
 local test_samples = {
 	{ "Worn Trinket", [[Interface\Icons\INV_Jewelry_Necklace_07]], 2 },

@@ -1,10 +1,8 @@
--- Create module
 local addon, L = XLoot:NewModule("Monitor")
 
 XLootMonitor = CreateFrame("Frame", "XLootMonitor", UIParent)
 XLootMonitor.addon = addon
 
--- Grab locals
 local print, opt, eframe, anchor = print
 local CopperToString, FancyPlayerName = XLoot.CopperToString, XLoot.FancyPlayerName
 local table_insert, table_remove = table.insert, table.remove
@@ -12,9 +10,6 @@ local me = UnitName("player")
 
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local GetDetailedItemLevelInfo = C_Item and C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo
-
--------------------------------------------------------------------------------
--- Settings
 
 local defaults = {
 	profile = {
@@ -60,10 +55,6 @@ local defaults = {
 	}
 }
 
-
-----------------------------------------------------------------------
--- Helpers
-
 local numberize = function(v)
 	if v <= 9999 then return v end
 	if v >= 1000000 then
@@ -75,9 +66,6 @@ local numberize = function(v)
 	end
 end
 
--------------------------------------------------------------------------------
--- Module init
-
 function addon:OnInitialize()
 	eframe = CreateFrame("Frame")
 	self:InitializeModule(defaults, eframe)
@@ -86,10 +74,8 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
-	-- Register for loot events
 	LibStub("LootEvents"):RegisterLootCallback(self.LOOT_EVENT)
 	eframe:RegisterEvent("MODIFIER_STATE_CHANGED")
-	-- Set up skins
 	XLoot:MakeSkinner(self, {
 		default = { gradient = opt.gradients },
 		anchor = { r = .4, g = .4, b = .4, a = .6, gradient = false },
@@ -98,7 +84,6 @@ function addon:OnEnable()
 		item_highlight = { type = "highlight", layer = "OVERLAY" },
 		row_highlight = { type = "highlight" }
 	})
-	-- Set up anchor
 	anchor = XLoot.Stack:CreateStaticStack(self.CreateRow, L.anchor, opt.anchor)
 	self:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
 	XLoot.SuppressLootToasts("Monitor", opt.suppress_loot_toasts)
@@ -119,13 +104,13 @@ end
 
 local events = {}
 function events.item(player, link, num)
-	if link and link:match("|Hitem:") then -- Proper items
+	if link and link:match("|Hitem:") then
 		local name, _, quality, _, _, _, _, _, _, icon = GetItemInfo(link)
 		if not name or type(quality) ~= "number" then
-			return -- item not cached yet, or malformed; not an error to report
+			return -- item not cached yet or malformed, not an error to report
 		end
 		if (player == me and opt.threshold_own or opt.threshold_other) > quality then
-			return -- Doesn't meet threshold requirements
+			return
 		end
 		local r, g, b = C_Item.GetItemQualityColor(quality)
 		local nr, ng, nb
@@ -148,7 +133,7 @@ function events.item(player, link, num)
 			row.ilvl:SetText(ilvl)
 		end
 		row.item = link
-	elseif link and link:match("|Hbattlepet:") then -- Battlepets. Really?
+	elseif link and link:match("|Hbattlepet:") then
 		-- local _, speciesID, level, breedQuality, maxHealth, power, speed, battlePetID = strsplit(":", link)
 	else
 		-- print("Unknown or invalid link type")
@@ -235,7 +220,6 @@ function addon.EframeUpdate(self, elapsed)
 			end
 			row.timeToTotal = ttt
 		end
-		-- Animation
 		local remaining = row.expires - timer
 		if remaining < 0 then
 			row:SetAlpha(0)
@@ -264,7 +248,6 @@ function addon:RemoveRow(row)
 		end
 	end
 
-	-- Disable OnUpdate
 	if #stack == 0 then
 		active, timer = false, 0
 		eframe:SetScript("OnUpdate", nil)
@@ -272,31 +255,26 @@ function addon:RemoveRow(row)
 end
 
 function addon:AddRow(icon, fade_time, ir, ig, ib, rr, rg, rb)
-	-- Acquire
 	local row = table_remove(pool)
 	if not row then
 		row = self.CreateRow()
 	end
 
-	-- Set up row
 	row.icon:SetTexture(icon)
 	row.icon_frame:SetBorderColor(ir, ig, ib)
 	row:SetBorderColor(rr or ir, rg or ig, rb or ib)
 	row.expires = timer + fade_time
 	row.started = timer
 	row.item = nil
-	row.timeToTotal = nil -- a right-click-dismissed row can be pooled mid-countdown; clear it so the reused row doesn't tick GetItemCount(nil)
+	row.timeToTotal = nil -- a right-click-dismissed row can be pooled mid-countdown, so clear it or the reused row ticks GetItemCount(nil)
 
-	-- Anchor
 	anchor:AnchorChild(row)
 	table_insert(stack, 1, row)
-	-- Reanchor second newest
 	if stack[2] then
 		anchor:AnchorChild(stack[2], row)
 	end
 	row:Show()
 
-	-- Enable OnUpdate
 	if not active then
 		active = true
 		eframe:SetScript("OnUpdate", self.EframeUpdate)
@@ -311,8 +289,6 @@ function addon:Restack()
 	end
 end
 
--------------------------------------------------------------------------------
--- Frame methods
 do
 	local function ShowTooltip(self)
 		if self.item then
@@ -419,7 +395,6 @@ do
 		addon:Highlight(icon_frame, "item_highlight")
 		frame.icon_frame = icon_frame
 
-		-- Item texture
 		local icon = icon_frame:CreateTexture(nil, "BACKGROUND")
 		icon:SetPoint("TOPLEFT", 3, -3)
 		icon:SetPoint("BOTTOMRIGHT", -3, 3)

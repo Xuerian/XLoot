@@ -24,24 +24,20 @@ local print = print
 -- following the same rules as custom skins
 -- Quick or temporary tweaks can be added to SKIN_TWEAKS.lua
 
--- Base skin template
 lib.base = {
 	bar_texture = [[Interface\AddOns\XLoot\Textures\bar]],
 	color_mod = .75,
 	row_spacing = 2,
 }
 
--- Skin registration
 function XLoot:RegisterSkin(skin_name, skin_table)
 	setmetatable(skin_table, { __index = lib.base })
 	skin_table.key = skin_name
 	lib.skins[skin_name] = skin_table
 end
 
--- Masque tweaks
 function XLoot:RegisterMasqueTweak(masque_name, tweak_table)
 	lib.masque_tweaks[masque_name] = tweak_table
-	-- Apply to existing skins
 	if lib.skins[masque_name] then
 		for k, v in pairs(tweak_table) do
 			lib.skins[masque_name][k] = v
@@ -49,7 +45,6 @@ function XLoot:RegisterMasqueTweak(masque_name, tweak_table)
 	end
 end
 
--- Skinning
 local function subtable_insert(t, k, v)
 	if not t[k] then
 		t[k] = {}
@@ -104,7 +99,6 @@ do
 		b = b or options.b
 		a = a or options.a
 		for pos, tex in ipairs(borders) do
-			-- Set texture options
 			tex:SetDrawLayer(options.layer)
 			tex:SetTexture(options.texture)
 			tex:SetBlendMode(options.mode)
@@ -112,7 +106,6 @@ do
 			tex:SetHeight(size)
 			tex:SetVertexColor(r, g, b, a)
 
-			-- Position texture
 			tex:ClearAllPoints()
 			if pos == 1 then
 				tex:SetTexCoord(0, 1/6, 0, 1/6)
@@ -167,7 +160,6 @@ do
 	local bd_color = { 0, 0, 0, .9 }
 	local g_color = { .5, .5, .5, .6 }
 
-	-- Frame methods
 	local function SetBorderColor(self, r, g, b, a)
 		for i, x in pairs(self._skin_borders) do
 			x:SetVertexColor(r, g, b, a or 1)
@@ -198,23 +190,17 @@ do
 		frame:SetBackdropColor(unpack(bd_color))
 	end
 
-	-- Lib methods
-	-- Basic skin
 	function lib:Skin(frame, options)
-		-- Store options
 		frame._skin_options = meta(options)
 
-		-- Apply backdrop
 		if options.backdrop ~= false then
 			self:Backdrop(frame, type(options.backdrop) == 'table' and options.backdrop or nil)
 		end
 
-		-- Gradient
 		if options.gradient ~= false then
 			self:Gradient(frame)
 		end
 
-		-- Borders
 		frame._skin_borders = create_borders(frame, options)
 		frame.SetBorderColor = SetBorderColor
 		frame.GetBorderColor = GetBorderColor
@@ -229,7 +215,6 @@ do
 		update_borders(frame, options, frame._skin_borders, r, g, b, a)
 	end
 
-	-- Highlights
 	local function ShowHighlight(self, status)
 		for _, tex in ipairs(self._highlights) do
 			tex:Show()
@@ -254,9 +239,7 @@ do
 
 	local highlight = { type = 'highlight' }
 
-	-- Add highlight borders to a frame
 	function lib:Highlight(frame, options)
-		-- Default options
 		options = meta(options or highlight)
 
 		frame._highlights = create_borders(frame, options)
@@ -277,31 +260,23 @@ do
 	end
 end
 
-
--- Create a subset of skins to be applied
 do
-	-- Merge current skin with set options
 	local function compile(data, name)
 		assert(data.sets[name], "Bad set name given to XLoot.Skin")
-		-- Return cached
 		if not data.compiled[name] then
 			data.compiled[name] = {}
 		elseif next(data.compiled[name]) then
 			return data.compiled[name]
 		end
-		-- Generate to cache
 		local out = data.compiled[name]
 		local skin = (data.SKIN and lib.skins[data.SKIN]) and lib.skins[data.SKIN] or lib.current
 		local set = data.sets[name]
-		-- Copy defaults
 		for k,v in pairs(lib.base) do
 			out[k] = v
 		end
-		-- Copy skin data
 		for k,v in pairs(skin) do
 			out[k] = v
 		end
-		-- Extract data for highlights
 		if skin.highlight
 			and set.type
 			and set.type == 'highlight'
@@ -314,29 +289,23 @@ do
 				out.texture = nil
 			end
 		end
-		-- Apply set overrides
 		for k,v in pairs(set) do
 			out[k] = v
 		end
-		-- Apply metatable
 		setmetatable(out, getmetatable(skin))
 		return out
 	end
 
-	-- Re-compile and Re-apply all
 	local function Reskin(self)
 		local data = self._skin_data
-		-- Clear cache
 		for k,v in pairs(data.compiled) do
 			wipe(v)
 		end
-		-- Update skins
 		for set_name,frames in pairs(data.skinned) do
 			for i,frame in ipairs(frames) do
 				lib:UpdateSkin(frame, compile(data, set_name), frame:GetBorderColor())
 			end
 		end
-		-- Update highlights
 		for set_name,frames in pairs(data.highlighted) do
 			for i,frame in ipairs(frames) do
 				lib:UpdateHighlight(frame, compile(data, set_name), frame:GetHighlightColor())
@@ -361,7 +330,6 @@ do
 		subtable_insert(data.highlighted, set_name, frame)
 	end
 
-	-- Embed required functions and create data set to skin multiple similar frames
 	XLoot.skinners = {}
 	function XLoot:MakeSkinner(target, sets, default_set)
 		if not default_set and not sets.default then
@@ -382,8 +350,6 @@ do
 	end
 end
 
--------------------------------------------------------------------------------
--- Default skins
 local svelte = {
 	name = ('|c2244dd22%s|r'):format(L.skin_svelte),
 	texture = [[Interface\AddOns\XLoot\Textures\border_svelte]],
@@ -411,19 +377,15 @@ local smooth = {
 	color_mod = .9,
 }
 
--- Register default skins
 XLoot:RegisterSkin('svelte', svelte)
 XLoot:RegisterSkin('legacy', legacy)
 XLoot:RegisterSkin('smooth', smooth)
 
--------------------------------------------------------------------------------
 -- Index Masque skins later so we definitely catch all of them
 
 function XLoot:SkinsOnInitialize()
-	-- Masque skins
 	local Masque = LibStub('Masque', true) or LibStub('LibButtonFacade', true)
 	if Masque and Masque.GetSkins then
-		-- Add available skins
 		local Masque_Skins = Masque:GetSkins()
 		if type(Masque_Skins) == 'table' then
 			for k, v in pairs(Masque_Skins) do
@@ -437,29 +399,23 @@ function XLoot:SkinsOnInitialize()
 					end
 					skin.texture = v.Normal.Texture
 					skin.name = ('|c22dddd22Masque:|r %s'):format(k)
-					-- Apply existing tweak
 					if lib.masque_tweaks[k] then
 						for mk,mv in pairs(lib.masque_tweaks[k]) do
 							skin[mk] = mv
 						end
 					end
-					-- Register
 					XLoot:RegisterSkin(k, skin)
 				end
 			end
-		else -- Warn about outdated Masque
+		else
 			print("XLoot: Use of masque skins requires the beta version of Masque.")
 		end
 	end
 
 	XLoot:ApplySkinTweaks()
 
-	-- Activate current skin
 	self:SetSkin(self.db.profile.skin)
 end
-
--------------------------------------------------------------------------------
--- Skin access
 
 function XLoot:SetSkin(name)
 	lib.current = lib.skins[lib.skins[name] and name or 'smooth']

@@ -4,7 +4,7 @@ local print = print
 
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 
-local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
+local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
 
 --[[// Usage
 	Callbacks recieve (event, chat_event, ...)
@@ -32,7 +32,6 @@ local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
 			item_link
 --]]
 
--- Callback handling
 lib.callbacks = lib.callbacks or { loot = {}, group = {} }
 local lootcb, groupcb = lib.callbacks.loot, lib.callbacks.group
 
@@ -82,7 +81,6 @@ local Deformat = XLoot.Deformat
 
 local loot_patterns, group_patterns, unsortedloot, currentsort, system_patterns
 
--- Chatmsg handler
 local sort, group = table.sort
 local function sort_func(a, b)
 	return a[group] < b[group]
@@ -91,10 +89,8 @@ end
 local function Handler(text)
 	if issecret and issecret(text) then return end
 	if need_group and activerolls > 0 then
-		-- Move through the patterns one by one, match against the message
 		for k, v in ipairs(group_patterns) do
 			local m1, m2, m3, m4 = Deformat(text, v[1])
-			-- Match was found, call the handler with all captured values
 			if m1 then
 				current_pattern = v[3]
 				return v[2](m1, m2, m3, m4)
@@ -103,10 +99,8 @@ local function Handler(text)
 	end
 
 	if need_loot then
-		-- Match string against our patterns
 		for i, v in ipairs(loot_patterns) do
 			local m1, m2, m3, m4 = Deformat(text, v[1])
-			-- Match found, add to counter and call pattern's handler
 			if m1 then
 				current_pattern = v[1]
 				return v[2](m1, m2, m3, m4)
@@ -115,7 +109,7 @@ local function Handler(text)
 	end
 end
 
--- Whitelist-only; never route SYSTEM through Handler (LOOT_MONEY inverts to "(.-) loots (.-)" and would cross-match arbitrary system spam).
+-- Whitelist-only - never route SYSTEM through Handler (LOOT_MONEY inverts to "(.-) loots (.-)" and would cross-match arbitrary system spam).
 local function SystemHandler(text)
 	if issecret and issecret(text) then return end
 	if not need_loot then return end
@@ -129,7 +123,6 @@ local function SystemHandler(text)
 	end
 end
 
--- Invert gold patterns
 local function invert(pstr)
 	return pstr:gsub("%%d", "(%1+)")
 end
@@ -137,7 +130,6 @@ local cg = invert(GOLD_AMOUNT)
 local cs = invert(SILVER_AMOUNT)
 local cc = invert(COPPER_AMOUNT)
 
--- Parse coin strings (Really?)
 local function ParseCoinString(tstr)
 	local g = tstr:match(cg) or 0
 	local s = tstr:match(cs) or 0
@@ -145,7 +137,6 @@ local function ParseCoinString(tstr)
 	return g*10000+s*100+c
 end
 
--- Event handling
 if lib.frame then
 	lib.frame:SetScript("OnEvent", function() return nil end)
 end
@@ -163,7 +154,7 @@ event("CHAT_MSG_MONEY", Handler)
 event("CHAT_MSG_CURRENCY", Handler)
 event("CHAT_MSG_SYSTEM", SystemHandler)
 
--- Incriment and deincement rolls to only match while there is a roll happening
+-- Only match the group patterns while a roll is actually happening
 event("START_LOOT_ROLL", function()
 	activerolls = activerolls + 1
 	end)
@@ -175,8 +166,6 @@ end)
 
 local player = UnitName('player')
 
-
---// LOOT PATTERNS
 loot_patterns = { }
 do
 	local function handler(str, func)
@@ -184,7 +173,6 @@ do
 		table.insert(loot_patterns, { _G[str], func, str })
 	end
 
-	-- Loot triggers
 	local function loot(who, what, num)
 		trigger_loot('item', who, what, num or 1)
 	end
@@ -201,7 +189,6 @@ do
 		trigger_loot('coin', player, ParseCoinString(str), str)
 	end
 
-	-- Add item patterns
 	handler('LOOT_ITEM_PUSHED_SELF_MULTIPLE', loot_self)
 	handler('LOOT_ITEM_PUSHED_SELF', loot_self)
 	handler('LOOT_ITEM_SELF_MULTIPLE', loot_self)
@@ -224,19 +211,16 @@ do
 	handler('LOOT_ITEM', loot)
 
 
-	-- Add coin patterns
 	handler('LOOT_MONEY', coin)
 	handler('LOOT_MONEY_SPLIT_GUILD', coin_self)
 	handler('LOOT_MONEY_SPLIT', coin_self)
 
-	-- Currency patterns
 	local function currency(link, num)
 		trigger_loot('currency', link:match('currency:(%d+)'), num or 1)
 	end
 	handler('CURRENCY_GAINED_MULTIPLE', currency)
 	handler('CURRENCY_GAINED', currency)
 
-	-- Self crafting
 	local function crafted(what, num)
 		trigger_loot('crafted', what, num or 1)
 	end
@@ -252,12 +236,12 @@ end
 system_patterns = { }
 do
 	local function handler(str, func)
-		if _G[str] then -- absent on some flavors/locales; skip cleanly
+		if _G[str] then -- absent on some flavors and locales, so skip cleanly
 			table.insert(system_patterns, { _G[str], func, str })
 		end
 	end
 
-	-- Reward gold ("Received %s.") is word-form on some flavors and coin-texture markup on others; handle both.
+	-- Reward gold ("Received %s.") is word-form on some flavors and coin-texture markup on others, so handle both.
 	local function ParseCoinTexture(str)
 		local g = tonumber(str:match("(%d+)%s*|T[^|]-Gold")) or 0
 		local s = tonumber(str:match("(%d+)%s*|T[^|]-Silver")) or 0
@@ -268,7 +252,7 @@ do
 	local function system_coin(str)
 		local copper = ParseCoinString(str)
 		if copper == 0 then copper = ParseCoinTexture(str) end
-		if copper > 0 then -- "Received %s." also matches non-money lines; those parse to 0
+		if copper > 0 then -- "Received %s." also matches non-money lines, which parse to 0
 			trigger_loot('systemcoin', player, copper, str)
 		end
 	end
@@ -276,12 +260,8 @@ do
 	handler('ERR_QUEST_REWARD_MONEY_S', system_coin)
 end
 
-
---// GROUP PATTERNS
 group_patterns = { }
 do
-	-- Base handler function. Checks argument types, adds to handler table (Presorted)
-	--    The pattern is stored as the first key, and the function to be called in the second
 	local function handler(str, func)
 		table.insert(group_patterns, { _G[str], func, str })
 	end
@@ -303,7 +283,7 @@ do
 		end)
 	end
 
-	-- Add handlers using construct functions, ordered specifically
+	-- Order matters - the more specific patterns have to be tried first
 	selected('LOOT_ROLL_DISENCHANT', 'disenchant')
 	selected('LOOT_ROLL_GREED', 'greed')
 	selected('LOOT_ROLL_NEED', 'need')
@@ -440,7 +420,6 @@ local function tprint(...)
 	end
 end
 
--- Test each locale
 local function inv(pat) return select(1, XLoot.InvertFormatString(pat)) end
 local fmt = string.format
 for locale, t in pairs(locales) do
@@ -448,9 +427,7 @@ for locale, t in pairs(locales) do
 	-- setmetatable(t.strings, string_mt)
 	local test_table = test_table_from_locale(t)
 	local pass, fail = 0, 0
-	-- Test each string
 	for k, p in pairs(t.strings) do
-		-- Fake string
 		local test = p:format(unpack(test_table[k]))
 		-- Emulate Handle(text)
 		local m1, m2, m3, m4, matched
@@ -465,7 +442,6 @@ for locale, t in pairs(locales) do
 				-- cprint("[INCOMPLETE] string missing", v[3], locale)
 			end
 		end
-		-- String results
 		if matched == k then
 			tprint(fmt("[PASS] matched %s (%s) against %s", matched, inv(t.strings[k]), test), m1, m2, m3, m4)
 			pass = pass + 1
@@ -478,7 +454,6 @@ for locale, t in pairs(locales) do
 			fail = fail + 1
 		end
 	end
-	-- Locale results
 	if pass == 0 then
 		print("[FAIL ALL]", locale)
 	elseif fail ~= 0 then

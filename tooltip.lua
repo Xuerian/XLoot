@@ -1,9 +1,9 @@
 local XLoot = select(2, ...)
 
--- Retail already shows a vendor sell-price line in item tooltips; this only fills the gap on the Classic flavors, which don't.
+-- Retail already shows a vendor sell-price line in item tooltips. This only fills the gap on the Classic flavors, which don't.
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
 
-local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
+local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
 local GetItemInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo
 local GetContainerItemInfo = C_Container and C_Container.GetContainerItemInfo
 local MoneyString = XLoot.MoneyString
@@ -19,7 +19,7 @@ local function tip_link(tooltip)
 	end
 end
 
--- Stack count is only known when SetBagItem is called, and the post-call fires before a hooksecurefunc would; stash it pre-render, and clear on every read so a later non-bag tooltip can't inherit a stale count.
+-- Stack count is only known when SetBagItem is called and the post-call fires before a hooksecurefunc would, so stash it pre-render. Clear on every read so a later non-bag tooltip can't inherit a stale count.
 local pending_count
 if GameTooltip.SetBagItem and GetContainerItemInfo then
 	local orig = GameTooltip.SetBagItem
@@ -46,7 +46,7 @@ local function add_sell(tooltip)
 	end
 end
 
--- Retail routes item tooltips through TooltipDataProcessor; older clients use the OnTooltipSetItem script.
+-- Retail routes item tooltips through TooltipDataProcessor. Older clients use the OnTooltipSetItem script.
 local TDP = TooltipDataProcessor
 if TDP and TDP.AddTooltipPostCall and Enum and Enum.TooltipDataType and Enum.TooltipDataType.Item then
 	TDP.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip)

@@ -1,8 +1,5 @@
--- Create module
 local addon, L = XLoot:NewModule("Group")
--- Prepare global
 XLootGroup = addon
--- Grab locals
 local opt, anchor, alert_anchor, mouse_focus, Skinner
 local rolls = {}
 local auto_rolled = {}
@@ -50,9 +47,6 @@ local function RollBasedLootMethod()
 	end
 	return false
 end
-
--------------------------------------------------------------------------------
--- Settings
 
 local defaults = {
 	profile = {
@@ -127,19 +121,15 @@ local defaults = {
 
 opt = defaults.profile
 
--------------------------------------------------------------------------------
--- Module init
-
 local eframe = CreateFrame("Frame")
 function addon:OnInitialize()
 	self:InitializeModule(defaults, eframe)
 	opt = self.db.profile
 	XLootGroup.opt = opt
-	-- Extra slash command
 	XLoot:SetSlashCommand("xlg", self.SlashHandler)
 end
 
--- GroupLootFrame1..N are UIParent frames only anchored into GroupLootContainer, so hiding the container never suppressed them and only collided with bonus rolls, which anchor into that same container. Hide the roll frames directly and catch any re-show. A reload or zone-in during a roll rebuilds them via frame:Show outside START_LOOT_ROLL, which the frame hook catches.
+-- GroupLootFrame1..N are UIParent frames merely anchored into GroupLootContainer, so hiding the container never suppressed them and only broke bonus rolls, which do anchor into that container. Hide the frames directly, and hook Show since a reload or zone-in rebuilds them outside START_LOOT_ROLL.
 local function HideRollFrame(frame)
 	frame:Hide()
 	-- Route through RemoveFrame so the invisible layout container self-collapses, without ever hooking its Show.
@@ -165,7 +155,6 @@ local function SuppressDefaultRollUI()
 end
 
 function addon:OnEnable()
-	-- Register events
 	eframe:RegisterEvent('START_LOOT_ROLL')
 	eframe:RegisterEvent('MODIFIER_STATE_CHANGED')
 	eframe:RegisterEvent('CONFIRM_LOOT_ROLL')
@@ -180,13 +169,11 @@ function addon:OnEnable()
 		eframe:RegisterEvent('LOOT_ROLLS_COMPLETE')
 	end
 
-	-- Disable default frame
 	UIParent:UnregisterEvent("START_LOOT_ROLL")
 	UIParent:UnregisterEvent("CANCEL_LOOT_ROLL")
 	SuppressDefaultRollUI()
 	eframe:RegisterEvent('PLAYER_ENTERING_WORLD')
 
-	-- Set up skins
 	Skinner = {}
 	XLoot:MakeSkinner(Skinner, {
 		anchor = { r = .4, g = .4, b = .4, a = .6, gradient = false },
@@ -198,13 +185,11 @@ function addon:OnEnable()
 		bonus = { }
 	}, 'row')
 
-	-- Create Roll anchor
 	anchor = XLoot.Stack:CreateStaticStack(function() return RollFramePrototype:New() end, L.anchor, opt.roll_anchor)
 	anchor:SetFrameLevel(7)
 	anchor:Scale(opt.roll_anchor.scale)
 	addon.anchor = anchor
 
-	-- Create alert anchor
 	alert_anchor = XLoot.Stack:CreateAnchor(L.alert_anchor, opt.alert_anchor)
 	alert_anchor:SetFrameLevel(7)
 	addon.alert_anchor = alert_anchor
@@ -212,11 +197,9 @@ function addon:OnEnable()
 	alert_anchor.Show = alert_anchor.Hide
 	alert_anchor:Hide()
 
-	-- Skin anchor
 	Skinner:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
 	Skinner:Skin(alert_anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
 
-	-- Row fader
 	local fader = CreateFrame('Frame')
 	local timer = 0
 	fader:SetScript('OnUpdate', function(self, elapsed)
@@ -225,7 +208,6 @@ function addon:OnEnable()
 		else
 			timer = 0
 			local time = GetTime()
-			-- Extend expiration for mouseovered frames
 			if mouse_focus and mouse_focus.aexpire and (mouse_focus.aexpire - time) < 5 then
 				mouse_focus.aexpire = time + 5
 			end
@@ -248,7 +230,6 @@ function addon:OnEnable()
 		frame.aexpire = GetTime() + time
 	end
 
-	-- Find and show active rolls
 	if IsInGroup() and (IS_RETAIL or RollBasedLootMethod()) then
 		for i=1,300 do
 			local time = GetLootRollTimeLeft(i)
@@ -258,12 +239,6 @@ function addon:OnEnable()
 		end
 	end
 end
-
--------------------------------------------------------------------------------
--- Frame helpers
-
--------------------------------------------------------------------------------
--- Event handlers
 
 addon.bars = {}
 local type_strings = {
@@ -497,7 +472,6 @@ end
 
 local tidx = { [0] = 1, [3] = 2, [2] = 2, [1] = 3 }
 function addon:LOOT_HISTORY_ROLL_COMPLETE()
-	-- Locate history item
 	local hid, frame, rollid, players, done, _ = 1, nil, nil, nil, nil, nil
 	while true do
 		rollid, _, players, done = HistoryGetItem(hid)
@@ -510,7 +484,6 @@ function addon:LOOT_HISTORY_ROLL_COMPLETE()
 		hid = hid+1
 	end
 
-	-- Active frame found
 	frame.over = true
 	local top_type, top_roll, top_pid, top_is_me = 0, 0, nil, nil
 	for j=1, players do
@@ -527,7 +500,6 @@ function addon:LOOT_HISTORY_ROLL_COMPLETE()
 		end
 	end
 
-	-- Winner or lead
 	if top_pid then
 		local name, class = HistoryGetPlayerInfo(hid, top_pid)
 		local player, r, g, b = FancyPlayerName(name, class, opt)
@@ -545,13 +517,11 @@ function addon:LOOT_HISTORY_ROLL_COMPLETE()
 		frame.bar.expires = GetTime()
 		anchor:Expire(frame, top_is_me and opt.expire_won or opt.expire_lost)
 	else
-	-- No winner/lead
 		frame.text_status:SetText(string_format('%s: %s', PASS, ALL))
 		frame.text_status:SetTextColor(.7, .7, .7)
 		frame.bar.expires = GetTime()
 		anchor:Expire(frame, opt.expire_lost)
 	end
-	-- Refresh tooltip
 	if frame and mouse_focus == frame then
 		frame:OnEnter()
 	end
@@ -560,18 +530,15 @@ addon.LOOT_ROLLS_COMPLETE = addon.LOOT_HISTORY_ROLL_COMPLETE
 
 local rweights = { need = 3, greed = 2, disenchant = 2, pass = 1 }
 function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
-	-- Acquire roll information and frame
 	local rollid, link, players, done = HistoryGetItem(hid)
 	local frame = rolls[rollid]
 	if not frame or frame.rollid ~= rollid or not frame:IsShown() then
 		return nil
 	end
 
-	-- Acquire player information
 	local name, class, rtypeid, roll, winner, is_me = HistoryGetPlayerInfo(hid, pid)
 	local rtype = rtypes[rtypeid]
 
-	-- Transition or expire frame on player roll
 	if is_me then
 		if 	opt.track_all
 			or (opt.track_player_roll and rtype ~= 'pass')
@@ -588,10 +555,9 @@ function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 		end
 	end
 
-	-- Update post-player-roll status text
 	if frame.have_rolled then
 		local rtype = rtype == 'disenchant' and 'greed' or rtype
-		-- Roll of leading type or higher (rtype is nil until a player picks)
+		-- rtype is nil until that player picks
 		if rtype and rweights[rtype] >= rweights[frame.lead_type] then
 			frame.lead_type = rtype
 			local bracket, mtype = 0, nil
@@ -616,7 +582,6 @@ function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 			frame.text_status:SetTextColor(r, g, b)
 		end
 
-	-- Update roll button counters
 	else
 		local bracket = 0
 		for i=1, players do
@@ -629,7 +594,6 @@ function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 		if btn then btn:SetText(bracket) end
 	end
 
-	-- Refresh tooltip
 	if frame and mouse_focus == frame then
 		frame:OnEnter()
 	end
@@ -822,7 +786,6 @@ end
 
 local alert_frames = {}
 function addon.AlertFrameHook(alert)
-	-- Reskin toast
 	local elements = alert_frames[alert]
 	if not elements then
 		elements = {}
@@ -875,7 +838,6 @@ function addon.AlertFrameHook(alert)
 	alert:SetAlpha(opt.alert_alpha)
 	alert:SetScale(opt.alert_scale)
 
-	-- Update toast
 	if opt.alert_skin then
 		local c
 		if alert.hyperlink then
@@ -921,12 +883,8 @@ function addon.ToggleAnchors()
 	alert_anchor:SetShown(not state)
 end
 
--------------------------------------------------------------------------------
--- Frame creation
-
 do
 	local sf = string.format
-	-- Add a specific roll type to the tooltip
 	local function RollLines(list, hid)
 		for _,pid in pairs(list) do
 			local name, class, rtype, roll, is_winner, is_me = HistoryGetPlayerInfo(hid, pid)
@@ -948,7 +906,6 @@ do
 		end
 	end
 
-	-- Add roll status or summary to tooltip
 	local tneed, tgreed, tpass, trolls, tnone, table_sort
 		= {}, {}, {}, {}, {}, table.sort
 	local function rsort(a, b)
@@ -964,7 +921,8 @@ do
 	end
 
 	local function AddTooltipLines(self, show_all, show)
-		-- Locate history item
+		if not (HistoryGetItem and HistoryGetPlayerInfo) then return end
+
 		local rollid, hid = self.rollid, 1
 		local hrollid, link, players, done
 		while true do
@@ -977,7 +935,6 @@ do
 			hid = hid+1
 		end
 
-		-- Generate player lists
 		local tneed, tgreed, tpass, tnone, trolls
 			= wipe(tneed), wipe(tgreed), wipe(tpass), wipe(tnone), wipe(trolls)
 		for pid=1, players do
@@ -1004,7 +961,6 @@ do
 		table_sort(tgreed, rsort)
 		table_sort(tpass, rsort)
 
-		-- Generate tooltip
 		if show_all then
 			GameTooltip:AddLine('.', 0, 0, 0)
 		end
@@ -1025,14 +981,10 @@ do
 			RollLines(tnone, hid)
 		end
 
-		-- Force tooltip to refresh
 		GameTooltip:Show()
 		return true
 	end
 
-	---------------------------------------------------------------------------
-	-- Roll buttons
-	---------------------------------------------------------------------------
 	local RollButtonPrototype = XLoot.NewPrototype()
 	do
 		function RollButtonPrototype:OnClick()
@@ -1141,11 +1093,7 @@ do
 		end
 	end
 
-	---------------------------------------------------------------------------
-	-- Roll frames
-	---------------------------------------------------------------------------
 	RollFramePrototype = XLoot.NewPrototype()
-	-- Events
 	function RollFramePrototype:OnEnter()
 		mouse_focus = self
 		GameTooltip:SetOwner(self.icon_frame, 'ANCHOR_TOPLEFT', 28, 0)
@@ -1187,7 +1135,6 @@ do
 		end
 	end
 
-	-- Status bar update
 	local max, min = math.max, math.min
 	function RollFramePrototype:OnBarUpdate()
 		local parent = self.parent
@@ -1267,9 +1214,7 @@ do
 		end
 	end
 
-	-- Create roll frame
 	function RollFramePrototype:New()
-		-- Base frame
 		local frame = self:_New(CreateFrame('Button', nil, UIParent))
 		frame:SetFrameLevel(anchor:GetFrameLevel())
 		frame:SetHeight(24)
@@ -1278,14 +1223,12 @@ do
 		frame:SetScript('OnLeave', self.OnLeave)
 		frame:SetScript('OnClick', self.OnClick)
 
-		-- Overlay (For skin border)
 		local overlay = CreateFrame('frame', nil, frame, BackdropTemplateMixin and "BackdropTemplate")
 		overlay:SetFrameLevel(frame:GetFrameLevel())
 		overlay:SetAllPoints()
 		frame.overlay = overlay
 		local skin = Skinner:Skin(overlay, 'row')
 
-		-- Item icon (For skin border)
 		local icon_frame = CreateFrame('Frame', nil, frame)
 		icon_frame:SetPoint('LEFT', 0, 0)
 		icon_frame:SetWidth(28)
@@ -1293,14 +1236,12 @@ do
 		frame.icon_frame = icon_frame
 		Skinner:Skin(icon_frame, 'item')
 
-		-- Item texture
 		local icon = icon_frame:CreateTexture(nil, 'BACKGROUND')
 		icon:SetPoint('TOPLEFT', 3, -3)
 		icon:SetPoint('BOTTOMRIGHT', -3, 3)
 		icon:SetTexCoord(.07,.93,.07,.93)
 		frame.icon = icon
 
-		-- Timer bar
 		local bar = CreateFrame('StatusBar', nil, frame)
 		bar:SetFrameLevel(frame:GetFrameLevel())
 		local pad = skin.padding or 2
@@ -1311,7 +1252,7 @@ do
 		bar:SetScript('OnUpdate', self.OnBarUpdate)
 		bar.parent = frame
 		frame.bar = bar
-		-- Reference bar for quick re-skinning when XLoot skin changes
+		-- Tracked so SkinUpdate can re-skin every live bar
 		table.insert(addon.bars, bar)
 
 		local spark = bar:CreateTexture(nil, 'OVERLAY')
@@ -1321,17 +1262,14 @@ do
 		spark:SetBlendMode('ADD')
 		bar.spark = spark
 
-		-- Bind text
 		local bind = icon_frame:CreateFontString(nil, 'OVERLAY')
 		bind:SetPoint('BOTTOM', 0, 1)
 		frame.text_bind = bind
 
-		-- Time text
 		local time = icon_frame:CreateFontString(nil, 'OVERLAY')
 		time:SetPoint('CENTER', 0, 2)
 		frame.text_time = time
 
-		-- Item level
 		local ilvl = icon_frame:CreateFontString(nil, 'OVERLAY')
 		ilvl:SetPoint('TOPLEFT', 3, -3)
 		frame.text_ilvl = ilvl
@@ -1351,7 +1289,6 @@ do
 		local p = RollButtonPrototype:New(frame, 0, PASS, 'Pass', third, 0, 2, {.7, .7, .7})
 		frame.need, frame.greed, frame.disenchant, frame.transmog, frame.pass = n, g, d, t, p
 
-		-- Roll status text
 		local status = frame:CreateFontString(nil, 'OVERLAY')
 		status:SetHeight(16)
 		status:SetJustifyH('LEFT')
@@ -1359,7 +1296,6 @@ do
 		status:SetPoint('RIGHT', p, 'RIGHT', 2, 0)
 		frame.text_status = status
 
-		-- Loot name/link
 		local loot = frame:CreateFontString(nil, 'OVERLAY')
 		loot:SetHeight(16)
 		loot:SetJustifyH('LEFT')
@@ -1401,11 +1337,6 @@ do
 	end
 end
 
----------------------------------------------------------------------------
--- AddOn setup and events
----------------------------------------------------------------------------
-
--- Update skins when XLoot skin changes
 function addon:SkinUpdate()
 	local skin = Skinner:Reskin()
 	local padding = skin.padding or 2
@@ -1427,7 +1358,6 @@ function addon:SkinUpdate()
 
 end
 
--- Move anchors when scale changes
 function addon:ApplyOptions()
 	opt = self.opt
 
@@ -1450,9 +1380,6 @@ function addon:ApplyOptions()
 end
 
 
----------------------------------------------------------------------------
--- Test rolls
----------------------------------------------------------------------------
 local preview_loot = IS_RETAIL and {
 	{ 249288, true, true, true, true },
 	{ 258412, true, true, true, true },
@@ -1470,7 +1397,7 @@ local preview_loot = IS_RETAIL and {
 	{ 18332, false, true, false, true },
 	{ 14256, false, false, true, true }
 }
--- Activate items
+-- Prime the item cache so the preview links resolve
 for i, t in ipairs(preview_loot) do
 	GetItemInfo(t[1])
 end

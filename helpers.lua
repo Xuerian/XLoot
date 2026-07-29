@@ -4,7 +4,7 @@ local buffer, print = {}, print
 
 local table_insert, table_concat, string_format = table.insert, table.concat, string.format
 
-local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
+local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
 
 local coin_table = {
 	{ GOLD_AMOUNT, 0, "ffd700" },
@@ -140,7 +140,7 @@ else
 	function XLoot.IsNewAppearance() return false end
 end
 
--- Equip location -> the inventory slot(s) it competes with; multi-slot types (rings/trinkets/1H weapons) win if they beat any one.
+-- Equip location -> the inventory slot(s) it competes with. Multi-slot types (rings/trinkets/1H weapons) win if they beat any one.
 local UPGRADE_SLOTS = {
 	INVTYPE_HEAD = { INVSLOT_HEAD },
 	INVTYPE_NECK = { INVSLOT_NECK },
@@ -177,7 +177,7 @@ if GetDetailedItemLevelInfo and GetItemInfoInstant and GetInventoryItemLink then
 		if not slots then return false end
 		local lootedIlvl = GetDetailedItemLevelInfo(link)
 		if not lootedIlvl or lootedIlvl == 0 then
-			-- ilvl not cached yet; warm it and skip this pass rather than risk a wrong tag
+			-- ilvl not cached yet, so warm it and skip this pass rather than risk a wrong tag
 			if itemID and RequestLoadItemDataByID then RequestLoadItemDataByID(itemID) end
 			return false
 		end
@@ -203,7 +203,6 @@ function XLoot.TimeFractionColor(fraction, r, g, b)
 	return r + (URGENT_R - r) * t, g + (URGENT_G - g) * t, b + (URGENT_B - b) * t
 end
 
--- Tack role icon on to player name and return class colors
 local white = { r = 1, g = 1, b = 1 }
 local dimensions = {
 	HEALER = '48:64',
@@ -280,7 +279,7 @@ end
 
 -- Shared Blizzard loot-toast suppression, reference-counted so Monitor and Toast can each request it without
 -- clobbering the other. The AddAlert wrapper is installed once and never restored, so toggling a source off can
--- not clobber another addon's later hook. LegendaryItemAlertSystem is retail-only; MoP routes legendaries through
+-- not clobber another addon's later hook. LegendaryItemAlertSystem is retail-only. MoP routes legendaries through
 -- LootAlertSystem.
 do
 	local requesters = {}
@@ -315,11 +314,9 @@ return function(message)
 	return %s
 end]]
 
--- Return a inverted match string and corresponding list of ordered match slots (m1-m5)
 local match, gsub, insert = string.match, string.gsub, table.insert
 local function invert(pattern)
 	local inverted, arglist = pattern, nil
-	-- Escape magic characters
 	inverted = gsub(inverted, "%(", "%%(")
 	inverted = gsub(inverted, "%)", "%%)")
 	inverted = gsub(inverted, "%-", "%%-")
@@ -335,7 +332,6 @@ local function invert(pattern)
 			k, i = match(inverted, "%%(%d)%$"), i + 1
 		end
 		arglist = table.concat(list, ", ")
-	-- Simple patterns
 	else
 		inverted = gsub(inverted, "%%d", "(%%d+)")
 		inverted = gsub(inverted, "%%s", "(.-)")
@@ -344,7 +340,6 @@ local function invert(pattern)
 	return inverted, arglist
 end
 
--- Match string against a pattern, caching the inverted pattern
 local invert_cache = {}
 function XLoot.Deformat(str, pattern)
 	if issecret and issecret(str) then return end
@@ -359,7 +354,6 @@ end
 XLoot.InvertFormatString = invert
 
 --@do-not-package@
--- Debug
 local AC = LibStub('AceConsole-2.0', true)
 if AC then print = function(...) AC:PrintLiteral(...) end end
 --@end-do-not-package@

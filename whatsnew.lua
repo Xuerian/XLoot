@@ -240,7 +240,7 @@ local function unseen_releases()
 		out[#out + 1] = release
 	end
 	if #out == 0 then
-		out[1] = updates[1]  -- caught up but opened manually; never show an empty popup
+		out[1] = updates[1]  -- caught up but opened manually, never show an empty popup
 	end
 	return out
 end
@@ -315,7 +315,7 @@ local function announce_chat()
 	DEFAULT_CHAT_FRAME:AddMessage("|c2244dd22XLoot|r updated to "..WHATSNEW_VERSION.." — |Haddon:XLoot:whatsnew|h|cffffd100[See what's new]|r|h")
 end
 
--- Custom chat hyperlink (|Haddon:XLoot:whatsnew|h); Blizzard ignores the unknown
+-- Custom chat hyperlink (|Haddon:XLoot:whatsnew|h). Blizzard ignores the unknown
 -- type, so we open the popup ourselves when ours is clicked.
 hooksecurefunc("SetItemRef", function(link)
 	if link == "addon:XLoot:whatsnew" then
@@ -467,7 +467,7 @@ end
 
 --@do-not-package@
 -- Dev preview, stripped from packaged builds: /xlwhatsnew [lastSeenVersion|chat]
--- A version arg fakes whatsnew_seen so the digest is visible; "chat" prints the link.
+-- A version arg fakes whatsnew_seen so the digest is visible. "chat" prints the link.
 local demo_seeded = false
 local function seed_demo()
 	if demo_seeded then return end

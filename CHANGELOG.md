@@ -6,6 +6,25 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.13.2] - 2026-07-29
+
+### Bug Fixes
+- Fixed an error every time you moused over a roll window or its Need, Greed, or Pass buttons on Classic
+  clients that do not have the loot history API. The roll tooltip asked that API who had rolled without
+  first checking it existed, so the hover threw an error instead of showing the tooltip.
+- Switching XLoot profiles no longer breaks master loot. The Master module kept reading the profile you
+  switched away from, which is emptied out on a switch, so the next award failed with an error until you
+  reloaded. It now picks up the new profile straight away, on both Classic and retail.
+- Fixed the Classic raid roll handing the item to the wrong player. If anyone in the raid could not receive
+  loot, such as being out of range, the announced list of names no longer lined up with the numbers being
+  rolled on, so the winning number picked a different player than the one announced, and with enough
+  ineligible members the roll could error out and never start at all. The roll now announces and awards from
+  the same list, and only accepts a roll result that matches the raid roll it started.
+- A raid roll can no longer be resolved by an unrelated `/roll`. The old code left itself listening for roll
+  results after a failed raid roll, so a later manual roll could hand out the item.
+- Master loot now tells you when the player you picked can no longer receive the item, such as leaving the
+  group while the confirmation was open, instead of silently doing nothing.
+
 ## [12.13.1] - 2026-07-23
 
 ### Bug Fixes

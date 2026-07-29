@@ -1,10 +1,8 @@
--- Master loot returned to retail in 12.0.5 (CN-realm-only) on a new ScrollBox/MenuUtil flow this module doesn't handle; it targets the pre-8.0 flow, so keep it Classic-only.
+-- Master loot returned to retail in 12.0.5 (CN-realm-only) on a new ScrollBox/MenuUtil flow this module doesn't handle. It targets the pre-8.0 flow, so keep it Classic-only.
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
 
--- Create module
 local addon, L = XLoot:NewModule("Master")
 XLootMaster = addon
--- Grab locals
 local print, wipe, match = print, table.wipe, string.match
 local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
 local hexColors = {}
@@ -14,11 +12,9 @@ local randoms = {}
 local me = UnitName('player')
 local my_index, banker_index, disenchanter_index
 local candidate, color, lclass, className, slot, info, opt, eframe
--- Libraries
+local roll_pending
 local LD
 
--------------------------------------------------------------------------------
--- Settings
 local defaults = {
 	profile = {
 		menu_roll = true,
@@ -36,14 +32,17 @@ local defaults = {
 	}
 }
 
--------------------------------------------------------------------------------
--- Module init
 local eframe = CreateFrame("Frame")
 function addon:OnInitialize()
 	self:InitializeModule(defaults, eframe)
 	opt = self.db.profile
 	XLootMaster.opt = opt
 	XLoot:SetSlashCommand("xlml", self.SlashHandler)
+end
+
+-- AceDB strips defaults out of the old profile table on a switch, so re-read it or opt goes nil-valued
+function addon:ApplyOptions()
+	opt = self.opt
 end
 
 function addon:OnEnable()
@@ -67,7 +66,6 @@ function addon:OnEnable()
 	end
 end
 
--- Utility functions
 local function printall(...)
 	if DEFAULT_CHAT_FRAME then
 		DEFAULT_CHAT_FRAME:AddMessage(string.join(", ",tostringall(...)))
@@ -108,7 +106,6 @@ local function OutChannel(channel)
 	return out
 end
 
--- Addon functions
 function addon.AnnounceAward(data)
 	if data.quality >= opt.award_qualitythreshold then
 		if data.special and not opt.award_special then return end
@@ -130,26 +127,44 @@ function addon.AnnounceAward(data)
 	end
 end
 
-function addon.GiveLoot(frame, special)
-	local slot = LootFrame.selectedSlot
-	local quality = LootFrame.selectedQuality
-	local itemname = LootFrame.selectedItemName
-	local id = frame.value
-	local link = GetLootSlotLink(slot)	
-	local pname = index_name[id]
-	
-	local data = { slot = slot, link = link, special = special, quality = quality, pname = pname, id = id  }
-	local dialog
-	
- 	if ( quality >= opt.confirm_qualitythreshold ) then
- 		dialog = StaticPopup_Show("CONFIRM_XLOOT_DISTRIBUTION", ITEM_QUALITY_COLORS[quality].hex..itemname..FONT_COLOR_CODE_CLOSE, pname)
+local function xprint(msg)
+	if DEFAULT_CHAT_FRAME then
+		DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99XLootMaster|r: "..msg)
+	end
+end
+
+local function CandidateValid(slot, id, pname)
+	return slot and id and GetMasterLootCandidate(slot, id) == pname
+end
+
+local function Award(data)
+	if data.quality >= opt.confirm_qualitythreshold then
+		local qcolor = ITEM_QUALITY_COLORS[data.quality]
+		local dialog = StaticPopup_Show("CONFIRM_XLOOT_DISTRIBUTION",
+			(qcolor and qcolor.hex or "")..(data.itemname or "")..FONT_COLOR_CODE_CLOSE, data.pname)
 		if dialog then
 			dialog.data = data
 		end
- 	else
+	elseif CandidateValid(data.slot, data.id, data.pname) then
 		addon.AnnounceAward(data)
-		GiveMasterLoot(slot, id)
- 	end
+		GiveMasterLoot(data.slot, data.id)
+	else
+		xprint(L.CANDIDATE_UNAVAILABLE)
+	end
+end
+
+function addon.GiveLoot(frame, special)
+	local slot = LootFrame.selectedSlot
+	local id = frame.value
+	Award({
+		slot = slot,
+		id = id,
+		link = GetLootSlotLink(slot),
+		itemname = LootFrame.selectedItemName,
+		quality = LootFrame.selectedQuality or 0,
+		pname = index_name[id],
+		special = special,
+	})
 	CloseDropDownMenus()
 end
 
@@ -158,36 +173,70 @@ function addon.SpawnRoll(frame)
 	if DoMasterLootRoll then DoMasterLootRoll(frame.value) end
 end
 
-function addon.RaidRoll(frame, players)
-	-- Bail when loot frame is closed, avoiding nil error. Should be done better.
-	if not GetLootSlotLink(LootFrame.selectedSlot) then return nil end
-	local to = #players
+function addon.RaidRoll(frame, source)
+	local slot = LootFrame.selectedSlot
+	local link = slot and GetLootSlotLink(slot)
+	if not link then return end
+
+	-- `source` is the shared `randoms` table, which the next menu build wipes, so snapshot it.
+	local players, count = {}, 0
+	for i = 1, #source do
+		local index = source[i]
+		local name = index_name[index]
+		if name then
+			count = count + 1
+			players[count] = { index = index, name = name }
+		end
+	end
+	if count < 1 then return end
+
 	local out = OutChannel("AUTO")
-	if to >=1 then
-		eframe:RegisterEvent("CHAT_MSG_SYSTEM")
-		if out then
-			SendChatMessage("Raid Roll:"..GetLootSlotLink(LootFrame.selectedSlot),out) -- localize this
-			local k,names = 1,""
-			for i=1,to do
-				names = (k==1) and (i..":"..index_name[i]) or (names..", "..i..":"..index_name[i])
-				if i==to or k==3 then
-					SendChatMessage(names,out)
-					names = ""
-				end
-				k = k<3 and k+1 or 1
+	if out then
+		pcall(SendChatMessage, L.ML_RANDOM..": "..link, out)
+		local line = ""
+		for k = 1, count do
+			line = (line == "") and (k..": "..players[k].name) or (line..", "..k..": "..players[k].name)
+			if k == count or k % 3 == 0 then
+				pcall(SendChatMessage, line, out)
+				line = ""
 			end
 		end
- 		RandomRoll(1,to)
- 	end
+	end
+
+	roll_pending = {
+		slot = slot,
+		players = players,
+		count = count,
+		link = link,
+		itemname = LootFrame.selectedItemName,
+		quality = LootFrame.selectedQuality or 0,
+	}
+	eframe:RegisterEvent("CHAT_MSG_SYSTEM")
+	RandomRoll(1, count)
+	CloseDropDownMenus()
 end
 
+-- RandomRoll(1, count) returns a position into `players`, not a loot-slot candidate index.
 function addon:CHAT_MSG_SYSTEM(...)
-	local who, roll, from, to = XLoot.Deformat(..., RANDOM_ROLL_RESULT)
-	if who == me then
-		eframe.value = tonumber(roll)
-		eframe:UnregisterEvent("CHAT_MSG_SYSTEM")
-		addon.GiveLoot(eframe)
-	end
+	if not roll_pending then return end
+	local who, roll, low, high = XLoot.Deformat(..., RANDOM_ROLL_RESULT)
+	roll = tonumber(roll)
+	if who ~= me or not roll or tonumber(low) ~= 1 or tonumber(high) ~= roll_pending.count then return end
+
+	local pending = roll_pending
+	roll_pending = nil
+	eframe:UnregisterEvent("CHAT_MSG_SYSTEM")
+
+	local winner = pending.players[roll]
+	if not winner then return end
+	Award({
+		slot = pending.slot,
+		id = winner.index,
+		link = pending.link,
+		itemname = pending.itemname,
+		quality = pending.quality,
+		pname = winner.name,
+	})
 end
 
 function addon.AddMenuTitle(title)
@@ -211,13 +260,11 @@ function addon.AddMenuSeparator()
 end
 
 function addon.BuildPartyMenu(level)
-	-- In a party
 	if level == 1 then
 		for i=1, MAX_PARTY_MEMBERS+1, 1 do
 			candidate,lclass,className = GetMasterLootCandidate(slot,i)
 			index_name[i] = candidate
 			if candidate then
-				-- Add candidate button
 				info.text = candidate
 				info.colorCode = hexColors[className] or hexColors["UNKNOWN"]
 				info.textHeight = 12
@@ -250,7 +297,7 @@ function addon.BuildRaidMenuRecipients(level)
 			UIDropDownMenu_AddButton(info)
 		end
 	elseif level == 2 then
-		if UIDROPDOWNMENU_MENU_VALUE == "RECIPIENTS" then -- special recipients submenu
+		if UIDROPDOWNMENU_MENU_VALUE == "RECIPIENTS" then
 			if my_index then
 				candidate,lclass,className = GetMasterLootCandidate(slot,my_index)
 				if candidate and candidate == me then
@@ -313,7 +360,7 @@ function addon.BuildMenuSpecialRolls(level)
 		info.disabled = nil
 		UIDropDownMenu_AddButton(info)		
 	elseif level == 2 then
-		if UIDROPDOWNMENU_MENU_VALUE == "SPECIALROLLS" then -- special rolls submenu
+		if UIDROPDOWNMENU_MENU_VALUE == "SPECIALROLLS" then
 			info.colorCode = "|cffffffff"
 			info.isTitle = nil
 			info.textHeight = 12
@@ -356,7 +403,6 @@ function addon.listPriority(name, list)
 end
 
 function addon.BuildRaidMenu(level)
-	-- In a raid
 	if level == 1 then
 		wipe(player_indices)
 		wipe(index_name)
@@ -408,12 +454,10 @@ function addon.BuildRaidMenu(level)
 		addon.BuildRaidMenuRecipients(level)
 	
 	elseif level == 2 then
-		-- raid class menu
-		if classes_english[UIDROPDOWNMENU_MENU_VALUE] then -- classes submenus
+		if classes_english[UIDROPDOWNMENU_MENU_VALUE] then
 			if next(class_players[UIDROPDOWNMENU_MENU_VALUE]) then
 				table.sort(class_players[UIDROPDOWNMENU_MENU_VALUE])
 				for _,cand in ipairs(class_players[UIDROPDOWNMENU_MENU_VALUE]) do
-					-- Add candidate button
 					info.text = cand
 					info.colorCode = hexColors[UIDROPDOWNMENU_MENU_VALUE] or hexColors["UNKNOWN"]
 					info.textHeight = 12
@@ -470,8 +514,11 @@ StaticPopupDialogs["CONFIRM_XLOOT_DISTRIBUTION"] = {
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self,data)
+		if not (data and CandidateValid(data.slot, data.id, data.pname)) then
+			return xprint(L.CANDIDATE_UNAVAILABLE)
+		end
 		addon.AnnounceAward(data)
-		GiveMasterLoot(data.slot, data.id);
+		GiveMasterLoot(data.slot, data.id)
 	end,
 	timeout = 0,
 	hideOnEscape = 1,

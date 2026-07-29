@@ -7,7 +7,6 @@ local L = XLoot.L
 ---@class XLootAnchorPrototype: Button
 local AnchorPrototype = XLoot.NewPrototype()
 
--- ANCHOR element
 do
 	local backdrop = { bgFile = [[Interface\Tooltips\UI-Tooltip-Background]] }
 
@@ -164,7 +163,6 @@ do
 		return anchor
 	end
 end
--- END ANCHOR element
 
 local function AnchorScale(self, scale)
 	self:SetScale(scale)
@@ -187,7 +185,6 @@ local function AcquireChild(self)
 	return child, true
 end
 
--- STATIC STACK
 do
 	local function Push(self)
 		local child, new = AcquireChild(self)

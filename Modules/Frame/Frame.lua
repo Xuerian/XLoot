@@ -36,18 +36,14 @@ function XLootButtonOnClick(row, button, handled)
 	return handled
 end
 
--- Create module
 local addon, L = XLoot:NewModule("Frame")
 
--- Prepare frame/global
 XLootFrame = CreateFrame("Frame", "XLootFrame", UIParent, BackdropTemplateMixin and "BackdropTemplate")
 XLootFrame.addon = addon
 local XLootFrame = XLootFrame
 
--- Grab locals
 local opt
 
--- Because forking the API is a great idea
 local LOOT_SLOT_NONE = LOOT_SLOT_NONE or Enum.LootSlotType.None
 local LOOT_SLOT_ITEM = LOOT_SLOT_ITEM or Enum.LootSlotType.Item
 local LOOT_SLOT_MONEY = LOOT_SLOT_MONEY or Enum.LootSlotType.Money
@@ -56,16 +52,13 @@ local LOOT_SLOT_CURRENCY = LOOT_SLOT_CURRENCY or Enum.LootSlotType.Currency
 local GetContainerNumFreeSlots = C_Container and C_Container.GetContainerNumFreeSlots or GetContainerNumFreeSlots
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local SendChatMessage = XLoot.SendChatMessage
-local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
+local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
 
--- Chat output
 local print, wprint = print, print
 local function xprint(text)
 	wprint(('%s: %s'):format('|c2244dd22XLoot|r', tostring(text)))
 end
 
--- Performance blah blah blah
--- Using this function is a pain in the ass.
 local BIND_ON_NONE = 0
 local BIND_ON_PICKUP = 1
 local BIND_ON_EQUIP = 2
@@ -94,9 +87,6 @@ local function GetItemInfoTable(link)
 		isCraftingReagent = isCraftingReagent
 	}
 end
-
--------------------------------------------------------------------------------
--- Settings
 
 local defaults = {
 	profile = {
@@ -163,8 +153,8 @@ local defaults = {
 
 		autoloot_gear_quality = 0, -- Quality 0 - 6, Poor - Artifact
 		autoloot_gear_minlevel = 0,
-		autoloot_value_minprice = 0, -- Gold; sellPrice is copper (x10000)
-		autoloot_quality_min = 2, -- Quality 0 - 6; inert until the 'quality' when-state leaves 'never'
+		autoloot_value_minprice = 0, -- Gold, sellPrice is copper (x10000)
+		autoloot_quality_min = 2, -- Quality 0 - 6, inert until the 'quality' when-state leaves 'never'
 
 		speedy_autoloot = false,
 		speedy_autoloot_respect_filters = false,
@@ -193,9 +183,6 @@ local defaults = {
 	}
 }
 
--------------------------------------------------------------------------------
--- Module init
-
 function addon:OnInitialize()
 	self:InitializeModule(defaults, XLootFrame)
 	opt = self.db.profile
@@ -203,7 +190,6 @@ function addon:OnInitialize()
 end
 
 function addon:OnEnable()
-	-- Register events
 	XLootFrame:RegisterEvent("LOOT_READY")
 	XLootFrame:RegisterEvent("LOOT_OPENED")
 	XLootFrame:RegisterEvent("LOOT_CLOSED")
@@ -211,7 +197,6 @@ function addon:OnEnable()
 	XLootFrame:RegisterEvent("MODIFIER_STATE_CHANGED")
 	XLootFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 
-	-- Disable default frame
 	LootFrame:UnregisterEvent("LOOT_OPENED")
 	LootFrame:UnregisterEvent("LOOT_CLOSED")
 	LootFrame:UnregisterEvent("LOOT_SLOT_CLEARED")
@@ -248,7 +233,6 @@ function addon:ApplyOptions(in_options)
 		XLootFrame:Update(true)
 	end
 	XLootFrame:ParseAutolootList()
-	-- Update preview frame in options
 	if in_options then
 		local Fake = XLootFakeFrame
 		Fake.opt = opt
@@ -294,7 +278,6 @@ function addon:ApplyOptions(in_options)
 end
 
 function addon:OnOptionsShow(panel)
-	-- Create preview frame
 	local frame = XLootFakeFrame
 	if not frame then
 		frame = CreateFrame('Frame', 'XLootFakeFrame', panel, BackdropTemplateMixin and "BackdropTemplate")
@@ -319,9 +302,6 @@ local IsGroupState = {
 	party = function() return IsInGroup() and not IsInRaid() end,
 	solo = function() return not IsInGroup() end
 }
-
--------------------------------------------------------------------------------
--- Link All
 
 local LinkLoot, LinkDropdown
 do
@@ -456,13 +436,6 @@ do
 	end
 end
 
--------------------------------------------------------------------------------
--- Frame creation
---  Helpers
---  >Rows
---  >Loot frame
-
--- Universal events
 local function OnDragStart()
 	if opt.frame_draggable then
 		XLootFrame:StartMoving()
@@ -475,14 +448,12 @@ local function OnDragStop()
 	opt.frame_position_y = opt.frame_grow_upwards and XLootFrame:GetBottom() or XLootFrame:GetTop()
 end
 
--- Fontstring sizes
 local function AdjustFontstringSize(self)
 	local text = self:GetText()
 	self:SetHeight(self:GetStringHeight())
 	self:SetText(text)
 end
 
--- Colors
 local function Darken(mult, ...)
 	local r, g, b, a = ...
 	if type(r) == 'table' then
@@ -494,17 +465,13 @@ end
 local function GetColor(self, key, mult)
 	local skin, raw, default, t = self.skin, rawget(self.opt, key), defaults.profile[key]
 	assert(default, "No default color specified for key " .. key)
-	-- Use options if different from defaults
 	if raw and (raw[1] ~= default[1] or raw[2] ~= default[2] or raw[3] ~= default[3] or raw[4] ~= default[4]) then
 		t = raw
-	-- Use skin if options are defaults
 	elseif skin[key] then
 		t = skin[key]
-	-- Use defaults
 	else
 		t = default
 	end
-	-- Darken
 	if mult then
 		return Darken(mult, t)
 	end
@@ -512,7 +479,6 @@ local function GetColor(self, key, mult)
 end
 
 
--- Build individual loot row
 local mouse_focus
 local BuildRow
 do
@@ -531,7 +497,6 @@ do
 	---@field i integer
 	---@field owner Frame
 	local RowPrototype = XLoot.NewPrototype()
-	-- Text helpers
 	local function smalltext(text)
 		text:SetDrawLayer'OVERLAY'
 		text:SetHeight(10)
@@ -548,13 +513,11 @@ do
 		text:SetPoint('TOP', self, 0, y)
 	end
 
-	-- Color overrides
 	function RowPrototype:SetBorderColor(r, g, b, a)
 		self:_SetBorderColor(r, g, b, a or 1)
 		self.frame_item:SetBorderColor(r, g, b, a or 1)
 	end
 
-	-- Frame events
 	do
 		local function Row_ShowTooltip_Inner(self)
 			local f
@@ -648,16 +611,13 @@ do
 		self.parent.text_name:SetPoint('RIGHT', self.parent, 'RIGHT', -6, 0)
 	end
 
-	-- Appearance/skin updates
 	local resize_texts = {'text_name', 'text_info'}
 	function RowPrototype:UpdateAppearance()
 		local owner, opt = self.owner, self.owner.opt
 
-		-- Align frames
 		self:SetPoint('LEFT', opt.loot_padding_left, 0)
 		self:SetPoint('RIGHT', -opt.loot_padding_right, 0)
 
-		-- Colors
 		self:SetBorderColor(owner:GetColor('loot_color_border'))
 		self:SetBackdropColor(owner:GetColor('loot_color_backdrop', 0.7))
 		self:SetGradientColor(owner:GetColor('loot_color_gradient'))
@@ -667,7 +627,6 @@ do
 		self:SetAlpha(opt.loot_alpha)
 
 
-		-- Text
 		self.text_name:SetFont(opt.font, opt.font_size_loot, opt.font_flag_loot)
 		self.text_info:SetFont(opt.font, opt.font_size_info, opt.font_flag_loot)
 		self.text_sell:SetFont(opt.font, opt.font_size_info, opt.font_flag)
@@ -680,7 +639,6 @@ do
 		self.button_auto:SetWidth(self.text_button_auto:GetStringWidth()+4)
 		self.button_auto:SetHeight(self.text_button_auto:GetStringHeight()+4)
 
-		-- Resize fontstrings
 		for i=1,#resize_texts do
 			local fontstring = self[resize_texts[i]]
 			local text = fontstring:GetText()
@@ -689,15 +647,12 @@ do
 			fontstring:SetText(text)
 		end
 
-		-- Dimensions
 		self.frame_item:SetWidth(opt.loot_icon_size)
 		self.frame_item:SetHeight(opt.loot_icon_size)
 		self:SetHeight(opt.loot_row_height)
 
-		-- Calculated row height
 		owner.row_height = self:GetHeight() + owner.skin.row_spacing
 
-		-- Highlight textures
 		if opt.loot_highlight then
 			if not self._highlights then
 				owner:Highlight(self, 'row_highlight')
@@ -710,11 +665,9 @@ do
 			self.frame_item:SetHighlightColor(0, 0, 0, 0)
 		end
 
-		-- Clear layout cache
 		self.layout = nil
 	end
 
-	-- Bind texts
 	local binds = {
 		[1] = ('|cffff4422%s|r '):format(L.bind_on_pickup_short),
 		[2] = ('|cff44ff44%s|r '):format(L.bind_on_equip_short),
@@ -725,7 +678,6 @@ do
 	local NEW_LOOK = (' |cff66ccff%s|r'):format(L.new_look)
 	local UPGRADE = (' |cff1eff00%s|r'):format(L.upgrade)
 
-	-- Update slot with loot
 	function RowPrototype:Update(slotData)
 		local r, g, b, hex
 		local owner = self:GetParent()
@@ -733,7 +685,6 @@ do
 		local text_info, text_name, text_bind = '', '', ''
 		self.item_name = slotData.name
 
-		-- Items
 		local layout = 'simple'
 		if slotData.slotType == LOOT_SLOT_ITEM then
 			r, g, b, hex = C_Item.GetItemQualityColor(slotData.quality or 0)
@@ -748,7 +699,7 @@ do
 				text_name = text_name..UPGRADE
 			end
 
-			if opt.loot_texts_info then -- This is a bit gnarly
+			if opt.loot_texts_info then
 				local equip = slotData.typeName == ENCHSLOT_WEAPON and ENCHSLOT_WEAPON or slotData.equipLoc ~= '' and _G[slotData.equipLoc] or ''
 				local itemtype = (slotData.subTypeName == 'Junk' and slotData.quality > 0) and MISCELLANEOUS or slotData.subTypeName
 				if itemtype then
@@ -761,13 +712,11 @@ do
 				text_bind = binds[slotData.bindType] or ''
 			end
 
-		-- Currency
 		else
 			r, g, b = .4, .4, .4
 			text_name = slotData.secret and slotData.name or slotData.name:gsub('\n', ', ')
 		end
 
-		-- Strings
 		self.text_name:SetText(text_name)
 		self.text_info:SetText(text_info)
 		self.text_bind:SetText(text_bind)
@@ -784,7 +733,6 @@ do
 		end
 		local name_width = self.text_name:GetStringWidth()
 
-		-- Icon
 		self.texture_item:SetTexture(slotData.icon)
 		if slotData.locked and opt.loot_texts_lock then
 			self.text_locked:Show()
@@ -792,7 +740,6 @@ do
 			self.text_locked:Hide()
 		end
 
-		-- Layout
 		if self.layout ~= layout then
 			self.layout = layout
 			if layout == 'simple' then
@@ -802,19 +749,16 @@ do
 			end
 		end
 
-		-- Quality coloring
 		if opt.quality_color_slot then
 			self:SetBorderColor(Darken(owner.skin.color_mod, r, g, b))
 		end
 
-		-- Quest icon
 		if slotData.questID then
 			self.texture_bang:Show()
 		else
 			self.texture_bang:Hide()
 		end
 
-		-- Autoloot button
 		if opt.loot_buttons_auto and (self.owner.fake or (opt.autoloots.list ~= 'never' and slotData.slotType == LOOT_SLOT_ITEM and not slotData.secret and not self.owner.auto_items[slotData.name])) then
 			self.button_auto:Show()
 			name_width = name_width + self.button_auto:GetWidth() - 6
@@ -822,7 +766,6 @@ do
 			self.button_auto:Hide()
 		end
 
-		-- Attach
 		if self.i == 1 then
 			self:SetPoint('TOP', 0, -opt.loot_padding_top)
 		else
@@ -839,10 +782,8 @@ do
 		return max(info_width, name_width)
 	end
 
-	-- Factory
 	function BuildRow(frame, i)
 		local frame_name, opt, fake = frame:GetName()..'Button'..i, frame.opt, frame.fake
-		-- Create frames
 		local row = CreateFrame('Button', not fake and frame_name or nil, frame, BackdropTemplateMixin and "BackdropTemplate")
 		local item = CreateFrame('Frame', nil, row)
 		local button_auto = CreateFrame('Button', nil, row)
@@ -855,7 +796,6 @@ do
 		row.button_auto = button_auto
 		row.i = i
 
-		-- Skin row
 		frame:Skin(row)
 		frame:Skin(item, 'item')
 
@@ -863,7 +803,6 @@ do
 		RowPrototype:New(row)
 		---@cast row XLootFrameRow
 
-		-- Create fontstrings
 		local name = row:CreateFontString(not fake and frame_name..'Text' or nil)
 		local info = row:CreateFontString()
 		local bind = item:CreateFontString()
@@ -879,7 +818,6 @@ do
 		row.text_button_auto = auto
 		row.text_sell = sell
 
-		-- Setup fontstrings
 		smalltext(name)
 		smalltext(info)
 		smalltext(bind)
@@ -920,12 +858,10 @@ do
 		button_auto.parent = row
 		button_auto.text = auto
 
-		-- Supplimental events for a configuration instance
 		if fake then
 			row:RegisterForClicks()
 			row:SetScript('OnEnter', row.HighlightEnter)
 			row:SetScript('OnLeave', row.HighlightLeave)
-		-- Events for actual loot frame
 		else
 			row:RegisterForDrag('LeftButton')
 			row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
@@ -938,24 +874,20 @@ do
 			button_auto:SetScript('OnClick', row.Auto_OnClick)
 		end
 
-		-- Apply appearance
 		row:UpdateAppearance()
 
 		return row
 	end
 end
 
--- Build frame
 do
 	local FramePrototype = XLoot.NewPrototype()
-	-- Frame snapping
 	function FramePrototype:SnapToCursor()
 		local x, y = GetCursorPosition()
 		local f = self
 		local s = f:GetEffectiveScale()
 
 		if opt.frame_snap then
-			-- Horizontal position
 			if not f:IsShown() then
 				x = (x / s) - 25
 				local sWidth, fWidth, uWidth = GetScreenWidth(), f:GetWidth(), UIParent:GetWidth()
@@ -967,7 +899,6 @@ do
 				x = f:GetLeft() or x
 			end
 
-			-- Vertical position
 			y = (y / s) + 25 * (opt.frame_grow_upwards and -1 or 1)
 			local sHeight, fHeight, uHeight = GetScreenHeight(), f:GetHeight(), UIParent:GetHeight()
 			if uHeight > sHeight then sHeight = uHeight end
@@ -979,7 +910,6 @@ do
 			y = opt.frame_position_y or y
 		end
 
-		-- Apply
 		f:ClearAllPoints()
 		f:SetPoint((opt.frame_grow_upwards and "BOTTOMLEFT" or "TOPLEFT"), UIParent, "BOTTOMLEFT", x, y)
 	end
@@ -989,7 +919,6 @@ do
 	-- end
 
 
-	-- Link loot menu
 	function FramePrototype:LinkClick(button)
 		if button == 'RightButton' then
 			ToggleDropDownMenu(1, nil, LinkDropdown, self)--, GetCursorPosition())
@@ -1006,7 +935,6 @@ do
 		-- CloseLoot()
 	end
 
-	-- Bottom buttons
 	local function BottomButton(frame, name, text, justify)
 		local b = CreateFrame('Button', name, frame)
 		b.text = b:CreateFontString(name..'Text', 'OVERLAY')
@@ -1063,36 +991,30 @@ do
 	end
 
 	function FramePrototype:SizeAndColor(max_width, max_quality)
-		-- Update frame
 		self:UpdateLinkButton()
 		self:UpdateHeight()
 		self:UpdateWidth(max_width)
 
-		-- Color frame
 		if self.opt.quality_color_frame then
 			local r, g, b = C_Item.GetItemQualityColor(max_quality)
 			self.overlay:SetBorderColor(r, g, b, 1)
 		end
 	end
 
-	-- Update skin/appearance
 	function FramePrototype:UpdateAppearance()
 		self.skin = self:Reskin()
 		self.skin.row_offset = self.skin.row_spacing * -1
 
-		-- Update colors/other
 		self:SetScale(self.opt.frame_scale)
 		self.overlay:SetAlpha(self.opt.frame_alpha)
 		self.overlay:SetBorderColor(self:GetColor('frame_color_border'))
 		self.overlay:SetGradientColor(self:GetColor('frame_color_gradient'))
 		self.overlay:SetBackdropColor(self:GetColor('frame_color_backdrop', 0.7))
 
-		-- Update loot frames
 		for i, row in ipairs(self.rows) do
 			row:UpdateAppearance()
 		end
 
-		-- Resize frame
 		if #self.slots > 0 and self.opt.frame_width_automatic then
 			local max_width, max = 0, math.max
 			for i, slot in ipairs(self.slots) do
@@ -1101,7 +1023,6 @@ do
 			self:UpdateWidth(max_width)
 		end
 
-		-- Show close buttons
 		if opt.old_close_button then
 			self.close:Hide()
 			self.old_close:Show()
@@ -1110,21 +1031,17 @@ do
 			self.old_close:Hide()
 		end
 
-		-- Text
 		self.close.text:SetFont(opt.font, opt.font_size_bottombuttons)
 		self.link.text:SetFont(opt.font, opt.font_size_bottombuttons)
 	end
 
-	-- Factory
 	function addon:BuildLootFrame(f)
 		local name = f:GetName()
-		-- Setup frame
 		FramePrototype:New(f)
 		f:SetFrameStrata('DIALOG')
 		f:SetFrameLevel(5)
 		f:EnableMouse(1)
 
-		-- Set up frame skins
 		XLoot:MakeSkinner(f, {
 			item = {
 				backdrop = false
@@ -1146,18 +1063,15 @@ do
 		f:Skin(overlay)
 		f.overlay = overlay
 
-		-- Link all button
 		local link = BottomButton(f, name..'Link', L.button_link, 'CENTER')
 		link:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 		link:SetPoint('LEFT', 6, 0)
 		f.link = link
 
-		-- Close button
 		local close = BottomButton(f, name..'Close', L.button_close, 'CENTER')
 		close:SetPoint('RIGHT', -6, 0)
 		f.close = close
 
-		-- Legacy close button
 		local x = CreateFrame("Button", nil, f)
 		x:SetWidth(30)
 		x:SetHeight(30)
@@ -1173,7 +1087,6 @@ do
 		f.old_close = x
 
 
-		-- Events
 		if not f.fake then
 			f:SetMovable(1)
 			f:RegisterForDrag('LeftButton')
@@ -1207,7 +1120,6 @@ do
 	end
 end
 
--- Main loot handler
 local auto, auto_items = {}, {}
 function XLootFrame:ParseAutolootList()
 	wipe(auto_items)
@@ -1268,7 +1180,7 @@ local function SpeedyStop()
 	end
 end
 
--- Bags filling mid-vacuum strand loot in the suppressed window; reveal whatever is left once draining stops.
+-- Bags filling mid-vacuum strand loot in the suppressed window, so reveal whatever is left once draining stops.
 local function SpeedyLeftovers()
 	speedy.leftover = nil
 	for slot = 1, GetNumLootItems() do
@@ -1304,7 +1216,7 @@ local function SpeedyStart()
 	end
 end
 
--- lastcount dedups the shared LOOT_READY/LOOT_OPENED pass; a real count change rebuilds the queue.
+-- lastcount dedups the shared LOOT_READY/LOOT_OPENED pass. A real count change rebuilds the queue.
 local function SpeedyVacuum()
 	local n = GetNumLootItems()
 	if n == 0 or speedy.lastcount == n then return end
@@ -1330,7 +1242,6 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 		wipe(speedy.queue)
 	end
 
-	-- Construct frame
 	if not self.built then
 		addon:BuildLootFrame(self)
 		self:ParseAutolootList()
@@ -1338,17 +1249,14 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 		addon:GROUP_ROSTER_UPDATE()
 	end
 
-	-- References
 	local rows, slots, slots_index = self.rows, wipe(self.slots), wipe(self.slots_index)
 	local bag_slots -- Only assigned if we start autolooting
 
-	-- Autolooting options
 	local auto, auto_items = auto, auto_items
 	for k,v in pairs(opt.autoloots) do
 		auto[k] = auto_states[v]
 	end
 
-	-- Update rows
 	local max_quality, max_width, our_slot, slot, need_refresh = 0, 0, 0
 	for slot = 1, numloot do
 		local _, icon, name, quantity, currencyID, quality, locked, isQuestItem, questID, startsQuest = pcall(GetLootSlotInfo, slot)
@@ -1400,13 +1308,10 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 
 			-- Skip our autoloot on refresh/secret/locked slots, or when the game is already auto-looting: it grabs the free items, so we just show the window for what is left (BoP confirms, read-only master-loot drops) instead of double-looting and stranding them.
 			if not is_refresh and not secret and not locked and not game_autoloot then
-				-- Autolooting currency
 				if (auto.all or auto.currency) and (slotType == LOOT_SLOT_MONEY or slotType == LOOT_SLOT_CURRENCY) then
 					autoloot = true
-				-- Quest items
 				elseif (auto.all or auto.quest) and (isQuestItem or startsQuest) then
 					autoloot = true
-				-- Autolooting items
 				elseif
 					auto.all
 					or (auto.list and auto_items[name])
@@ -1420,8 +1325,6 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 						and slotData.sellPrice and slotData.sellPrice > 0
 						and slotData.sellPrice * quantity >= opt.autoloot_value_minprice * 10000)
 				then
-					-- Cache available space
-					--  Specific bag types make this a bit more annoying
 					if not bag_slots then
 						bag_slots = wipe(_bag_slots)
 						for i = 0, NUM_BAG_SLOTS do
@@ -1433,15 +1336,12 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 					end
 
 					local family = C_Item.GetItemFamily(slotData.link)
-					-- Empty slots
 					family = (family and family <= 4096) and family or 0
 					if bag_slots[0] > 0 or (bag_slots[family] and bag_slots[family] > 0) then
 						autoloot = true
-						-- Update remaining space estimate
 						family = bag_slots[family] and family or 0
 						bag_slots[family] = bag_slots[family] - 1
 
-					-- Space in existing stacks
 					else
 						local partial = C_Item.GetItemCount(slotData.link) % slotData.stackCount
 						if partial > 0 and (partial + quantity < slotData.stackCount) then
@@ -1461,7 +1361,6 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 			end
 
 
-			-- Show slot
 			if
 				not autoloot
 				or is_refresh
@@ -1470,14 +1369,12 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 				local row = rows[our_slot]
 				slots[our_slot] = row
 
-				-- Default UI and tooltip data
 				row.item = slotData.link
 				row.quality = slotData.quality
 				row.slot = slot
 				row.frame_slot = our_slot
 				row:SetID(slot)
 
-				-- Update row
 				local width = row:Update(slotData)
 
 				max_width = max(width, max_width)
@@ -1494,7 +1391,6 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 		C_Timer.After(0.8, BoPRefresh)
 	end
 
-	-- Exit if we autolooted everything
 	if our_slot == 0 then
 		-- CloseLoot()
 		return nil
@@ -1502,7 +1398,6 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 
 	self:SizeAndColor(max_width, max_quality)
 
-	-- Show
 	if not no_snap and not is_refresh then
 		self:SnapToCursor()
 	end
@@ -1527,7 +1422,7 @@ function addon:LOOT_CLOSED()
 	end
 end
 
--- LOOT_READY fires before LOOT_OPENED; vacuum here so looting starts a frame earlier.
+-- LOOT_READY fires before LOOT_OPENED, so vacuum here to start looting a frame earlier.
 function addon:LOOT_READY()
 	if opt.speedy_autoloot and not opt.speedy_autoloot_respect_filters
 		and SpeedyAllowed() and GetNumLootItems() > 0 then
@@ -1583,8 +1478,7 @@ function addon:LOOT_SLOT_CLEARED(slot)
 	end
 end
 
--- Show compare tooltip when shift pressed
--- Without using OnUpdate for all frames
+-- Refreshes the shift-compare tooltip without an OnUpdate on every row
 function addon:MODIFIER_STATE_CHANGED()
 	if (GetNumLootItems() ~= 0) and mouse_focus and MouseIsOver(mouse_focus) then
 		mouse_focus:ShowTooltip()
@@ -1602,11 +1496,7 @@ end
 -- SlashCmdList['XLOOT'] = option_handler
 
 
---[[
-Notes:
-LootSlotHasItem() -- MoP generic 'check if slot has any loot', meaning item/coin/currency etc
-LootSlotIsCoin(slot) etc are replaced by GetLootSlotType(slot) == LOOT_SLOT_* checks
-]]
+-- LootSlotHasItem() is generic since MoP - it covers item, coin, and currency. LootSlotIsCoin() and friends are replaced by GetLootSlotType(slot) == LOOT_SLOT_* checks.
 
 
 --@do-not-package@

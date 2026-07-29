@@ -61,14 +61,11 @@ Features/BetterOptions:
 --   { "key", {k, v} }
 Please note that inline and non-inline groups do not mix well for AceConfigDialog. -]=]
 
--- Create module
 local addon, L = XLoot:NewModule("Options")
 addon.modules = {}
 
--- Global
 _G.XLootOptions = addon
 
--- Locals
 local print = print
 
 local function trigger(target, method, ...)
@@ -86,7 +83,6 @@ local function sizeof(t)
 	return i
 end
 
--- Provide throttled updates
 local update_throttle, elapsed = CreateFrame("Frame"), 0
 update_throttle:Hide()
 update_throttle:SetScript("OnUpdate", function(self, delta)
@@ -99,30 +95,18 @@ update_throttle:SetScript("OnUpdate", function(self, delta)
 	end
 end)
 
--------------------------------------------------------------------------------
--- Module init
+function addon:OnEnable()
 
-function addon:OnEnable() -- Construct addon option tables here
-
-	local option_metadata = {} -- Stores metadata for option entries outside of library-specific compiled option structure
+	local option_metadata = {}
 	addon.option_metadata = option_metadata -- Until resulting AceOptionsTable can have .values upated, this is the only way to store a new .items table
 
-	-------------------------------------------------------------------------------
-	-- General config methods
-
-	-- Find module options and requested key from AceConfigDialog info table
-	--	returns:
-	--	db -- Current settings table for option (May be a subtable)
-	--	k -- Current settings key for option
-	--	meta -- Config metatable for option
-	--  full_db -- Full settings table for module
+	-- Returns db (may be a subtable), key, meta, full module db
 	local function path(info)
 		local meta = option_metadata[info.option]
 		local db = meta.module_data.addon.db.profile
 		return meta.subtable and db[meta.subtable] or db, meta.subkey or info[#info], meta, db
 	end
 
-	-- Generic option getter
 	local function get(info)
 		local db, k, meta = path(info)
 		if info.option.type == "color" then
@@ -138,7 +122,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		end
 	end
 
-	-- Generic option setter
 	local function set(info, v, v2, v3, v4, ...)
 		update_throttle:Show()
 		local db, k, meta = path(info)
@@ -160,14 +143,12 @@ function addon:OnEnable() -- Construct addon option tables here
 		end
 	end
 
-	-- Anchor toggles
 	local function set_anchor(...)
 		set(...)
 		local db, k, meta = path(...)
 		trigger(meta.module_data.addon, "UpdateAnchors")
 	end
 
-	-- Select value generator
 	local function values_from_items(info)
 		local db, k, meta = path(info)
 		local values = meta.values
@@ -178,16 +159,12 @@ function addon:OnEnable() -- Construct addon option tables here
 		return values
 	end
 
-	-- Dependencies
 	-- TODO: Recursive dependencies
 	local function requires(info)
 		local db, k, meta, full_db = path(info)
 		return ((meta.requires and (not full_db[meta.requires]) or false)
 				or (meta.requires_inverse and full_db[meta.requires_inverse] or false))
 	end
-
-	-------------------------------------------------------------------------------
-	-- Streamlined options tables
 
 	local BetterOptions = {}
 	local table_remove = table.remove
@@ -205,30 +182,24 @@ function addon:OnEnable() -- Construct addon option tables here
 	local BetterOptionsTypes = {}
 	BetterOptions.types = BetterOptionsTypes
 	function BetterOptions.any_type(t)
-		-- Simple
 		if type(t) == 'string' then
 			t = { t }
 		end
 
-		-- Shift required elements
 		local key = table.remove(t, 1)
 		t.type = table.remove(t, 1)
-		-- Infer toggle by default
 		if not t.type then
 			t.type = "toggle"
-		-- Infer select from table
 		elseif type(t.type) == "table" then
 			t.items, t.type = t.type, "select"
 			-- Other positional arguments may be present
 			table.insert(t, 1, "select")
 		end
 
-		-- Handle specific option types
 		if BetterOptionsTypes[t.type] then
 			BetterOptionsTypes[t.type](t)
 		end
 
-		-- Cleanup
 		for i,v in ipairs(t) do
 			t[i] = nil
 		end
@@ -307,31 +278,22 @@ function addon:OnEnable() -- Construct addon option tables here
 	addon.BetterOptions = BetterOptions
 	addon.BetterOptionsTypes = BetterOptionsTypes
 
-	-------------------------------------------------------------------------------
-	-- AceOptionsTable extension
-
-	-- Flesh out AceOptionsTables for a given module
-	-- Add features not directly supported
 	local function Finalize(module_data, opts, key)
 		local meta = option_metadata[opts]
 		if not meta then
 			meta = { module_data = module_data }
 			option_metadata[opts] = meta
 		end
-		-- First call
 		if not key then
 			for k,v in pairs(opts) do
 				Finalize(module_data, v, k)
 			end
-		-- Recursion
 		else
-			-- Automatically localized selects
 			if opts.type == "alpha" or opts.type == "scale" then
 				opts.name = opts.name or L[module_data.name][key] or L[key] or L[opts.type]
 				opts.type = "range"
 			end
 
-			-- Fill in localized name/description
 			opts.name = opts.name or L[module_data.name][key] or L[key] or key
 			opts.desc = opts.desc or L[module_data.name][key.."_desc"]
 
@@ -342,20 +304,17 @@ function addon:OnEnable() -- Construct addon option tables here
 			meta.subtable, meta.subkey = opts.subtable, opts.subkey
 			opts.subtable, opts.subkey = nil, nil
 
-			-- Dependencies
 			if opts.requires or opts.requires_inverse then
 				meta.requires, meta.requires_inverse = opts.requires, opts.requires_inverse
 				opts.disabled = requires
 				opts.requires, opts.requires_inverse = nil, nil
 			end
 
-			-- Reload UI warning
 			if opts.must_reload_ui then
 				meta.must_reload_ui = true
 				opts.must_reload_ui = nil
 			end
 
-			-- Sorted select
 			-- TODO: Set metatable on option table to update meta.items?
 			if opts.type == "select" and opts.items then
 				opts.values = values_from_items
@@ -364,9 +323,7 @@ function addon:OnEnable() -- Construct addon option tables here
 				opts.items = nil
 			end
 
-			-- Traverse subgroup
 			if opts.args then
-				-- Apply subgroup defaults
 				if opts.defaults then
 					for argk, argv in pairs(opts.args) do
 						for defk, defv in pairs(opts.defaults) do
@@ -377,12 +334,10 @@ function addon:OnEnable() -- Construct addon option tables here
 					end
 					opts.defaults = nil
 				end
-				-- Finalize subgroups
 				for k,v in pairs(opts.args) do
 					Finalize(module_data, v, k)
 				end
 
-			-- Default type "toggle"
 			elseif not opts.type then
 				opts.type = "toggle"
 			end
@@ -390,10 +345,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		return opts
 	end
 
-	-------------------------------------------------------------------------------
-	-- Module config registration
-
-	-- Global config header
 	self.config = {
 		type = "group",
 		name = "XLoot",
@@ -435,7 +386,6 @@ function addon:OnEnable() -- Construct addon option tables here
 	self.config.args = options
 
 	function addon:RegisterAceOptionTable(module_name, option_table)
-		-- Insert into options
 		options[module_name] = {
 			type = "group",
 			name = L[module_name].panel_title,
@@ -448,14 +398,10 @@ function addon:OnEnable() -- Construct addon option tables here
 
 	function addon:RegisterOptions(module_data, option_table)
 		-- Have to finalize here because Finalize needs to know what module we're in
-		-- There's probably a better way to do this.
 		addon.modules[module_data.name] = module_data
 		Finalize(module_data, BetterOptions.Compile(option_table))
 		self:RegisterAceOptionTable(module_data.name, option_table)
 	end
-
-	-------------------------------------------------------------------------------
-	-- Generic select values
 
 	local item_qualities = {}
 	do
@@ -475,7 +421,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		{ "right", L.right },
 	}
 
-	-- Shared Media
 	local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
 
 	local fonts
@@ -500,10 +445,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		{ "MONOCHROME", "MONOCHROME" }
 	}
 
-	-------------------------------------------------------------------------------
-	-- Module configs
-
-	-- XLoot Frame
 	if XLoot:GetModule("Frame", true) then
 		local when_group = {
 			{ "never", L.when_never },
@@ -618,7 +559,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
-	-- XLoot Group
 	if XLoot:GetModule("Group", true) then
 		addon:RegisterOptions({ name = "Group", addon =  XLootGroup }, {
 			{ "testing", "group", {
@@ -673,7 +613,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
-	-- XLoot Monitor
 	if XLoot:GetModule("Monitor", true) then
 		addon:RegisterOptions({ name = "Monitor", addon =  XLootMonitor.addon }, {
 			{ "testing", "group", {
@@ -730,7 +669,6 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
-	-- XLoot Toast
 	if XLoot:GetModule("Toast", true) then
 		local click_modes = {
 			{ "always", L.Toast.click_always },
@@ -783,9 +721,7 @@ function addon:OnEnable() -- Construct addon option tables here
 		})
 	end
 
-	-- XLoot Master
 	if XLoot:GetModule("Master", true) then
-		-- Item quality dropdown generator
 		local item_qualities = {}
 		do
 			for i, v in ipairs({ "ITEM_QUALITY2_DESC", "ITEM_QUALITY3_DESC", "ITEM_QUALITY4_DESC", "CANCEL" }) do -- we only care for the qualities available as ML filters
@@ -854,9 +790,6 @@ function addon:OnInitialize()
 
 end
 
--------------------------------------------------------------------------------
--- Panel methods
-
 local function PanelDefault(self)
 	-- StaticPopup_Show("XLOOT_RESETPROFILE")
 	addon:ResetProfile()
@@ -878,7 +811,6 @@ local init = false
 local AceConfigDialog, AceConfigRegistry = LibStub("AceConfigDialog-3.0"), LibStub("AceConfigRegistry-3.0")
 
 function addon:Init()
-	-- One-time init
 	if not init then
 		init = true
 		if not Settings then
@@ -889,7 +821,6 @@ function addon:Init()
 				end
 			end
 		end
-		-- Generate new panel
 		AceConfigRegistry:RegisterOptionsTable("XLoot", self.config)
 		local panel, category_id = AceConfigDialog:AddToBlizOptions("XLoot")
 		XLoot.option_panel = panel
@@ -913,7 +844,6 @@ function addon:Init()
 			end
 		end)
 
- 		-- Create profile panel
 		AceConfigRegistry:RegisterOptionsTable("XLootProfile", LibStub("AceDBOptions-3.0"):GetOptionsTable(XLoot.db))
 		XLoot.profile_panel = AceConfigDialog:AddToBlizOptions("XLootProfile", L.profile, "XLoot")
 		XLoot.profile_panel.default = PanelDefault
@@ -927,7 +857,6 @@ end
 
 function addon:OpenPanel(module)
 	addon:Init()
-	-- Open panel
 	if Settings then
 		Settings.OpenToCategory(XLoot.option_category_id or "XLoot")
 	else

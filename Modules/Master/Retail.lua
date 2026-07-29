@@ -28,7 +28,7 @@ local defaults = {
 local opt
 local eframe = CreateFrame("Frame")
 local me
-local issecret = issecretvalue -- 12.0 secret values; nil pre-12.0
+local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
 
 function addon:OnInitialize()
 	self:InitializeModule(defaults, eframe)
@@ -39,9 +39,14 @@ function addon:OnInitialize()
 	XLoot:SetSlashCommand("xlmldebug", addon.ToggleDebug)
 end
 
+-- AceDB strips defaults out of the old profile table on a switch, so re-read it or opt goes nil-valued
+function addon:ApplyOptions()
+	opt = self.opt
+end
+
 function addon.OnEnable()
 	me = UnitName("player")
-	-- Drop the native master-loot trigger; under XLoot's suppressed LootFrame it anchors to nil and errors.
+	-- Drop the native master-loot trigger. Under XLoot's suppressed LootFrame it anchors to nil and errors.
 	if EventRegistry and EventRegistry.UnregisterFrameEventAndCallback then
 		local n = 0
 		for i = 1, 4 do
@@ -141,7 +146,7 @@ local function listPriority(name, list)
 	return (normalize_toon_list(list):find(normalize_toon_list(name), 1, true))
 end
 
--- Real master loot is CN-server-only; fake candidates let /xlmltest preview the menu anywhere.
+-- Real master loot is CN-server-only, so fake candidates let /xlmltest preview the menu anywhere.
 addon.test_candidates = {
 	{ name = "Banker", class = "WARRIOR" },
 	{ name = "Disenchanter", class = "MAGE" },
@@ -174,7 +179,7 @@ local function CollectCandidates(slot)
 	return list
 end
 
--- self / banker / disenchanter shortcuts; test mode keys off the fixed names above so they preview off-CN.
+-- self / banker / disenchanter shortcuts. Test mode keys off the fixed names above so they preview off-CN.
 local function ResolveSpecial(candidates)
 	local result = {}
 	if addon.testing then
@@ -218,7 +223,7 @@ local function InRaidMode()
 	return addon.testing or IsInRaid()
 end
 
--- The index is captured when the menu opens; re-check it still maps to the same player at award time.
+-- The index is captured when the menu opens, so re-check it still maps to the same player at award time.
 local function CandidateValid(slot, index, name)
 	return GetMasterLootCandidate(slot, index) == name
 end
