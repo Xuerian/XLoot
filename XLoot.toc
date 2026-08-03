@@ -24,6 +24,7 @@ stacks.lua
 helpers.lua
 tooltip.lua
 whatsnew.lua
+minimap.lua
 
 #@do-not-package@
 Modules\Modules.xml

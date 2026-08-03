@@ -356,6 +356,8 @@ function addon:OnEnable()
 	local function OnCoreChanged(k, v)
 		if k == 'skin' then
 			XLoot:ApplyOptions(true)
+		elseif k == 'minimap_icon' then
+			XLoot:UpdateMinimapIcon()
 		end
 	end
 
@@ -367,16 +369,18 @@ function addon:OnEnable()
 	}
 	local options = Finalize({ name = "Core", addon =  XLoot, OnChanged = OnCoreChanged }, BetterOptions.Compile({
 		{ "details", "description" },
-		{ "skin", "select", values = function()
+		-- Narrowed so all four fit one row: AceConfigDialog frames are a fixed 170px each and the panel holds about 3.3 of them.
+		{ "skin", "select", width = 0.9, values = function()
 			wipe(skins)
 			for k,v in pairs(XLoot.Skin.skins) do
 				skins[k] = v.name
 			end
 			return skins
 		end},
-		{ "skin_anchors", "toggle" },
+		{ "skin_anchors", "toggle", width = 0.75 },
 		{ "tooltip_sell", "toggle", hidden = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE },
-		{ "value_coin_icons", "toggle" },
+		{ "value_coin_icons", "toggle", width = 0.75 },
+		{ "minimap_icon", "toggle", width = 0.75 },
 		{ "whatsnew_mode", whatsnew_modes },
 		{ "whatsnew_show", "execute", func = function() XLoot:ShowWhatsNew() end },
 		{ "reset_defaults", "execute", confirm = true, func = function() addon:ResetProfile() end },

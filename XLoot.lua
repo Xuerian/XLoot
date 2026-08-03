@@ -10,6 +10,8 @@ local defaults = {
 		skin_anchors = false,
 		tooltip_sell = false,
 		value_coin_icons = false,
+		minimap_icon = false,
+		minimap = { hide = true },
 		whatsnew_mode = "popup",
 	},
 	global = {
@@ -104,6 +106,7 @@ function XLoot:ApplyOptions(in_options)
 			v:ApplyOptions(in_options)
 		end
 	end
+	self:UpdateMinimapIcon()
 end
 
 ---@class XLootModule: AceAddon
@@ -162,6 +165,7 @@ function XLoot:OnEnable()
 	C_AddOns.LoadAddOn("XLoot_Options")
 	self:SetSlashCommand("xloot", function() self:ShowOptionPanel(self) end)
 
+	self:SetupMinimapIcon()
 	self:CheckWhatsNew()
 end
 

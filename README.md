@@ -55,6 +55,12 @@ current Classic flavor. Every module is optional and can be toggled like any oth
 - **/xlgd** previews sample roll frames, including the roll-results display.
 - **/xlml** opens the Master Loot options (Classic flavors, experimental on retail CN).
 
+An optional **minimap icon** puts a coin button on your minimap: left-click opens the options,
+right-click shows the What's New summary, and you can drag it anywhere around the minimap edge. Turn it
+on under **/xloot → Minimap icon**. Off by default. XLoot is also offered to **broker displays** such as
+Titan Panel, ChocolateBar, and ElvUI's datatexts, so you can put it on a bar instead, whether or not the
+minimap button itself is shown.
+
 Every option has a mouseover tooltip explaining what it does. Don't want a module?
 Disable XLoot Frame / Monitor / Toast / Group / Master individually in the AddOns list.
 
@@ -65,7 +71,7 @@ so an update never changes how your looting behaves until you turn something on.
 ## Installing
 
 XLoot lives on [CurseForge](https://www.curseforge.com/wow/addons/xloot). To run it from source instead
-(for testing or contributing), the Ace3 libraries are bundled, so the repo loads with no extra
+(for testing or contributing), all required libraries are bundled, so the repo loads with no extra
 downloads. Either copy this folder into `World of Warcraft/_retail_/Interface/AddOns/` named `XLoot`, or
 point a directory junction there (no admin needed):
 

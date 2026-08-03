@@ -50,6 +50,8 @@ local LOOT_SLOT_MONEY = LOOT_SLOT_MONEY or Enum.LootSlotType.Money
 local LOOT_SLOT_CURRENCY = LOOT_SLOT_CURRENCY or Enum.LootSlotType.Currency
 
 local GetContainerNumFreeSlots = C_Container and C_Container.GetContainerNumFreeSlots or GetContainerNumFreeSlots
+-- Gate on the flavor, not the field: Classic ships the same BagIndex enum but container 5 is a bank bag there. Counted apart from the family loop because the reagent bag reports family 0.
+local REAGENT_BAG = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag or nil
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local SendChatMessage = XLoot.SendChatMessage
 local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
@@ -1123,8 +1125,12 @@ end
 local auto, auto_items = {}, {}
 function XLootFrame:ParseAutolootList()
 	wipe(auto_items)
-	for item in opt.autoloot_item_list:gmatch("%s*([^,]+)%s*") do
-		auto_items[item] = true
+	for entry in opt.autoloot_item_list:gmatch('[^,]+') do
+		-- Trim with a lazy capture: a greedy [^,]+ keeps trailing spaces, so "Silk Cloth " never matched a loot name.
+		local item = entry:match('^%s*(.-)%s*$')
+		if item ~= '' then
+			auto_items[item] = true
+		end
 	end
 end
 
@@ -1162,7 +1168,7 @@ local function BoPRefresh()
 end
 
 local tremove = table.remove
-local speedy = { queue = {}, ticker = nil, leftover = nil, lastcount = nil, vacuum = false }
+local speedy = { queue = {}, attempted = {}, ticker = nil, leftover = nil, lastcount = nil }
 
 -- Never vacuum under master loot (would grab assignable drops) or while the auto-loot modifier is held.
 local function SpeedyAllowed()
@@ -1181,9 +1187,10 @@ local function SpeedyStop()
 end
 
 -- Bags filling mid-vacuum strand loot in the suppressed window, so reveal whatever is left once draining stops.
+-- Only slots we actually queued count: the filtered path deliberately leaves the rest on the corpse, already drawn.
 local function SpeedyLeftovers()
 	speedy.leftover = nil
-	for slot = 1, GetNumLootItems() do
+	for slot in pairs(speedy.attempted) do
 		if LootSlotHasItem(slot) then
 			BoPRefresh()
 			return
@@ -1198,7 +1205,7 @@ local function SpeedyDrain()
 	end
 	if #speedy.queue == 0 then
 		SpeedyStop()
-		if speedy.vacuum and C_Timer and C_Timer.NewTimer then
+		if C_Timer and C_Timer.NewTimer then
 			speedy.leftover = C_Timer.NewTimer(0.3, SpeedyLeftovers)
 		end
 	end
@@ -1221,16 +1228,19 @@ local function SpeedyVacuum()
 	local n = GetNumLootItems()
 	if n == 0 or speedy.lastcount == n then return end
 	speedy.lastcount = n
-	speedy.vacuum = true
 	SpeedyStop()
 	wipe(speedy.queue)
+	wipe(speedy.attempted)
 	for slot = 1, n do
 		speedy.queue[slot] = slot
+		speedy.attempted[slot] = true
 	end
 	SpeedyStart()
 end
 
 local _bag_slots, GetItemBindType = {}, XLoot.GetItemBindType
+-- Loot slots deferred by the filters because the item was not cached yet, reconsidered once BoPRefresh has it.
+local auto_retry = {}
 function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 	local numloot = GetNumLootItems()
 	if numloot == 0 then return nil end
@@ -1238,8 +1248,12 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 	local speedy_paced = not is_refresh and opt.speedy_autoloot
 		and opt.speedy_autoloot_respect_filters and SpeedyAllowed()
 	if speedy_paced then
-		speedy.vacuum = false
 		wipe(speedy.queue)
+		wipe(speedy.attempted)
+	end
+	-- Keeps auto_retry to slots the current first pass vetted, so a refresh can never route around the skips below.
+	if not is_refresh then
+		wipe(auto_retry)
 	end
 
 	if not self.built then
@@ -1250,14 +1264,14 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 	end
 
 	local rows, slots, slots_index = self.rows, wipe(self.slots), wipe(self.slots_index)
-	local bag_slots -- Only assigned if we start autolooting
+	local bag_slots, reagent_free -- Only assigned if we start autolooting
 
 	local auto, auto_items = auto, auto_items
 	for k,v in pairs(opt.autoloots) do
 		auto[k] = auto_states[v]
 	end
 
-	local max_quality, max_width, our_slot, slot, need_refresh = 0, 0, 0
+	local max_quality, max_width, our_slot, slot, need_refresh, retried = 0, 0, 0
 	for slot = 1, numloot do
 		local _, icon, name, quantity, currencyID, quality, locked, isQuestItem, questID, startsQuest = pcall(GetLootSlotInfo, slot)
 		-- Already looted or erroring slot
@@ -1272,7 +1286,7 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 			end
 
 		else
-			local autoloot, secret = false, false
+			local autoloot, secret, uncached = false, false, false
 			local slotType, slotData = GetLootSlotType(slot)
 			if slotType == LOOT_SLOT_ITEM then
 				local link = GetLootSlotLink(slot)
@@ -1281,7 +1295,7 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 				-- Item not in client cache yet: render from loot-slot data, refresh shortly
 				if not slotData then
 					slotData = { name = name, icon = icon, quality = quality, link = link, stackCount = 1, bindType = 0 }
-					need_refresh = true
+					need_refresh, uncached = true, true
 				end
 				slotData.slotType = slotType
 				slotData.quantity = quantity
@@ -1307,7 +1321,8 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 			end
 
 			-- Skip our autoloot on refresh/secret/locked slots, or when the game is already auto-looting: it grabs the free items, so we just show the window for what is left (BoP confirms, read-only master-loot drops) instead of double-looting and stranding them.
-			if not is_refresh and not secret and not locked and not game_autoloot then
+			-- auto_retry only holds slots this same block vetted but could not judge, so the refresh reconsiders them without reopening the other skips.
+			if (not is_refresh or auto_retry[slot]) and not secret and not locked and not game_autoloot then
 				if (auto.all or auto.currency) and (slotType == LOOT_SLOT_MONEY or slotType == LOOT_SLOT_CURRENCY) then
 					autoloot = true
 				elseif (auto.all or auto.quest) and (isQuestItem or startsQuest) then
@@ -1333,6 +1348,7 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 								bag_slots[family] = bag_slots[family] and bag_slots[family] + open or open
 							end
 						end
+						reagent_free = REAGENT_BAG and GetContainerNumFreeSlots(REAGENT_BAG) or 0
 					end
 
 					local family = C_Item.GetItemFamily(slotData.link)
@@ -1341,6 +1357,10 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 						autoloot = true
 						family = bag_slots[family] and family or 0
 						bag_slots[family] = bag_slots[family] - 1
+
+					elseif slotData.isCraftingReagent and reagent_free > 0 then
+						autoloot = true
+						reagent_free = reagent_free - 1
 
 					else
 						local partial = C_Item.GetItemCount(slotData.link) % slotData.stackCount
@@ -1353,18 +1373,20 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 				if autoloot then
 					if speedy_paced then
 						speedy.queue[#speedy.queue + 1] = slot
+						speedy.attempted[slot] = true
 					else
 						need_refresh = true
+						retried = is_refresh or retried
 						LootSlot(slot)
 					end
 				end
+
+				-- Only slots we did NOT act on: a LootSlot that leaves the item (BoP confirm, unique already owned, bags full) must fall through to a row, not be looted twice.
+				auto_retry[slot] = (uncached and not autoloot) or nil
 			end
 
 
-			if
-				not autoloot
-				or is_refresh
-			then
+			if not autoloot then
 				our_slot = our_slot + 1
 				local row = rows[our_slot]
 				slots[our_slot] = row
@@ -1387,7 +1409,8 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 		SpeedyStart()
 	end
 
-	if not is_refresh and need_refresh then
+	-- A retry pass loots slots whose row it also suppresses, so it must re-arm once in case the item stays put (BoP confirm, unique already owned). Bounded: the retry clears auto_retry, so the next pass cannot loot that slot again.
+	if (not is_refresh and need_refresh) or retried then
 		C_Timer.After(0.8, BoPRefresh)
 	end
 
@@ -1398,7 +1421,8 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 
 	self:SizeAndColor(max_width, max_quality)
 
-	if not no_snap and not is_refresh then
+	-- A refresh must not yank the window out from under the cursor, but a speedy-autoloot leftover sweep is a first show and has never been positioned.
+	if not no_snap and (not is_refresh or not self:IsShown()) then
 		self:SnapToCursor()
 	end
 	self:Show()
@@ -1407,8 +1431,9 @@ end
 function addon:LOOT_CLOSED()
 	SpeedyStop()
 	wipe(speedy.queue)
+	wipe(speedy.attempted)
+	wipe(auto_retry)
 	speedy.lastcount = nil
-	speedy.vacuum = false
 	if type(XLootFrame.rows) == 'table' then
 		for i, row in pairs(XLootFrame.rows) do
 			clear(row)

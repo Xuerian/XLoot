@@ -6,6 +6,36 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.14.0] - 2026-08-02
+
+### Features
+- **Minimap icon.** XLoot can now put a coin button on your minimap. Left-click opens XLoot's options,
+  right-click brings up What's New, and you can drag it anywhere around the minimap edge. Turn it on with
+  the new "Minimap icon" switch in Global options. Off by default.
+- **Broker support.** XLoot now offers itself to broker displays such as Titan Panel, ChocolateBar, and
+  ElvUI's datatexts, so you can put it on a bar instead of the minimap if you prefer. This works whether
+  or not the minimap icon itself is switched on.
+
+### Bug Fixes
+- Auto-loot filters now work on items you are seeing for the first time. The gear, value, and trade goods
+  filters need item details the game has not downloaded yet the first time an item drops, so until now
+  they silently skipped every new item until you had already seen it once that session. XLoot now takes a
+  second look once the details arrive.
+- Items that would not fit in your bags are no longer left without a row in the loot window when Speedy
+  auto-loot is filtering. If your bags filled up partway through looting, the leftovers stayed on the
+  corpse with nothing shown for them.
+- The loot window no longer opens in the wrong place after Speedy auto-loot leaves something behind. It
+  could appear at an unset position instead of at your cursor.
+- Crafting reagents are now auto-looted into your reagent bag on retail when your normal bags are full.
+  The free space check never looked at the reagent bag, so a reagent that would have fitted was left behind.
+- Auto-loot item lists now match names written with spaces around the commas. "Silk Cloth , Linen Cloth"
+  kept the trailing space as part of the name, so that entry never matched anything.
+
+### Improvements
+- Two Global option labels were shortened so the panel fits them on one row: "Apply to anchors" is now
+  "Skin anchors" and "Item values as coin icons" is now "Coin icons". Both still explain themselves in
+  full when you mouse over them, and neither changed what it does.
+
 ## [12.13.2] - 2026-07-29
 
 ### Bug Fixes

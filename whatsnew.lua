@@ -6,6 +6,23 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.14.0",
+		date = "2026-08-02",
+		changes = {
+			{
+				label = "Minimap icon and broker support",
+				type = "feature",
+				option = "Global options > Minimap icon",
+				description = "XLoot can now sit on your minimap as a coin button. Left-click opens the options, right-click shows What's New, and you can drag it around the minimap edge. XLoot also offers itself to broker displays like Titan Panel, ChocolateBar, and ElvUI datatexts, whether or not the minimap icon is on. Off by default.",
+			},
+			{
+				label = "Auto-loot filters work on first-seen items",
+				type = "bugfix",
+				description = "The gear, value, and trade goods filters need item details the game has not downloaded the first time an item drops, so they quietly skipped every new item until you had seen it once that session. XLoot now takes a second look once the details arrive. Speedy auto-loot also no longer strands filtered items without a row, and the loot window no longer opens in the wrong place afterwards.",
+			},
+		},
+	},
+	{
 		version = "12.13.0",
 		date = "2026-07-16",
 		changes = {
