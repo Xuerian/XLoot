@@ -6,6 +6,24 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.14.1] - 2026-08-06
+
+### Bug Fixes
+- Switching, copying, or resetting an XLoot profile now applies it everywhere. XLoot mistook the name of
+  the profile event for a signal that its options window was open, so it tried to refresh the options
+  preview before that preview existed and errored partway through, leaving part of the addon still running
+  on the profile you switched away from until you reloaded.
+- The loot window preview in the options no longer comes out the wrong height when one of its sample items
+  has not finished loading. The currency rows were recorded at the wrong position, which left a gap in the
+  list the preview measures itself from.
+
+### Improvements
+- Changing options is lighter on the game. Every skinned frame in the addon was being restyled twice for
+  each change, which on a slider meant about ten times a second while you dragged it.
+- The three "Track" options and the "Minimum quality" setting under Group Loot > What rolls to show are now
+  hidden on retail, where they have no effect. Retail shows who rolled and who won through "Show roll
+  results" instead. Nothing changed on Classic, and any values you had saved are kept.
+
 ## [12.14.0] - 2026-08-02
 
 ### Features

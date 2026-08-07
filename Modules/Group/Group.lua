@@ -1338,7 +1338,7 @@ do
 end
 
 function addon:SkinUpdate()
-	local skin = Skinner:Reskin()
+	local skin = Skinner:CurrentSkin()
 	local padding = skin.padding or 2
 	local p, n = padding + 3, -padding - 3
 	for _,bar in pairs(addon.bars) do

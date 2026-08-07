@@ -87,7 +87,11 @@ end
 function XLoot:ShowOptionPanel(module)
 	if not XLootOptions then
 		C_AddOns.EnableAddOn("XLoot_Options")
-		C_AddOns.LoadAddOn("XLoot_Options")
+		local loaded, reason = C_AddOns.LoadAddOn("XLoot_Options")
+		if not loaded or not XLootOptions then
+			wprint(("|c2244dd22XLoot|r could not load its options panel (%s)."):format(reason or "XLoot_Options loaded but did not initialize"))
+			return
+		end
 	end
 	XLootOptions:OpenPanel(module)
 end
@@ -144,12 +148,17 @@ function XLoot.NewPrototype()
 	return { New = XLoot.Prototype_New, _New = XLoot.Prototype_New }
 end
 
+-- Not registered as "ApplyOptions" directly: CallbackHandler passes the event name as the first argument, which ApplyOptions would read as a truthy in_options.
+function XLoot:ProfileChanged()
+	self:ApplyOptions(true)
+end
+
 function XLoot:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("XLootADB", defaults, true)
 	self.opt = self.db.profile
-	self.db.RegisterCallback(self, "OnProfileChanged", "ApplyOptions")
-	self.db.RegisterCallback(self, "OnProfileCopied", "ApplyOptions")
-	self.db.RegisterCallback(self, "OnProfileReset", "ApplyOptions")
+	self.db.RegisterCallback(self, "OnProfileChanged", "ProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileCopied", "ProfileChanged")
+	self.db.RegisterCallback(self, "OnProfileReset", "ProfileChanged")
 	self:SkinsOnInitialize()
 end
 
@@ -161,6 +170,7 @@ function XLoot:OnEnable()
 		end
 	end
 
+	-- Loaded at login rather than on demand: a packaged build ships Options as a LoadOnDemand sibling, and its OnEnable is what registers XLoot in the Blizzard Settings AddOns list.
 	C_AddOns.EnableAddOn("XLoot_Options")
 	C_AddOns.LoadAddOn("XLoot_Options")
 	self:SetSlashCommand("xloot", function() self:ShowOptionPanel(self) end)

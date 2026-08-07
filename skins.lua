@@ -296,6 +296,12 @@ do
 		return out
 	end
 
+	-- Reads the compiled skin without Reskin's frame walk, for callers that do not need to re-apply it. XLoot:ApplyOptions reskins every skinner before the module hooks run.
+	local function CurrentSkin(self)
+		local data = self._skin_data
+		return compile(data, data.default or next(data.sets))
+	end
+
 	local function Reskin(self)
 		local data = self._skin_data
 		for k,v in pairs(data.compiled) do
@@ -311,7 +317,7 @@ do
 				lib:UpdateHighlight(frame, compile(data, set_name), frame:GetHighlightColor())
 			end
 		end
-		return compile(data, data.default or next(data.sets))
+		return CurrentSkin(self)
 	end
 
 	local function Skin(self, frame, set_name)
@@ -343,6 +349,7 @@ do
 			default = default_set or "default"
 		}
 		target.Reskin = Reskin
+		target.CurrentSkin = CurrentSkin
 		target.Skin = Skin
 		target.Highlight = Highlight
 		table.insert(XLoot.skinners, target)
