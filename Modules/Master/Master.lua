@@ -4,6 +4,7 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
 local addon, L = XLoot:NewModule("Master")
 XLootMaster = addon
 local print, wipe, match = print, table.wipe, string.match
+local SendChatMessage = XLoot.SendChatMessage
 local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
 local hexColors = {}
 local classesInRaid, class_players, classes_english = {}, {}, {}
@@ -11,7 +12,7 @@ local player_indices, index_name = {}, {}
 local randoms = {}
 local me = UnitName('player')
 local my_index, banker_index, disenchanter_index
-local candidate, color, lclass, className, slot, info, opt, eframe
+local candidate, color, lclass, className, slot, info, opt
 local roll_pending
 local LD
 
@@ -122,7 +123,7 @@ function addon.AnnounceAward(data)
 			pcall(SendChatMessage, text, secondary)
 		end
 		if opt.award_guildannounce and IsInGuild() then
-			SendChatMessage(text, "GUILD")
+			pcall(SendChatMessage, text, "GUILD")
 		end
 	end
 end
@@ -173,6 +174,20 @@ function addon.SpawnRoll(frame)
 	if DoMasterLootRoll then DoMasterLootRoll(frame.value) end
 end
 
+local roll_serial = 0
+local ROLL_TIMEOUT = 15
+
+-- A pending roll left registered lets a later unrelated /roll 1-N award a slot from a closed loot window. The id keeps a stale timeout from clearing a newer roll.
+local function ClearPendingRoll(id, discarded)
+	if not roll_pending then return end
+	if id and roll_pending.id ~= id then return end
+	roll_pending = nil
+	eframe:UnregisterEvent("CHAT_MSG_SYSTEM")
+	eframe:UnregisterEvent("LOOT_CLOSED")
+	-- The raid has already seen the candidate list and the roll, so dying quietly reads as a bug.
+	if discarded then xprint(L.ROLL_DISCARDED) end
+end
+
 function addon.RaidRoll(frame, source)
 	local slot = LootFrame.selectedSlot
 	local link = slot and GetLootSlotLink(slot)
@@ -203,7 +218,9 @@ function addon.RaidRoll(frame, source)
 		end
 	end
 
+	roll_serial = roll_serial + 1
 	roll_pending = {
+		id = roll_serial,
 		slot = slot,
 		players = players,
 		count = count,
@@ -212,6 +229,11 @@ function addon.RaidRoll(frame, source)
 		quality = LootFrame.selectedQuality or 0,
 	}
 	eframe:RegisterEvent("CHAT_MSG_SYSTEM")
+	eframe:RegisterEvent("LOOT_CLOSED")
+	if C_Timer and C_Timer.After then
+		local id = roll_serial
+		C_Timer.After(ROLL_TIMEOUT, function() ClearPendingRoll(id, true) end)
+	end
 	RandomRoll(1, count)
 	CloseDropDownMenus()
 end
@@ -224,8 +246,7 @@ function addon:CHAT_MSG_SYSTEM(...)
 	if who ~= me or not roll or tonumber(low) ~= 1 or tonumber(high) ~= roll_pending.count then return end
 
 	local pending = roll_pending
-	roll_pending = nil
-	eframe:UnregisterEvent("CHAT_MSG_SYSTEM")
+	ClearPendingRoll()
 
 	local winner = pending.players[roll]
 	if not winner then return end
@@ -237,6 +258,11 @@ function addon:CHAT_MSG_SYSTEM(...)
 		quality = pending.quality,
 		pname = winner.name,
 	})
+end
+
+-- Slot indices are meaningless once the window closes, so a pending roll must not outlive it.
+function addon.LOOT_CLOSED()
+	ClearPendingRoll(nil, true)
 end
 
 function addon.AddMenuTitle(title)

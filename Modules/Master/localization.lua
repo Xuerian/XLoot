@@ -11,6 +11,7 @@ local locales = {
 		BINDING_DISENCHANTER = "Set Disenchanter",
 		ITEM_AWARDED = "%s awarded: %s",
 		CANDIDATE_UNAVAILABLE = "That player is no longer eligible to receive loot.",
+		ROLL_DISCARDED = "Raid roll discarded - no winner was assigned.",
 	},
 	-- Possibly localized
 	ptBR = {

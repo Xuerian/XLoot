@@ -6,6 +6,18 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.14.2] - 2026-08-11
+
+### Bug Fixes
+- A master-loot raid roll that never finished no longer lingers. If the loot window closed part way
+  through, or the result never arrived, XLoot kept waiting indefinitely, and the next loot window you
+  opened could have an item handed out from the old roll. XLoot now stops waiting when the loot window
+  closes, gives up on its own after fifteen seconds, and tells you when a roll was discarded.
+
+### Improvements
+- Master loot now sends its announcements through the same chat path as the rest of XLoot, the one
+  hardened against the "secret value" errors that 12.0 introduced in instanced encounters.
+
 ## [12.14.1] - 2026-08-06
 
 ### Bug Fixes

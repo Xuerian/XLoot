@@ -29,6 +29,7 @@ local opt
 local eframe = CreateFrame("Frame")
 local me
 local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
+local SendChatMessage = XLoot.SendChatMessage
 
 function addon:OnInitialize()
 	self:InitializeModule(defaults, eframe)
@@ -247,6 +248,19 @@ StaticPopupDialogs["XLOOT_MASTER_DISTRIBUTE"] = {
 }
 
 local roll_pending
+local roll_serial = 0
+local ROLL_TIMEOUT = 15
+
+-- A pending roll left registered lets a later unrelated /roll 1-N award a slot from a closed loot window. The id keeps a stale timeout from clearing a newer roll.
+local function ClearPendingRoll(id, discarded)
+	if not roll_pending then return end
+	if id and roll_pending.id ~= id then return end
+	roll_pending = nil
+	eframe:UnregisterEvent("CHAT_MSG_SYSTEM")
+	eframe:UnregisterEvent("LOOT_CLOSED")
+	-- The raid has already seen the candidate list and the roll, so dying quietly reads as a bug.
+	if discarded then xprint(L.ROLL_DISCARDED) end
+end
 
 local function Award(slot, candidate, link, quality, special)
 	-- Test mode must never reach GiveMasterLoot with a fake index.
@@ -288,8 +302,14 @@ local function RaidRoll(slot, candidates, link, quality)
 			end
 		end
 	end
-	roll_pending = { slot = slot, candidates = candidates, link = link, quality = quality, count = count }
+	roll_serial = roll_serial + 1
+	roll_pending = { id = roll_serial, slot = slot, candidates = candidates, link = link, quality = quality, count = count }
 	eframe:RegisterEvent("CHAT_MSG_SYSTEM")
+	eframe:RegisterEvent("LOOT_CLOSED")
+	if C_Timer and C_Timer.After then
+		local id = roll_serial
+		C_Timer.After(ROLL_TIMEOUT, function() ClearPendingRoll(id, true) end)
+	end
 	RandomRoll(1, count)
 end
 
@@ -300,12 +320,16 @@ function addon.CHAT_MSG_SYSTEM(_, ...)
 	roll = tonumber(roll)
 	if who ~= me or not roll or tonumber(low) ~= 1 or tonumber(high) ~= roll_pending.count then return end
 	local pending = roll_pending
-	roll_pending = nil
-	eframe:UnregisterEvent("CHAT_MSG_SYSTEM")
+	ClearPendingRoll()
 	local winner = pending.candidates[roll]
 	if winner then
 		Award(pending.slot, winner, pending.link, pending.quality)
 	end
+end
+
+-- Slot indices are meaningless once the window closes, so a pending roll must not outlive it.
+function addon.LOOT_CLOSED()
+	ClearPendingRoll(nil, true)
 end
 
 function addon.ShowAssignMenu(row)
