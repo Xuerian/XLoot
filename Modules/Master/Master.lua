@@ -75,7 +75,7 @@ end
 addon.printall = printall
 
 local function dump(val)
-	UIParentLoadAddOn("Blizzard_DebugTools")
+	C_AddOns.LoadAddOn("Blizzard_DebugTools")
 	_G['xlminfostruct'] = val
 	DevTools_DumpCommand('xlminfostruct')
 	_G['xlminfostruct'] = nil

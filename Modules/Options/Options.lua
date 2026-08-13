@@ -870,11 +870,6 @@ function addon:OpenPanel(module)
 end
 
 --@do-not-package@
--- function print(...)
--- 	_G.UIParentLoadAddOn("Blizzard_DebugTools");
--- 	_G.DevTools_Dump((...));
--- 	_G.DevTools_Dump(select(2, ...));
--- end
 local AC = LibStub('AceConsole-2.0', true)
 
 if AC then print = function(...) AC:PrintLiteral(...) end end

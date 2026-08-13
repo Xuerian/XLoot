@@ -1507,7 +1507,7 @@ end
 
 -- Refreshes the shift-compare tooltip without an OnUpdate on every row
 function addon:MODIFIER_STATE_CHANGED()
-	if (GetNumLootItems() ~= 0) and mouse_focus and MouseIsOver(mouse_focus) then
+	if (GetNumLootItems() ~= 0) and mouse_focus and mouse_focus:IsMouseOver() then
 		mouse_focus:ShowTooltip()
 	end
 end
@@ -1516,11 +1516,7 @@ local function option_handler(msg)
 	if not addon:SlashHandler(msg) then
 		addon:ShowOptions()
 	end
-	--local what, arg, data = string.split(' ', msg, 3)
-	--local what, arg, data = msg:match'^(%w+)%s?([A-Za-z\_]*)%s?(.*)$'
 end
--- SLASH_XLOOT1 = '/xloot'
--- SlashCmdList['XLOOT'] = option_handler
 
 
 -- LootSlotHasItem() is generic since MoP - it covers item, coin, and currency. LootSlotIsCoin() and friends are replaced by GetLootSlotType(slot) == LOOT_SLOT_* checks.

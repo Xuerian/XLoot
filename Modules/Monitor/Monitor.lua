@@ -190,7 +190,7 @@ end
 
 local mouse_focus
 function addon:MODIFIER_STATE_CHANGED()
-	if mouse_focus and MouseIsOver(mouse_focus) then
+	if mouse_focus and mouse_focus:IsMouseOver() then
 		mouse_focus:ShowTooltip()
 	end
 end

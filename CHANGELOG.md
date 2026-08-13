@@ -1,10 +1,23 @@
 # Changelog
 
 XLoot is a revival fork of Xuerian's original addon, continued for retail World of
-Warcraft **12.0.7 ("Midnight")**. This changelog starts at the revival; earlier
+Warcraft **12.1.0 ("Midnight")**. This changelog starts at the revival; earlier
 history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
+
+## [12.14.3] - 2026-08-12
+
+### Bug Fixes
+- Loot rolls work again on retail patch 12.1.0. The patch removed a game function XLoot used to grey out
+  the roll buttons you are not eligible for, and every roll then failed partway through setting itself up.
+  The item icon stayed blank, the timer bar never started, and the roll either closed itself moments later
+  or did nothing when you clicked it. Reported by Addonman.
+- The options window no longer errors on its first checkbox on 12.1.0. The bundled Ace3 checkbox widget
+  used that same removed function, and has been updated to the current version.
+- Fixed errors on 12.1.0 when holding a modifier key over the loot window, a roll bar, the loot monitor, or
+  a toast, and when the same item was looted twice in quick succession. Those used a second function the
+  patch removed.
 
 ## [12.14.2] - 2026-08-11
 

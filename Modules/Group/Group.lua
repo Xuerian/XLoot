@@ -779,7 +779,7 @@ function addon:UpdateRetailStatusEvents()
 end
 
 function addon:MODIFIER_STATE_CHANGED()
-	if mouse_focus and MouseIsOver(mouse_focus) and mouse_focus.OnEnter then
+	if mouse_focus and mouse_focus:IsMouseOver() and mouse_focus.OnEnter then
 		mouse_focus:OnEnter()
 	end
 end
@@ -1007,7 +1007,7 @@ do
 				self:Disable()
 				self:SetAlpha(.6)
 			end
-			SetDesaturation(self:GetNormalTexture(), not status)
+			self:GetNormalTexture():SetDesaturated(not status)
 		end
 
 		function RollButtonPrototype:OnEnter()
@@ -1020,8 +1020,6 @@ do
 				GameTooltip:SetText(self.label, unpack(self.label_colors))
 				GameTooltip:Show()
 			end
-			-- This is for those people who think they should be able
-			--  to roll on something, can't, and then come complain to me.
 			if self.reason then
 				AddIneligibleReason(self, 1, .2, 0)
 			end

@@ -178,7 +178,7 @@ function addon:BuildToast(link, num)
 			existing.Blink:Stop()
 			existing.Blink:Play()
 			-- Skip while hovered so a coalesced loot cannot fade the toast out from under the cursor.
-			if not MouseIsOver(existing) then existing:RestartFade() end
+			if not existing:IsMouseOver() then existing:RestartFade() end
 		else
 			set_count(existing.count, existing.count_value, true)
 		end
@@ -308,7 +308,7 @@ local function update_modifier_click(toast)
 end
 
 function addon:MODIFIER_STATE_CHANGED()
-	if mouse_focus and MouseIsOver(mouse_focus) then
+	if mouse_focus and mouse_focus:IsMouseOver() then
 		update_modifier_click(mouse_focus)
 		if opt.mouse_hover and mouse_focus.item then
 			GameTooltip:SetHyperlink(mouse_focus.item)
