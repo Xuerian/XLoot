@@ -6,6 +6,21 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.14.4] - 2026-08-15
+
+### Bug Fixes
+- Roll rows no longer leave a hole in the list. When a roll ended from the middle of the stack, the rows below
+  it stayed where they were instead of closing up, and a row reused for a later roll could reappear in the gap
+  it left behind rather than in its place in the list.
+- A roll waiting on its result no longer lingers after the game clears its loot history. The result it was
+  waiting for could never arrive, but the bar sat there for a full six minutes before giving up on its own.
+  Retail only, and only with "Show roll results" turned on.
+- A roll row that fails to finish building can no longer act on the wrong item. The roll's identity and timer
+  are now set the moment the row appears rather than most of the way through, so an error while filling in the
+  rest of the row can no longer leave it carrying the previous roll's id, counting down against a finished
+  roll, or closing itself moments after opening. Nothing between those two points could throw on a healthy
+  client, but two of the calls that sat in the gap reach outside XLoot, one of them into Pawn.
+
 ## [12.14.3] - 2026-08-12
 
 ### Bug Fixes

@@ -314,6 +314,22 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 	local frame = anchor:Push()
 	rolls[id] = frame
 
+	-- Push already showed the frame, so everything the bar's OnUpdate reads is set before any call that can throw.
+	local bar = frame.bar
+	bar.length = length
+	bar.expires = GetTime() + start
+	frame.link = link
+	frame.rollid = id
+	frame.rollended = nil
+	frame.quality = quality
+	frame.expires = bar.expires
+	frame.over = nil
+	frame.have_rolled = false
+	frame.lead_type = 'pass'
+	frame.drop_key = nil
+	frame.awaiting = nil
+	frame.await_until = nil
+
 	frame.need:Show()
 	frame.greed:Show()
 	if frame.disenchant then
@@ -356,22 +372,6 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 		frame.disenchant.reason = reason_de ~= 0 and reason_de or nil
 		frame.disenchant.skill = de_skill ~= 0 and de_skill or nil
 	end
-
-	local bar = frame.bar
-	bar.length = length
-	bar.expires = GetTime() + start
-
-	frame.link = link
-	frame.rollid = id
-	frame.rollended = nil
-	frame.quality = quality
-	frame.expires = bar.expires
-	frame.over = nil
-	frame.have_rolled = false
-	frame.lead_type = 'pass'
-	frame.drop_key = nil
-	frame.awaiting = nil
-	frame.await_until = nil
 
 	frame.text_bind:SetText(bop and '|cffff4422BoP' or '')
 	frame.text_loot:SetText(name)
@@ -760,6 +760,7 @@ function addon:LOOT_HISTORY_CLEAR_HISTORY()
 	wipe(drop_to_roll)
 	for _, frame in pairs(rolls) do
 		frame.drop_key = nil
+		if frame.awaiting then anchor:Pop(frame) end
 	end
 end
 

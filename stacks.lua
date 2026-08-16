@@ -186,14 +186,22 @@ local function AcquireChild(self)
 end
 
 do
-	local function Push(self)
-		local child, new = AcquireChild(self)
-		if new then
-			local n = #self.children
-			self:AnchorChild(child, n > 1 and self.children[n-1] or nil)
+	-- The live set can change mid-array, since AcquireChild reuses the first free slot rather than appending.
+	local function Restack(self)
+		local previous
+		for _, child in ipairs(self.children) do
+			if child.active then
+				self:AnchorChild(child, previous)
+				previous = child
+			end
 		end
-		child:Show()
+	end
+
+	local function Push(self)
+		local child = AcquireChild(self)
 		child.active = true
+		Restack(self)
+		child:Show()
 		return child
 	end
 
@@ -203,14 +211,7 @@ do
 		if child.Popped then
 			child:Popped()
 		end
-	end
-
-	local function Restack(self)
-		local children = self.children
-		for i,child in ipairs(self.children) do
-			child:ClearAllPoints()
-			self:AnchorChild(child, i == 1 and self or children[i-1])
-		end
+		Restack(self)
 	end
 
 	function lib:CreateStaticStack(factory, ...)
