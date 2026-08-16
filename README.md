@@ -1,6 +1,6 @@
 # XLoot
 
-[![Version](https://img.shields.io/github/v/release/Xuerian/XLoot?color=FF2222&label=Version)](https://github.com/Xuerian/XLoot/releases) [![Downloads](https://img.shields.io/curseforge/dt/14906?color=F16436&label=Downloads&style=flat-square)](https://www.curseforge.com/wow/addons/xloot) [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/vm8K2WfQUE) ![WoW Midnight](https://img.shields.io/badge/WoW-Midnight_12.1.0-8B0000?style=flat-square) ![WoW BCC](https://img.shields.io/badge/WoW-BCC_2.5.6-8B0000?style=flat-square) ![WoW MoP Classic](https://img.shields.io/badge/WoW-MoP_Classic_5.5-8B0000?style=flat-square) ![WoW Classic Era](https://img.shields.io/badge/WoW-Classic_Era_1.15.9-8B0000?style=flat-square) [![License](https://img.shields.io/badge/License-All_Rights_Reserved-333333?style=flat-square)](LICENSE.txt)
+[![Version](https://img.shields.io/github/v/release/Xuerian/XLoot?color=FF2222&label=Version)](https://github.com/Xuerian/XLoot/releases) [![Downloads](https://img.shields.io/curseforge/dt/14906?color=F16436&label=Downloads&style=flat-square)](https://www.curseforge.com/wow/addons/xloot) [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/vm8K2WfQUE) ![WoW Midnight](https://img.shields.io/badge/WoW-Midnight_12.1.0-8B0000?style=flat-square) ![WoW BCC](https://img.shields.io/badge/WoW-BCC_2.5.6-8B0000?style=flat-square) ![WoW MoP Classic](https://img.shields.io/badge/WoW-MoP_Classic_5.5.4-8B0000?style=flat-square) ![WoW Classic Era](https://img.shields.io/badge/WoW-Classic_Era_1.15.9-8B0000?style=flat-square) [![License](https://img.shields.io/badge/License-All_Rights_Reserved-333333?style=flat-square)](LICENSE.txt)
 
 XLoot improves looting in World of Warcraft by replacing the default loot frames with cleaner, more
 informative, and highly configurable ones. It is supported on retail **Midnight (12.1.0)** and every
@@ -25,7 +25,7 @@ current Classic flavor. Every module is optional and can be toggled like any oth
   coloring, and how many of an item you already own. It can surface gold the game only reports as a
   system message (world-quest rewards, gold purses), match your class colors, hide Blizzard's own loot
   pop-ups so they don't pile up, and let you right-click a row to dismiss it, with adjustable fade times.
-- **XLoot Toast** _(new)_. A Blizzard-style pop-up toast for notable loot as you receive it: item icon,
+- **XLoot Toast.** A Blizzard-style pop-up toast for notable loot as you receive it: item icon,
   quality-colored name, and a counting-up quantity, with same-item pickups coalescing onto one "+N"
   toast. Configurable quality threshold, item level, max on screen, fade time, spawn animation, sound,
   coloring, font, a movable anchor, and how toasts respond to the mouse (fully clickable, click-through,
