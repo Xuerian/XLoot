@@ -160,6 +160,7 @@ local defaults = {
 
 		speedy_autoloot = false,
 		speedy_autoloot_respect_filters = false,
+		speedy_autoloot_skip_fishing = false,
 
 		frame_draggable = true,
 
@@ -1172,8 +1173,9 @@ end
 local tremove = table.remove
 local speedy = { queue = {}, attempted = {}, ticker = nil, leftover = nil, lastcount = nil }
 
--- Never vacuum under master loot (would grab assignable drops) or while the auto-loot modifier is held.
+-- Vacuuming under master loot would grab assignable drops.
 local function SpeedyAllowed()
+	if opt.speedy_autoloot_skip_fishing and IsFishingLoot() then return false end
 	return not IsModifiedClick('AUTOLOOTTOGGLE') and not XLoot.GroupUsesMasterLoot()
 end
 
@@ -1249,6 +1251,8 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 	local max = math.max
 	local speedy_paced = not is_refresh and opt.speedy_autoloot
 		and opt.speedy_autoloot_respect_filters and SpeedyAllowed()
+	-- Fishing skips the filter auto-loot too, or a matching fish is taken before the tracker reads it.
+	local skip_fishing = opt.speedy_autoloot and opt.speedy_autoloot_skip_fishing and IsFishingLoot()
 	if speedy_paced then
 		wipe(speedy.queue)
 		wipe(speedy.attempted)
@@ -1322,9 +1326,9 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 				if issecret and issecret(name) then slotData.secret, slotData.quality, slotData.quantity, slotData.locked = true, nil, 1, nil end
 			end
 
-			-- Skip our autoloot on refresh/secret/locked slots, or when the game is already auto-looting: it grabs the free items, so we just show the window for what is left (BoP confirms, read-only master-loot drops) instead of double-looting and stranding them.
+			-- When the game is already auto-looting it grabs the free items, so we just show the window for what is left (BoP confirms, read-only master-loot drops) instead of double-looting and stranding them.
 			-- auto_retry only holds slots this same block vetted but could not judge, so the refresh reconsiders them without reopening the other skips.
-			if (not is_refresh or auto_retry[slot]) and not secret and not locked and not game_autoloot then
+			if (not is_refresh or auto_retry[slot]) and not secret and not locked and not game_autoloot and not skip_fishing then
 				if (auto.all or auto.currency) and (slotType == LOOT_SLOT_MONEY or slotType == LOOT_SLOT_CURRENCY) then
 					autoloot = true
 				elseif (auto.all or auto.quest) and (isQuestItem or startsQuest) then

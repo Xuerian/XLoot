@@ -6,6 +6,18 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.15.0",
+		date = "2026-08-16",
+		changes = {
+			{
+				label = "Leave fishing catches alone",
+				type = "feature",
+				option = "Loot Frame > Auto-looting",
+				description = "Speedy auto-loot can empty a fishing bobber faster than a fishing tracker addon can read the catch, so those addons quietly missed fish. A new switch under Speedy auto-loot leaves fishing loot for the normal loot window, while everything else still auto-loots exactly as before. Off by default. Reported by Addonman.",
+			},
+		},
+	},
+	{
 		version = "12.14.0",
 		date = "2026-08-02",
 		changes = {

@@ -6,6 +6,15 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.15.0] - 2026-08-16
+
+### Features
+- **Leave fishing catches alone.** A new switch under Speedy auto-loot stops XLoot taking your fishing
+  loot, so the normal loot window opens for it instead. Speedy empties the bobber faster than some
+  fishing tracker addons can read the catch, which left them quietly missing fish. Everything that is
+  not a fishing catch still auto-loots exactly as before. Off by default, under Loot Frame >
+  Auto-looting. Reported by Addonman.
+
 ## [12.14.4] - 2026-08-15
 
 ### Bug Fixes
