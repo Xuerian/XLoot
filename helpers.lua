@@ -204,16 +204,35 @@ function XLoot.TimeFractionColor(fraction, r, g, b)
 end
 
 local white = { r = 1, g = 1, b = 1 }
+-- Read the globals live: class color addons install CUSTOM_CLASS_COLORS after we load.
+function XLoot.ClassColor(class)
+	return (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class])
+		or (_G.RAID_CLASS_COLORS and _G.RAID_CLASS_COLORS[class])
+		or white
+end
+
+function XLoot.MyClassColor()
+	local c = XLoot.ClassColor(select(2, UnitClass('player')))
+	return c.r, c.g, c.b
+end
+
+local function ColorByte(v)
+	v = floor((v or 0) * 255 + 0.5)
+	return v < 0 and 0 or (v > 255 and 255 or v)
+end
+
+-- Eight chars with a leading ff: this substitutes for GetItemQualityColor's escape, which callers use whole.
+function XLoot.ColorToHex(r, g, b)
+	return string_format('ff%02x%02x%02x', ColorByte(r), ColorByte(g), ColorByte(b))
+end
+
 local dimensions = {
 	HEALER = '48:64',
 	DAMAGER = '16:32',
 	TANK = '32:48'
 }
 function XLoot.FancyPlayerName(name, class, opt)
-	local c = (_G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class])
-		or (_G.RAID_CLASS_COLORS and _G.RAID_CLASS_COLORS[class])
-		or white
-	-- !CLASSIC
+	local c = XLoot.ClassColor(class)
 	local role = 'NONE'
 	if UnitGroupRolesAssigned then
 		role = UnitGroupRolesAssigned(name)
@@ -328,7 +347,7 @@ local function invert(pattern)
 		local i, list = 1, wipe(temp_list)
 		while k ~= nil do
 			inverted = gsub(inverted, "(%%%d%$.)", "(.-)", 1)
-			list[i] = 'm'..tostring(k)
+			list[tonumber(k)] = 'm'..i
 			k, i = match(inverted, "%%(%d)%$"), i + 1
 		end
 		arglist = table.concat(list, ", ")
@@ -352,6 +371,70 @@ function XLoot.Deformat(str, pattern)
 	return func(str)
 end
 XLoot.InvertFormatString = invert
+
+local quest_objective_items, quest_objectives_stale = {}, true
+local MAX_QUEST_LOG_SCAN = 200
+
+local function ObjectiveItemName(text)
+	local needed = _G.QUEST_ITEMS_NEEDED
+	local name = needed and XLoot.Deformat(text, needed)
+	if name then return name end
+	local found = _G.QUEST_OBJECTS_FOUND
+	return found and XLoot.Deformat(text, found)
+end
+
+local function AddQuestObjectiveItem(text)
+	local name = text and ObjectiveItemName(text)
+	if name and name ~= '' then
+		quest_objective_items[name] = true
+	end
+end
+
+local function RebuildQuestObjectiveItems()
+	quest_objectives_stale = false
+	wipe(quest_objective_items)
+	local QuestLog = _G.C_QuestLog
+	if QuestLog and QuestLog.GetNumQuestLogEntries and QuestLog.GetInfo and QuestLog.GetQuestObjectives then
+		for i = 1, (QuestLog.GetNumQuestLogEntries()) do
+			local info = QuestLog.GetInfo(i)
+			if info and not info.isHeader and info.questID then
+				local objectives = QuestLog.GetQuestObjectives(info.questID)
+				for _, objective in ipairs(objectives or {}) do
+					if objective.type == 'item' then
+						AddQuestObjectiveItem(objective.text)
+					end
+				end
+			end
+		end
+	elseif _G.GetQuestLogTitle and _G.GetNumQuestLeaderBoards and _G.GetQuestLogLeaderBoard then
+		-- GetNumQuestLogEntries counts only rows the log is showing, so collapsing a header would hide quests.
+		for i = 1, MAX_QUEST_LOG_SCAN do
+			local title, _, _, is_header = _G.GetQuestLogTitle(i)
+			if not title then break end
+			if not is_header then
+				for j = 1, _G.GetNumQuestLeaderBoards(i) do
+					local text, objective_type = _G.GetQuestLogLeaderBoard(j, i)
+					if objective_type == 'item' then
+						AddQuestObjectiveItem(text)
+					end
+				end
+			end
+		end
+	end
+end
+
+-- The loot API's quest flag only covers Quest-type items, so match the log's own item objectives too.
+function XLoot.IsQuestObjectiveItem(name)
+	if not name then return false end
+	if quest_objectives_stale then
+		pcall(RebuildQuestObjectiveItems)
+	end
+	return quest_objective_items[name] or false
+end
+
+local quest_watcher = CreateFrame("Frame")
+quest_watcher:RegisterEvent("QUEST_LOG_UPDATE")
+quest_watcher:SetScript("OnEvent", function() quest_objectives_stale = true end)
 
 --@do-not-package@
 local AC = LibStub('AceConsole-2.0', true)

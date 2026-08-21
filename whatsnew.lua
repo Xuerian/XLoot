@@ -6,6 +6,18 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.16.0",
+		date = "2026-08-20",
+		changes = {
+			{
+				label = "Color quest items",
+				type = "feature",
+				option = "Loot Frame > Colors",
+				description = "Quest items can take a color of their own on both the item name and the row border, so they stand out the moment the loot window opens. Pick any color you like, or use your class color instead. It covers both quest-type items and the ordinary drops your active quests ask you to collect, since the game's own quest flag only marks the first kind. Off by default. The loot feed will get the same treatment in a following update. Suggested by Kharris.",
+			},
+		},
+	},
+	{
 		version = "12.15.0",
 		date = "2026-08-16",
 		changes = {

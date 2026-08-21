@@ -97,6 +97,8 @@ local defaults = {
 
 		quality_color_frame = false,
 		quality_color_slot = true,
+		quest_color_slot = false,
+		quest_color_class = false,
 
 		loot_texts_info = true,
 		loot_texts_bind  = true,
@@ -180,6 +182,7 @@ local defaults = {
 		loot_color_backdrop = { 0, 0, 0, .9 },
 		loot_color_gradient = { .5, .5, .5, .4 },
 		loot_color_info = { .5, .5, .5, 1 },
+		loot_color_quest = { 1, .8, .1, 1 },
 		loot_color_button_auto = { .4, .8, .4, .6 },
 
 		show_slot_errors = true,
@@ -251,7 +254,8 @@ function addon:ApplyOptions(in_options)
 			else
 				t.quantity = 1
 				t.slotType = LOOT_SLOT_ITEM
-				t.preview_upgrade = (i == #preview_loot) -- force the (upgrade) demo tag on one preview row
+				t.preview_upgrade = (i == #preview_loot)
+				t.preview_quest = (i == 2)
 				slot = slot + 1
 				local row = Fake.rows[slot]
 				row.item = t.link
@@ -483,6 +487,13 @@ local function GetColor(self, key, mult)
 	return unpack(t)
 end
 
+local function QuestColor(owner)
+	if owner.opt.quest_color_class then
+		return XLoot.MyClassColor()
+	end
+	return GetColor(owner, 'loot_color_quest')
+end
+
 
 local mouse_focus
 local BuildRow
@@ -684,7 +695,7 @@ do
 	local UPGRADE = (' |cff1eff00%s|r'):format(L.upgrade)
 
 	function RowPrototype:Update(slotData)
-		local r, g, b, hex
+		local r, g, b, hex, is_quest, quest_colored
 		local owner = self:GetParent()
 		local opt = owner.opt
 		local text_info, text_name, text_bind = '', '', ''
@@ -693,6 +704,15 @@ do
 		local layout = 'simple'
 		if slotData.slotType == LOOT_SLOT_ITEM then
 			r, g, b, hex = C_Item.GetItemQualityColor(slotData.quality or 0)
+
+			-- Keep is_quest narrow. Widening it would recolor the legacy orange subtitle with the feature off.
+			is_quest = slotData.questID or slotData.isQuestItem
+			if opt.quest_color_slot and not slotData.secret
+				and (is_quest or slotData.preview_quest or XLoot.IsQuestObjectiveItem(slotData.name)) then
+				quest_colored = true
+				r, g, b = QuestColor(owner)
+				hex = XLoot.ColorToHex(r, g, b)
+			end
 
 			text_name = slotData.secret and slotData.name or ('|c%s%s|r'):format(hex, slotData.name)
 
@@ -731,7 +751,9 @@ do
 		else
 			self.text_sell:SetText()
 		end
-		if slotData.questID or slotData.isQuestItem then
+		if quest_colored then
+			self.text_info:SetTextColor(r, g, b)
+		elseif is_quest then
 			self.text_info:SetTextColor(1, .8, .1)
 		else
 			self.text_info:SetTextColor(owner:GetColor('loot_color_info'))
@@ -754,8 +776,13 @@ do
 			end
 		end
 
-		if opt.quality_color_slot then
+		if quest_colored then
+			self:SetBorderColor(r, g, b)
+		elseif opt.quality_color_slot then
 			self:SetBorderColor(Darken(owner.skin.color_mod, r, g, b))
+		else
+			-- Rows are pooled and clear() leaves borders alone, so this arm must always repaint.
+			self:SetBorderColor(owner:GetColor('loot_color_border'))
 		end
 
 		if slotData.questID then

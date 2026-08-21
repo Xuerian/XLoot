@@ -560,6 +560,9 @@ function addon:OnEnable()
 				{ "loot_color_gradient", "color" },
 				{ "loot_color_info", "color", width = "double", requires = "loot_texts_info" },
 				{ "loot_color_button_auto", "color", requires = "loot_buttons_auto", name = L.Frame.loot_buttons_auto},
+				{ "quest_color_slot", width = "full" },
+				{ "quest_color_class", width = "double", requires = "quest_color_slot" },
+				{ "loot_color_quest", "color", false, requires = "quest_color_slot", requires_inverse = "quest_color_class" },
 			}}
 		})
 	end
