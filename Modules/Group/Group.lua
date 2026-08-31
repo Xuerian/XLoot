@@ -475,9 +475,10 @@ function addon:LOOT_HISTORY_ROLL_COMPLETE()
 	local hid, frame, rollid, players, done, _ = 1, nil, nil, nil, nil, nil
 	while true do
 		rollid, _, players, done = HistoryGetItem(hid)
-		if not rollid or (rolls[rollid] and rolls[rollid].over) then
+		-- Walk past rolls already painted, or a second roll finishing while the first bar is up gets no winner.
+		if not rollid then
 			return
-		elseif done and rolls[rollid] then
+		elseif done and rolls[rollid] and not rolls[rollid].over then
 			frame = rolls[rollid]
 			break
 		end
@@ -488,14 +489,18 @@ function addon:LOOT_HISTORY_ROLL_COMPLETE()
 	local top_type, top_roll, top_pid, top_is_me = 0, 0, nil, nil
 	for j=1, players do
 		local name, class, rtype, roll, is_winner, is_me = HistoryGetPlayerInfo(hid, j)
-		-- roll = roll and roll or true
+		-- A player who never chose reports no rollType, and tidx[nil] cannot be compared.
+		local priority = rtype and rtype ~= 0 and tidx[rtype]
 		if is_winner then
+			-- 0 maps to no icon: an unknown winning type must draw nothing, not the last player's.
+			top_type = rtype or 0
 			top_pid = j
 			top_is_me = is_me
 			break
-		elseif rtype ~= 0 and tidx[rtype] >= tidx[top_type] and (not roll or roll > top_roll) then
+		elseif priority and priority >= tidx[top_type] and (not roll or roll > top_roll) then
 			top_type = rtype
-			top_roll = roll
+			-- Chosen but not yet rolled: keep top_roll a number or the next comparison throws.
+			top_roll = roll or 0
 			top_pid = j
 		end
 	end
@@ -504,11 +509,12 @@ function addon:LOOT_HISTORY_ROLL_COMPLETE()
 		local name, class = HistoryGetPlayerInfo(hid, top_pid)
 		local player, r, g, b = FancyPlayerName(name, class, opt)
 		if opt.win_icon then
-			if top_type == 'need' then
+			local won_with = rtypes[top_type]
+			if won_with == 'need' then
 				player = [[|TInterface\Buttons\UI-GroupLoot-Dice-Up:16:16:-1:-1|t]]..player
-			elseif top_type == 'greed' then
+			elseif won_with == 'greed' then
 				player = [[|TInterface\Buttons\UI-GroupLoot-Coin-Up:16:16:-1:-2|t]]..player
-			elseif top_type == 'disenchant' then
+			elseif won_with == 'disenchant' then
 				player = [[|TInterface\Buttons\UI-GroupLoot-DE-Up:16:16:-1:-1|t]]..player
 			end
 		end
@@ -1205,6 +1211,10 @@ do
 		if FakeHistory then
 			FakeHistory.rolls[self.rollid] = nil
 			FakeHistory.links[self.rollid] = nil
+			-- Fake entries shadow real history by index, so once no fake roll is live they all have to go.
+			if not next(FakeHistory.rolls) then
+				wipe(FakeHistory.items)
+			end
 		end
 		if self.drop_key then
 			drop_to_roll[self.drop_key] = nil
@@ -1439,8 +1449,10 @@ function XLootGroup.TestSettings()
 			table.insert(schedule, { GetTime() + seconds, func, target, {...} } )
 		end
 
-		local function changed(...)
-			addon:LOOT_HISTORY_ROLL_CHANGED(...)
+		-- Once the fake entries are gone this index is real history.
+		local function changed(hid, pid)
+			if not FakeHistory.items[hid] then return end
+			addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 		end
 
 		-- An orphaned fake drop must never join a real roll of the same item and fake a winner onto it.
@@ -1532,6 +1544,12 @@ function XLootGroup.TestSettings()
 			table.insert(FakeHistory.items, 1, fake)
 
 			local fake_frame = addon:START_LOOT_ROLL(rollid, random(20000, 40000), true)
+			-- No frame means Popped never runs for this id, stranding the entries that shadow real history.
+			if not fake_frame then
+				FakeHistory.rolls[rollid], FakeHistory.links[rollid] = nil, nil
+				table.remove(FakeHistory.items, 1)
+				return
+			end
 			if not IS_RETAIL then
 				after(5, function() fake.players[2][3] = 0 end, changed, 1, 2)
 				after(7, function() fake.players[3][3] = 2 end, changed, 1, 3)

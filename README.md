@@ -19,12 +19,16 @@ current Classic flavor. Every module is optional and can be toggled like any oth
   total vendor value, by a custom item list, or just grab everything, each rule applying solo, in
   groups, always, or never. **Speedy auto-loot** can instead vacuum a corpse instantly with no loot
   window (paced to avoid the fast-loot disconnect on big pulls), optionally limited to only your
-  filtered items.
+  filtered items. Quest items can also take **a color of their own** on the name and row border, either a
+  color you pick or your class color, covering both quest-type items and the ordinary drops your quest log
+  asks you to collect.
 - **XLoot Monitor.** A "toaster" loot feed for items you and others loot, so you can watch drops at a
   glance or move loot spam out of your chat box entirely. Shows item level, stack counts, quality
   coloring, and how many of an item you already own. It can surface gold the game only reports as a
   system message (world-quest rewards, gold purses), match your class colors, hide Blizzard's own loot
   pop-ups so they don't pile up, and let you right-click a row to dismiss it, with adjustable fade times.
+  Quest items can take **a color of their own** here too, and are shown even when they fall below your
+  quality thresholds.
 - **XLoot Toast.** A Blizzard-style pop-up toast for notable loot as you receive it: item icon,
   quality-colored name, and a counting-up quantity, with same-item pickups coalescing onto one "+N"
   toast. Configurable quality threshold, item level, max on screen, fade time, spawn animation, sound,

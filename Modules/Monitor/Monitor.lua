@@ -29,6 +29,9 @@ local defaults = {
 		quality_color = true,
 		monitor_color_border = { .5, .5, .5, 1 },
 		color_all_rows = false,
+		quest_color = false,
+		quest_color_class = false,
+		monitor_color_quest = { 1, .8, .1, 1 },
 
 		threshold_own = 2,
 		threshold_other = 3,
@@ -87,12 +90,14 @@ function addon:OnEnable()
 	anchor = XLoot.Stack:CreateStaticStack(self.CreateRow, L.anchor, opt.anchor)
 	self:Skin(anchor, XLoot.opt.skin_anchors and 'anchor_pretty' or 'anchor')
 	XLoot.SuppressLootToasts("Monitor", opt.suppress_loot_toasts)
+	XLoot.WantQuestLoot("Monitor", opt.quest_color)
 end
 
 function addon:ApplyOptions()
 	opt = self.opt
 	anchor:UpdateSVData(opt.anchor)
 	XLoot.SuppressLootToasts("Monitor", opt.suppress_loot_toasts)
+	XLoot.WantQuestLoot("Monitor", opt.quest_color)
 	addon:Restack()
 end
 
@@ -102,17 +107,43 @@ local function set_row_border(row)
 	row.icon_frame:SetBorderColor(c[1], c[2], c[3], c[4])
 end
 
+local function get_quest_color()
+	if opt.quest_color_class then
+		return XLoot.MyClassColor()
+	end
+	local c = opt.monitor_color_quest
+	return c[1], c[2], c[3]
+end
+
+-- Row text is the item link itself, so recoloring the name means rewriting the link's own quality escape.
+-- Retail can emit the named form (|cnIQ4:) instead of eight hex digits, and neither pattern matches the other.
+local function recolor_link(link, hex)
+	local escape = '|c'..hex
+	local out, hits = link:gsub('|c%x%x%x%x%x%x%x%x', escape, 1)
+	if hits == 0 then
+		out, hits = link:gsub('|cn[^:|]+:', escape, 1)
+	end
+	return hits > 0 and out or ('%s%s|r'):format(escape, link)
+end
+
 local events = {}
-function events.item(player, link, num)
+function events.item(player, link, num, preview_quest)
 	if link and link:match("|Hitem:") then
 		local name, _, quality, _, _, _, _, _, _, icon = GetItemInfo(link)
 		if not name or type(quality) ~= "number" then
 			return -- item not cached yet or malformed, not an error to report
 		end
-		if (player == me and opt.threshold_own or opt.threshold_other) > quality then
+		local is_quest = opt.quest_color and (preview_quest or (player == me and XLoot.IsQuestLoot(link)))
+		-- Quest items are nearly always Common or Poor, so the thresholds would hide the feature entirely.
+		if not is_quest and (player == me and opt.threshold_own or opt.threshold_other) > quality then
 			return
 		end
 		local r, g, b = C_Item.GetItemQualityColor(quality)
+		local display = link
+		if is_quest then
+			r, g, b = get_quest_color()
+			display = recolor_link(link, XLoot.ColorToHex(r, g, b))
+		end
 		local nr, ng, nb
 		if player ~= me then
 			player, nr, ng, nb = FancyPlayerName(player, select(2, UnitClass(player)), opt)
@@ -120,11 +151,11 @@ function events.item(player, link, num)
 			player = nil
 		end
 		local row = addon:AddRow(icon, (player and opt.fade_other or opt.fade_own), r, g, b)
-		if not opt.quality_color then
+		if not opt.quality_color and not is_quest then
 			set_row_border(row)
 		end
 		local num = tonumber(num) or 1
-		row:SetTexts(player, num > 1 and ("%sx%d"):format(link, num) or link, nil, nr, ng, nb)
+		row:SetTexts(player, num > 1 and ("%sx%d"):format(display, num) or display, nil, nr, ng, nb)
 		if opt.show_totals then
 			row.timeToTotal = opt.totals_delay
 		end
@@ -494,6 +525,10 @@ local function test_currency(event)
 	end
 end
 
+local function test_quest_item(event, is_me)
+	addon.LOOT_EVENT('item', event, random_player(is_me), random_item_link(), 1, true)
+end
+
 local function test_crafted(event)
 	addon.LOOT_EVENT('crafted', event, random_item_link(), random_item_num())
 end
@@ -510,6 +545,7 @@ local tests = {
 	{ test_item, "LOOT_ITEM_SELF_MULTIPLE", true },
 	{ test_item, "LOOT_ITEM_PUSHED_SELF", true },
 	{ test_item, "LOOT_ITEM_PUSHED_SELF_MULTIPLE", true },
+	{ test_quest_item, "LOOT_ITEM_SELF", true },
 	{ test_coin, "LOOT_MONEY" },
 	{ test_coin, "LOOT_MONEY_SPLIT", true },
 	{ test_coin, "YOU_LOOT_MONEY", true },

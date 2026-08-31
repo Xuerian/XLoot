@@ -673,6 +673,9 @@ function addon:OnEnable()
 				{ "quality_color", width = "full" },
 				{ "monitor_color_border", "color", requires_inverse = "quality_color" },
 				{ "color_all_rows", requires_inverse = "quality_color" },
+				{ "quest_color", width = "full" },
+				{ "quest_color_class", width = "double", requires = "quest_color" },
+				{ "monitor_color_quest", "color", false, requires = "quest_color", requires_inverse = "quest_color_class" },
 				{ "gradients", must_reload_ui = true },
 			}, name = L.Frame.colors },
 		})

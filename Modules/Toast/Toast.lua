@@ -131,24 +131,14 @@ function addon:ApplyOptions()
 end
 
 function addon:UpdateAnchors()
-	-- Raw _Show/_Hide keeps the config preview from flipping the saved visible flag that Show would set.
-	if opt.anchor.visible or addon.config_preview then
+	-- Raw _Show/_Hide, so this never writes back the saved visible flag that Show would set.
+	if opt.anchor.visible then
 		anchor:SetClampedToScreen(true)
 		anchor:Position()
 		anchor:_Show()
 	else
 		anchor:_Hide()
 	end
-end
-
-function addon:OnOptionsShow()
-	addon.config_preview = true
-	self:UpdateAnchors()
-end
-
-function addon:OnOptionsHide()
-	addon.config_preview = nil
-	self:UpdateAnchors()
 end
 
 function addon.LOOT_EVENT(event, _, ...)

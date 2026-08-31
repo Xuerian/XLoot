@@ -6,6 +6,35 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.17.0] - 2026-08-30
+
+### Features
+- **Color quest items in the loot feed.** The loot feed now colors quest items the same way the loot window
+  does, finishing what 12.16.0 started. The item name, the row border and the icon border all take the color,
+  and you can pick any color you like or tick "Use my class color". It covers both quest-type items and the
+  ordinary drops your active quests ask you to collect. Quest items are shown even when they fall below your
+  quality thresholds, so the setting works without having to lower them. Only your own loot is colored, and
+  only items that come from a loot window - a quest reward handed straight to your bags is not. Off by
+  default, under Loot Monitor > Colors. Suggested by Kharris.
+
+### Bug Fixes
+- The Loot Toast anchor no longer un-hides itself. Hiding it and then changing any setting brought it straight
+  back, because opening the options panel put the anchor into a preview mode that outranked the anchor's own
+  hide button on every later change. The saved setting is now the only thing that decides, matching the Loot
+  Monitor and roll anchors. One consequence worth knowing: opening the options panel no longer reveals a
+  hidden Toast anchor, so use Loot Toast > Anchor > "Anchor visible" to bring it back.
+- Roll results no longer stop at the first finished roll. When a roll finished while an earlier roll's bar was
+  still on screen, the second one never got a winner, because the search gave up as soon as it met a bar it
+  had already filled in. Classic flavors only.
+- A roll no longer errors when somebody never chooses. A player still deciding when the roll completed
+  reported no roll type, which the winner comparison could not handle. Classic flavors only.
+- The winning type icon now actually appears. The dice, coin and disenchant icons shown next to the winner's
+  name were compared against the wrong kind of value and could never match, so "Show winning type icon" had no
+  effect at all. Classic flavors only.
+- The roll test command no longer hides your real loot history. After running /xlgd, its practice entries sat
+  in front of the real ones for the rest of the session, so genuine roll results stopped appearing entirely
+  until you reloaded. Classic flavors only.
+
 ## [12.16.0] - 2026-08-20
 
 ### Features

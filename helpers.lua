@@ -436,6 +436,78 @@ local quest_watcher = CreateFrame("Frame")
 quest_watcher:RegisterEvent("QUEST_LOG_UPDATE")
 quest_watcher:SetScript("OnEvent", function() quest_objectives_stale = true end)
 
+-- Quest verdicts shared with the loot feed, which only sees a chat message and cannot ask the loot API itself.
+-- Scanned in the core, not the Frame module, because that ships as a sibling addon a user can disable and
+-- because speedy auto-loot never opens a window for its scan to run.
+do
+	local wanted, seen, count = {}, {}, 0
+	local TTL, SWEEP = 30, 64
+
+	local function ItemKey(link)
+		return link and link:match('item:(%d+)')
+	end
+
+	function XLoot.WantQuestLoot(source, want)
+		wanted[source] = want or nil
+	end
+
+	local function Mark(link)
+		local key = ItemKey(link)
+		if not key then return end
+		local now = GetTime()
+		if count >= SWEEP then
+			count = 0
+			for k, t in pairs(seen) do
+				if now - t > TTL then seen[k] = nil else count = count + 1 end
+			end
+		end
+		if not seen[key] then count = count + 1 end
+		seen[key] = now
+	end
+
+	function XLoot.IsQuestLoot(link)
+		local key = ItemKey(link)
+		local t = key and seen[key]
+		return (t and GetTime() - t <= TTL) or false
+	end
+
+	local scanned = 0
+	local function Scan()
+		if not next(wanted) then return end
+		local n = GetNumLootItems()
+		-- LOOT_READY and LOOT_OPENED both land on one window, and speedy auto-loot drains from the first.
+		if n == 0 or scanned == n then return end
+		local incomplete = false
+		for slot = 1, n do
+			local link = GetLootSlotLink(slot)
+			if link and not (issecret and issecret(link)) then
+				local ok, _, name, _, _, _, _, isQuestItem, questID = pcall(GetLootSlotInfo, slot)
+				if not ok or not name then
+					incomplete = true
+				-- A secret cannot be indexed, keyed or even tested for truth, so screen every field before use.
+				elseif not (issecret and (issecret(name) or issecret(isQuestItem) or issecret(questID)))
+					and (isQuestItem or questID or XLoot.IsQuestObjectiveItem(name)) then
+					Mark(link)
+				end
+			end
+		end
+		-- A slot the server had not filled in yet earns another pass on LOOT_OPENED.
+		scanned = incomplete and 0 or n
+	end
+
+	local scanner = CreateFrame("Frame")
+	scanner:RegisterEvent("LOOT_READY")
+	scanner:RegisterEvent("LOOT_OPENED")
+	scanner:RegisterEvent("LOOT_CLOSED")
+	scanner:SetScript("OnEvent", function(_, event)
+		if event == "LOOT_CLOSED" then
+			scanned = 0
+		else
+			Scan()
+		end
+	end)
+end
+
 --@do-not-package@
 local AC = LibStub('AceConsole-2.0', true)
 if AC then print = function(...) AC:PrintLiteral(...) end end
