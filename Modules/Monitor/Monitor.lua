@@ -115,8 +115,7 @@ local function get_quest_color()
 	return c[1], c[2], c[3]
 end
 
--- Row text is the item link itself, so recoloring the name means rewriting the link's own quality escape.
--- Retail can emit the named form (|cnIQ4:) instead of eight hex digits, and neither pattern matches the other.
+-- Retail can emit the named color form (|cnIQ4:) instead of eight hex digits, and neither pattern matches the other.
 local function recolor_link(link, hex)
 	local escape = '|c'..hex
 	local out, hits = link:gsub('|c%x%x%x%x%x%x%x%x', escape, 1)
@@ -232,7 +231,9 @@ stack[0] = anchor
 local timer = 0
 function addon.EframeUpdate(self, elapsed)
 	timer = timer + elapsed
-	for i,row in ipairs(stack) do
+	-- RemoveRow table.removes from stack, so a forward pass would skip the row that shifts down.
+	for i = #stack, 1, -1 do
+		local row = stack[i]
 		-- Deferred total calculation due to GetItemCount reliability
 		local ttt = row.timeToTotal
 		if ttt then
@@ -318,6 +319,10 @@ function addon:Restack()
 		anchor:AnchorChild(v, i > 1 and stack[i-1] or nil)
 		v:ApplyOptions()
 	end
+	-- Pooled rows are re-shown by AddRow without restyling, so they need the new options too.
+	for _,v in ipairs(pool) do
+		v:ApplyOptions()
+	end
 end
 
 do
@@ -344,6 +349,18 @@ do
 		end
 		GameTooltip:Hide()
 		ResetCursor()
+	end
+
+	-- A parent hide (Alt-Z, cinematics) hides the row without firing OnLeave, so clear the hover state it would otherwise strand.
+	local function OnHide(self)
+		if mouse_focus == self then
+			mouse_focus = nil
+			if self._highlights then
+				self.icon_frame:HideHighlight()
+			end
+			GameTooltip:Hide()
+			ResetCursor()
+		end
 	end
 
 	local function OnClick(self, button)
@@ -417,8 +434,8 @@ do
 		frame:SetScript("OnClick", OnClick)
 		frame:SetScript("OnEnter", OnEnter)
 		frame:SetScript("OnLeave", OnLeave)
+		frame:SetScript("OnHide", OnHide)
 
-		-- Item icon (For skin border)
 		local icon_frame = CreateFrame("Frame", nil, frame, BackdropTemplateMixin and "BackdropTemplate")
 		icon_frame:SetWidth(28)
 		icon_frame:SetHeight(28)
@@ -557,7 +574,7 @@ local tests = {
 
 }
 
-local queue, queueframe, tick = {}, CreateFrame("Frame"), 0
+local queue, queueframe, tick, qactive = {}, CreateFrame("Frame"), 0, false
 
 local function queue_update(self, elapsed)
 	tick = tick + elapsed
@@ -566,23 +583,23 @@ local function queue_update(self, elapsed)
 		local time = GetTime()
 		for k,v in pairs(queue) do
 			if v[1] < time then
+				-- Drop the entry before running it, so a test that throws cannot wedge the queue open forever.
+				queue[k] = nil
 				if v[3] then
 					print("Testing "..v[3])
 				end
 				v[2](select(3, unpack(v)))
-				queue[k] = nil
 			end
+		end
+		if not next(queue) then
+			self:SetScript("OnUpdate", nil)
+			qactive = false
 		end
 	end
 end
 
-local qactive = false
-
 function XLootMonitor.TestSettings()
 	local now = GetTime()
-	-- for i=1,15 do
-	-- 	table.insert(queue, { now + i, unpack(tests[random(1, #tests)]) })
-	-- end
 	if not qactive then
 		queueframe:SetScript("OnUpdate", queue_update)
 		qactive = true

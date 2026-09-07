@@ -6,6 +6,24 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.17.1] - 2026-09-07
+
+### Bug Fixes
+- Loot feed rows now keep your font and layout settings when they are reused. Changing the font,
+  size, alignment or name width only restyled the rows that happened to be on screen at that
+  moment. Rows that had already faded were put aside and brought back for the next drop still
+  wearing the old settings, so the feed looked inconsistent until you reloaded.
+- Loot feed rows no longer linger past their fade. When several rows reached the end of their fade
+  in the same instant, only every other one was actually removed and the rest waited for a later
+  pass, so during heavy looting the feed could hold on to more rows than it should.
+- A loot feed row hidden while you were pointing at it no longer strands its tooltip and cursor.
+  Hiding the interface with Alt-Z, or a cinematic starting while your pointer sat on a row, left
+  the item tooltip on screen and the item cursor stuck, because the row never got the chance to
+  clear them.
+- The loot feed preview no longer keeps running once it finishes. Pressing "Click to test settings"
+  (or /xlmd) started a timer that was never switched off, so it went on ticking every frame for the
+  rest of your session with nothing left to do.
+
 ## [12.17.0] - 2026-08-30
 
 ### Features
