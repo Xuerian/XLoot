@@ -1,4 +1,4 @@
-## Interface: 11509, 20506, 50504, 120100, 120007, 120005
+## Interface: 11509, 20506, 50504, 120105, 120100, 120007
 ## Title: XLoot Frame
 ## Notes: A customizable, skinnable loot frame.
 ## Version: @project-version@

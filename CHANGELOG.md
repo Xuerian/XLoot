@@ -6,6 +6,11 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.17.2] - 2026-09-09
+
+### Improvements
+- Updated the supported game versions for retail patch 12.1.5.
+
 ## [12.17.1] - 2026-09-07
 
 ### Bug Fixes
