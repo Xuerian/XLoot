@@ -6,6 +6,19 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.18.2] - 2026-09-30
+
+### Bug Fixes
+- Closing the loot window with Escape now actually stops looting on retail and WoW Forever. The window
+  disappeared, but the loot stayed open in the background until you moved away or looted something else.
+  The same goes for anything else that hides the window, such as hiding the interface with Alt-Z, opening
+  the game menu, or a cinematic starting. These now end looting the way Blizzard's own loot window does.
+  Classic was not affected.
+- Auto-loot filters now count your free bag space correctly when a profession bag, quiver, ammo pouch or
+  soul bag is completely full. XLoot kept charging matching items to the full bag and never counted down
+  your regular bag space, so it could try to loot more than you had room for, setting off a string of
+  "Inventory is full" errors.
+
 ## [12.18.1] - 2026-09-18
 
 ### Features
