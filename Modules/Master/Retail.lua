@@ -1,5 +1,5 @@
 -- Retail master loot: removed in 8.0.1, back in 12.0.5 (CN-realm-only).
-if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then return end
+if not XLoot.IS_RETAIL_ENGINE then return end
 
 local addon, L = XLoot:NewModule("Master")
 XLootMaster = addon

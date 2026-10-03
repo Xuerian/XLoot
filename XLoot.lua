@@ -22,6 +22,9 @@ local defaults = {
 
 XLoot.DISCORD_URL = "https://discord.gg/vm8K2WfQUE"
 
+-- Forever runs the retail engine but reports its own project ID, WOW_PROJECT_CAMELOT, since build 70170.
+XLoot.IS_RETAIL_ENGINE = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or WOW_PROJECT_ID == WOW_PROJECT_CAMELOT
+
 StaticPopupDialogs["XLOOT_DISCORD"] = {
 	text = L.discord_popup,
 	button1 = CLOSE,

@@ -6,6 +6,22 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.18.3] - 2026-10-03
+
+### Bug Fixes
+- Fixed an error on every login and `/reload` on WoW Forever ("Attempt to register unknown event
+  LOOT_HISTORY_ROLL_CHANGED"). A recent Forever update changed how the game identifies itself, so XLoot
+  mistook Forever for a Classic client and ran Classic-only code there, which also stopped XLoot's group roll
+  frames from working. Forever now runs the same code it did before that update. Thanks to severd8 and
+  Scoboose for reporting it.
+- The color picker's opacity slider in XLoot's options works the right way round on WoW Forever again.
+- The "Coin icons" option now works on WoW Forever, and keeps working once retail patch 12.1.5 arrives, which
+  removes the old game function XLoot used for it. Before, the sell price on loot rows could quietly show
+  plain text instead of coin icons.
+- Shift-clicking an item on a group roll bar to link it no longer causes an error on clients where Blizzard's
+  older compatibility functions are turned off. It also now puts the link into an XLoot options text box
+  when one has focus.
+
 ## [12.18.2] - 2026-09-30
 
 ### Bug Fixes

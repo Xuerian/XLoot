@@ -51,7 +51,7 @@ local LOOT_SLOT_CURRENCY = LOOT_SLOT_CURRENCY or Enum.LootSlotType.Currency
 
 local GetContainerNumFreeSlots = C_Container and C_Container.GetContainerNumFreeSlots or GetContainerNumFreeSlots
 -- Gate on the flavor, not the field: Classic ships the same BagIndex enum but container 5 is a bank bag there. Counted apart from the family loop because the reagent bag reports family 0.
-local REAGENT_BAG = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag or nil
+local REAGENT_BAG = XLoot.IS_RETAIL_ENGINE and Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag or nil
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local SendChatMessage = XLoot.SendChatMessage
 local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0

@@ -1,7 +1,7 @@
 local XLoot = select(2, ...)
 
--- Retail already shows a vendor sell-price line in item tooltips. This only fills the gap on the Classic flavors, which don't.
-if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
+-- The retail engine already shows a vendor sell-price line in item tooltips. This only fills the gap on the Classic flavors, which don't.
+if XLoot.IS_RETAIL_ENGINE then return end
 
 local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
 local GetItemInfo = (C_Item and C_Item.GetItemInfo) or GetItemInfo

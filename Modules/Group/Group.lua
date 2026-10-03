@@ -23,7 +23,7 @@ local HoldForResult
 local AWAIT_TIMEOUT = 360 -- seconds, past the longest retail roll window
 
 local BUILD_NUMBER = select(4, GetBuildInfo())
-local IS_RETAIL = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+local IS_RETAIL = XLoot.IS_RETAIL_ENGINE
 local BUILD_HAS_DISENCHANT = not IS_RETAIL and BUILD_NUMBER >= 30300
 local HAS_TRANSMOG = IS_RETAIL
 
@@ -1136,7 +1136,9 @@ do
 		if IsControlKeyDown() then
 			DressUpItemLink(self.link)
 		elseif IsShiftKeyDown() then
-			ChatEdit_InsertLink(self.link)
+			-- Looked up per click so hooks added to ChatFrameUtil.InsertLink after load still run.
+			local InsertLink = ChatFrameUtil and ChatFrameUtil.InsertLink or ChatEdit_InsertLink
+			InsertLink(self.link)
 		end
 	end
 

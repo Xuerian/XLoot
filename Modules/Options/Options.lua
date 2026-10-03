@@ -378,7 +378,7 @@ function addon:OnEnable()
 			return skins
 		end},
 		{ "skin_anchors", "toggle", width = 0.75 },
-		{ "tooltip_sell", "toggle", hidden = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE },
+		{ "tooltip_sell", "toggle", hidden = XLoot.IS_RETAIL_ENGINE },
 		{ "value_coin_icons", "toggle", width = 0.75 },
 		{ "minimap_icon", "toggle", width = 0.75 },
 		{ "whatsnew_mode", whatsnew_modes },
@@ -603,12 +603,12 @@ function addon:OnEnable()
 				{ "font_flag", font_flag },
 			}},
 			{ "roll_tracking", "group", {
-				{ "roll_status", width = "double", hidden = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE },
+				{ "roll_status", width = "double", hidden = not XLoot.IS_RETAIL_ENGINE },
 				-- Retail never registers LOOT_HISTORY_ROLL_CHANGED, the only reader of these, so they are inert there.
-				{ "track_all", hidden = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE },
-				{ "track_player_roll", requires_inverse = "track_all", hidden = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE },
-				{ "track_by_threshold", requires_inverse = "track_all", width = "double", hidden = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE },
-				{ "track_threshold", item_qualities, requires = "track_by_threshold", name = L.minimum_quality, hidden = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE },
+				{ "track_all", hidden = XLoot.IS_RETAIL_ENGINE },
+				{ "track_player_roll", requires_inverse = "track_all", hidden = XLoot.IS_RETAIL_ENGINE },
+				{ "track_by_threshold", requires_inverse = "track_all", width = "double", hidden = XLoot.IS_RETAIL_ENGINE },
+				{ "track_threshold", item_qualities, requires = "track_by_threshold", name = L.minimum_quality, hidden = XLoot.IS_RETAIL_ENGINE },
 				{ "expiration", "header" },
 				{ "expire_won", "range", 5, 30, 1 },
 				{ "expire_lost", "range", 5, 30, 1 },

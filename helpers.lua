@@ -30,7 +30,7 @@ function XLoot.CopperToString(copper)
 	return table_concat(buffer, ", ")
 end
 
-local GetCoinTextureString = GetCoinTextureString
+local GetCoinTextureString = C_CurrencyInfo and C_CurrencyInfo.GetCoinTextureString or GetCoinTextureString
 function XLoot.MoneyString(copper, icons)
 	if icons and GetCoinTextureString then
 		return GetCoinTextureString(copper)

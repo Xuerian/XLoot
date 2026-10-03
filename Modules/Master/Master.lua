@@ -1,5 +1,5 @@
 -- Master loot returned to retail in 12.0.5 (CN-realm-only) on a new ScrollBox/MenuUtil flow this module doesn't handle. It targets the pre-8.0 flow, so keep it Classic-only.
-if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
+if XLoot.IS_RETAIL_ENGINE then return end
 
 local addon, L = XLoot:NewModule("Master")
 XLootMaster = addon
