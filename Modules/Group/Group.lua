@@ -1391,7 +1391,7 @@ function addon:ApplyOptions()
 end
 
 
-local preview_loot = IS_RETAIL and {
+local preview_retail = {
 	{ 249288, true, true, true, true },
 	{ 258412, true, true, true, true },
 	{ 193701, false, true, true, true },
@@ -1400,24 +1400,38 @@ local preview_loot = IS_RETAIL and {
 	{ 260188, true, true, true, true },
 	{ 249659, true, true, true, false },
 	{ 249626, false, true, true, true }
-} or {
-	-- Low classic-safe IDs with a spread of quality and item types
+}
+local preview_classic = {
 	{ 17204, true, true, true, true },
 	{ 2244, false, true, true, true },
 	{ 69818, false, false, true, false },
 	{ 18332, false, true, false, true },
 	{ 14256, false, false, true, true }
 }
+-- Forever runs the retail engine, but its server never resolves the retail items.
+local preview_sets = IS_RETAIL and { preview_retail, preview_classic } or { preview_classic }
 -- Prime the item cache so the preview links resolve
-for i, t in ipairs(preview_loot) do
-	GetItemInfo(t[1])
+for _, set in ipairs(preview_sets) do
+	for _, t in ipairs(set) do
+		GetItemInfo(t[1])
+	end
+end
+
+local function PreviewLoot()
+	for _, set in ipairs(preview_sets) do
+		local ready = {}
+		for _, t in ipairs(set) do
+			if GetItemInfo(t[1]) then ready[#ready+1] = t end
+		end
+		if #ready > 0 then return ready end
+	end
+	return {}
 end
 
 local init, tests, links, StartFakeRoll = false, {}, {}, nil
 
 local deframe = CreateFrame('Frame')
 
--- Currently only debugs one roll at a time.
 function XLootGroup.TestSettings()
 	local schedule = {}
 	local type_index = { 'need', 'greed', 'disenchant', [0] = 'pass' }
@@ -1522,10 +1536,9 @@ function XLootGroup.TestSettings()
 			return _HistoryGetSortedInfoForDrop and _HistoryGetSortedInfoForDrop(encounterID, lootListID)
 		end
 
-		function StartFakeRoll(index)
+		function StartFakeRoll(item, variant)
 			local fake = {}
 
-			local item = preview_loot[index or random(1, #preview_loot)]
 			local iname, ilink, iquality, _, _, _, _, _, _, itex = GetItemInfo(item[1])
 
 			-- count up from a high base so fake ids never collide with real loot-roll ids
@@ -1568,7 +1581,6 @@ function XLootGroup.TestSettings()
 					fake_frame.drop_key = key
 					drop_to_roll[key] = fake_frame
 					local infos = drop.rollInfos
-					local variant = index or 1
 					if variant % 3 == 0 then
 						after(3, function() infos[#infos+1] = { playerName = 'Player1', playerClass = 'MAGE', state = S.Pass } end, updated, enc, list)
 						after(5, function() infos[#infos+1] = { playerName = 'Player2', playerClass = 'PRIEST', state = S.Pass } end, updated, enc, list)
@@ -1588,8 +1600,8 @@ function XLootGroup.TestSettings()
 		end
 
 	end
-	for i = 1, #preview_loot do
-		StartFakeRoll(i)
+	for i, item in ipairs(PreviewLoot()) do
+		StartFakeRoll(item, i)
 	end
 end
 
@@ -1599,7 +1611,8 @@ XLoot:SetSlashCommand('xlgd', XLootGroup.TestSettings)
 --@do-not-package@
 -- The pre-Legion *_ShowAlert globals are gone, so drive the modern alert-system objects directly.
 local function alert()
-	local _, link = GetItemInfo(preview_loot[random(1, #preview_loot)][1])
+	local loot = PreviewLoot()
+	local link = loot[1] and select(2, GetItemInfo(loot[random(1, #loot)][1]))
 	local function try(name, ...)
 		local sys = _G[name]
 		if sys and sys.AddAlert then

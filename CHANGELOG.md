@@ -6,6 +6,13 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.18.4] - 2026-10-06
+
+### Bug Fixes
+- The `/xlgd` roll preview, and the "Click to test settings" button in the Group options, now show test roll
+  frames on WoW Forever. Before, they did nothing there, because the preview used retail items that Forever
+  cannot load. Forever now previews with Classic items instead.
+
 ## [12.18.3] - 2026-10-03
 
 ### Bug Fixes
