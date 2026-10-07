@@ -46,6 +46,7 @@ function addon:ApplyOptions()
 end
 
 function addon.OnEnable()
+	eframe:RegisterEvent("LOOT_CLOSED")
 	me = UnitName("player")
 	-- Drop the native master-loot trigger. Under XLoot's suppressed LootFrame it anchors to nil and errors.
 	if EventRegistry and EventRegistry.UnregisterFrameEventAndCallback then
@@ -229,16 +230,27 @@ local function CandidateValid(slot, index, name)
 	return GetMasterLootCandidate(slot, index) == name
 end
 
+-- Candidate indices are roster-stable, so only the link proves the slot still holds this item. A secret link cannot be compared, so that case passes.
+local function SlotHolds(slot, link)
+	if not link then return true end
+	local now = GetLootSlotLink(slot)
+	if issecret and issecret(now) then return true end
+	return now == link
+end
+
 StaticPopupDialogs["XLOOT_MASTER_DISTRIBUTE"] = {
 	text = CONFIRM_LOOT_DISTRIBUTION or "Assign %s to %s?",
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(_, data)
-		if data and CandidateValid(data.slot, data.index, data.name) then
+		if not data then return end
+		if not SlotHolds(data.slot, data.link) then
+			xprint(L.ITEM_UNAVAILABLE or "That item is no longer in the loot window.")
+		elseif CandidateValid(data.slot, data.index, data.name) then
 			AnnounceAward(data.quality, data.link, data.name, data.special)
 			addon.dprint(("GiveMasterLoot(slot=%d, index=%d) -> %s"):format(data.slot, data.index, data.name))
 			GiveMasterLoot(data.slot, data.index)
-		elseif data then
+		else
 			xprint(L.CANDIDATE_UNAVAILABLE or "That player is no longer eligible to receive loot.")
 		end
 	end,
@@ -257,7 +269,6 @@ local function ClearPendingRoll(id, discarded)
 	if id and roll_pending.id ~= id then return end
 	roll_pending = nil
 	eframe:UnregisterEvent("CHAT_MSG_SYSTEM")
-	eframe:UnregisterEvent("LOOT_CLOSED")
 	-- The raid has already seen the candidate list and the roll, so dying quietly reads as a bug.
 	if discarded then xprint(L.ROLL_DISCARDED) end
 end
@@ -305,7 +316,6 @@ local function RaidRoll(slot, candidates, link, quality)
 	roll_serial = roll_serial + 1
 	roll_pending = { id = roll_serial, slot = slot, candidates = candidates, link = link, quality = quality, count = count }
 	eframe:RegisterEvent("CHAT_MSG_SYSTEM")
-	eframe:RegisterEvent("LOOT_CLOSED")
 	if C_Timer and C_Timer.After then
 		local id = roll_serial
 		C_Timer.After(ROLL_TIMEOUT, function() ClearPendingRoll(id, true) end)
@@ -327,9 +337,10 @@ function addon.CHAT_MSG_SYSTEM(_, ...)
 	end
 end
 
--- Slot indices are meaningless once the window closes, so a pending roll must not outlive it.
+-- Slot indices are meaningless once the window closes, so a pending roll or confirm popup must not outlive it.
 function addon.LOOT_CLOSED()
 	ClearPendingRoll(nil, true)
+	StaticPopup_Hide("XLOOT_MASTER_DISTRIBUTE")
 end
 
 function addon.ShowAssignMenu(row)
@@ -387,21 +398,23 @@ function addon.ShowAssignMenu(row)
 			end
 		end
 
-		local rolls = root:CreateButton(L.SPECIALROLLS or "Special Rolls")
-		-- DoMasterLootRoll was removed from every client flavor in 12.x with no replacement, so drop the item when it is gone.
-		if DoMasterLootRoll then
-			rolls:CreateButton(REQUEST_ROLL or "Request Roll", function()
-				if addon.testing then
-					xprint(("[test] would request roll on slot %d."):format(slot))
-				else
-					DoMasterLootRoll(slot)
-				end
-			end)
-		end
-		if raid and opt.menu_roll then
-			rolls:CreateButton(L.ML_RANDOM or "Raid Roll", function()
-				RaidRoll(slot, candidates, link, quality)
-			end)
+		local raid_roll = raid and opt.menu_roll
+		if DoMasterLootRoll or raid_roll then
+			local rolls = root:CreateButton(L.SPECIALROLLS or "Special Rolls")
+			if DoMasterLootRoll then
+				rolls:CreateButton(REQUEST_ROLL or "Request Roll", function()
+					if addon.testing then
+						xprint(("[test] would request roll on slot %d."):format(slot))
+					else
+						DoMasterLootRoll(slot)
+					end
+				end)
+			end
+			if raid_roll then
+				rolls:CreateButton(L.ML_RANDOM or "Raid Roll", function()
+					RaidRoll(slot, candidates, link, quality)
+				end)
+			end
 		end
 	end)
 end

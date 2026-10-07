@@ -14,6 +14,7 @@ local me = UnitName('player')
 local my_index, banker_index, disenchanter_index
 local candidate, color, lclass, className, slot, info, opt
 local roll_pending
+local GroupLootDropDown
 local LD
 
 local defaults = {
@@ -47,6 +48,7 @@ function addon:ApplyOptions()
 end
 
 function addon:OnEnable()
+	eframe:RegisterEvent("LOOT_CLOSED")
 	for i,class in ipairs(CLASS_SORT_ORDER) do
 		classes_english[class] = true
 	end
@@ -169,7 +171,6 @@ function addon.GiveLoot(frame, special)
 	CloseDropDownMenus()
 end
 
--- DoMasterLootRoll was removed from every client flavor in 12.x with no replacement, so guard the call.
 function addon.SpawnRoll(frame)
 	if DoMasterLootRoll then DoMasterLootRoll(frame.value) end
 end
@@ -183,7 +184,6 @@ local function ClearPendingRoll(id, discarded)
 	if id and roll_pending.id ~= id then return end
 	roll_pending = nil
 	eframe:UnregisterEvent("CHAT_MSG_SYSTEM")
-	eframe:UnregisterEvent("LOOT_CLOSED")
 	-- The raid has already seen the candidate list and the roll, so dying quietly reads as a bug.
 	if discarded then xprint(L.ROLL_DISCARDED) end
 end
@@ -229,7 +229,6 @@ function addon.RaidRoll(frame, source)
 		quality = LootFrame.selectedQuality or 0,
 	}
 	eframe:RegisterEvent("CHAT_MSG_SYSTEM")
-	eframe:RegisterEvent("LOOT_CLOSED")
 	if C_Timer and C_Timer.After then
 		local id = roll_serial
 		C_Timer.After(ROLL_TIMEOUT, function() ClearPendingRoll(id, true) end)
@@ -260,9 +259,13 @@ function addon:CHAT_MSG_SYSTEM(...)
 	})
 end
 
--- Slot indices are meaningless once the window closes, so a pending roll must not outlive it.
+-- Slot indices are meaningless once the window closes, so a pending roll, menu or confirm popup must not outlive it.
 function addon.LOOT_CLOSED()
 	ClearPendingRoll(nil, true)
+	StaticPopup_Hide("CONFIRM_XLOOT_DISTRIBUTION")
+	if UIDropDownMenu_GetCurrentDropDown() == GroupLootDropDown then
+		CloseDropDownMenus()
+	end
 end
 
 function addon.AddMenuTitle(title)
@@ -373,8 +376,18 @@ function addon.BuildRaidMenuRecipients(level)
 	end
 end
 
+-- UIDropDownMenu_Initialize runs DropdownInit at file load, before OnInitialize sets opt.
+local function RaidRollAvailable()
+	return IsInRaid() and next(randoms) and opt and opt.menu_roll
+end
+
+local function SpecialRollsAvailable()
+	return DoMasterLootRoll or RaidRollAvailable()
+end
+
 function addon.BuildMenuSpecialRolls(level)
 	if level == 1 then
+		if not SpecialRollsAvailable() then return end
 		info.isTitle = nil
 		info.text = L.SPECIALROLLS
 		info.colorCode = YELLOW_FONT_COLOR_CODE
@@ -400,7 +413,7 @@ function addon.BuildMenuSpecialRolls(level)
 				UIDropDownMenu_AddButton(info,level)
 			end
 			
-			if IsInRaid() and next(randoms) and opt.menu_roll then
+			if RaidRollAvailable() then
 				info.colorCode = "|cffffffff"
 				info.isTitle = nil
 				info.textHeight = 12
@@ -524,7 +537,7 @@ function addon.DropdownInit()
  	end	
 end
 
-local GroupLootDropDown = CreateFrame("Frame", nil, UIParent, "UIDropDownMenuTemplate")
+GroupLootDropDown = CreateFrame("Frame", nil, UIParent, "UIDropDownMenuTemplate")
 UIDropDownMenu_Initialize(GroupLootDropDown, addon.DropdownInit, "MENU")
 hooksecurefunc("MasterLooterFrame_Show", function(frame)
 	if frame == LootFrame.selectedLootButton then
@@ -540,7 +553,12 @@ StaticPopupDialogs["CONFIRM_XLOOT_DISTRIBUTION"] = {
 	button1 = YES,
 	button2 = NO,
 	OnAccept = function(self,data)
-		if not (data and CandidateValid(data.slot, data.id, data.pname)) then
+		if not data then return end
+		-- Candidate indices are roster-stable, so only the link proves slot N still holds this item.
+		if data.link and GetLootSlotLink(data.slot) ~= data.link then
+			return xprint(L.ITEM_UNAVAILABLE)
+		end
+		if not CandidateValid(data.slot, data.id, data.pname) then
 			return xprint(L.CANDIDATE_UNAVAILABLE)
 		end
 		addon.AnnounceAward(data)

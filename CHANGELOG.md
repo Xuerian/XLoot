@@ -6,6 +6,16 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.18.5] - 2026-10-06
+
+### Bug Fixes
+- The master-loot confirmation popup now closes when the loot window closes, and so does the master-loot
+  menu on Classic. Before, they stayed on screen, so confirming or picking a player after opening another
+  corpse could hand out whatever item sat in the same spot in the new loot window. XLoot also now checks the
+  item is still there before giving it away.
+- On Classic, the master-loot menu no longer shows an empty "Special Rolls" entry in a party, or in a raid
+  with "Show raid roll" turned off.
+
 ## [12.18.4] - 2026-10-06
 
 ### Bug Fixes
