@@ -15,7 +15,7 @@ local HistoryGetPlayerInfo = C_LootHistory and C_LootHistory.GetPlayerInfo
 local HistoryGetNumItems = C_LootHistory and C_LootHistory.GetNumItems
 -- Retail only, added in 10.1.0. Nil on Classic.
 local HistoryGetSortedInfoForDrop = C_LootHistory and C_LootHistory.GetSortedInfoForDrop
-local CanEquipItem, IsItemUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.IsItemUpgrade, XLoot.FancyPlayerName
+local CanEquipItem, IsPawnUpgrade, FancyPlayerName = XLoot.CanEquipItem, XLoot.IsPawnUpgrade, XLoot.FancyPlayerName
 local IsIlvlUpgrade, IsNewAppearance, TimeFractionColor = XLoot.IsIlvlUpgrade, XLoot.IsNewAppearance, XLoot.TimeFractionColor
 local RollFramePrototype
 -- Defined in the retail roll-status block, used above it.
@@ -347,7 +347,8 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 	frame.greed.texture_special:SetTexture()
 
 	if opt.equip_prefix then
-		local canequip, isupgrade = CanEquipItem(link), IsItemUpgrade(link)
+		local canequip = CanEquipItem(link)
+		local isupgrade = canequip and IsPawnUpgrade(link)
 		if canequip or isupgrade then
 			name = string_format("|cFF%s%s|r%s", isupgrade and "44FF22" or "BBBBBB", isupgrade and opt.prefix_upgrade or opt.prefix_equippable, name)
 			if isupgrade then
@@ -471,16 +472,22 @@ function addon.AutoRollRulesText()
 end
 
 local tidx = { [0] = 1, [3] = 2, [2] = 2, [1] = 3 }
+-- History lists newest first and keeps finished rolls whose id was since reused, so only the first entry per id is current.
+local seen_ids = {}
 function addon:LOOT_HISTORY_ROLL_COMPLETE()
 	local hid, frame, rollid, players, done, _ = 1, nil, nil, nil, nil, nil
+	wipe(seen_ids)
 	while true do
 		rollid, _, players, done = HistoryGetItem(hid)
 		-- Walk past rolls already painted, or a second roll finishing while the first bar is up gets no winner.
 		if not rollid then
 			return
-		elseif done and rolls[rollid] and not rolls[rollid].over then
-			frame = rolls[rollid]
-			break
+		elseif not seen_ids[rollid] then
+			seen_ids[rollid] = true
+			if done and rolls[rollid] and not rolls[rollid].over then
+				frame = rolls[rollid]
+				break
+			end
 		end
 		hid = hid+1
 	end
@@ -538,7 +545,7 @@ local rweights = { need = 3, greed = 2, disenchant = 2, pass = 1 }
 function addon:LOOT_HISTORY_ROLL_CHANGED(hid, pid)
 	local rollid, link, players, done = HistoryGetItem(hid)
 	local frame = rolls[rollid]
-	if not frame or frame.rollid ~= rollid or not frame:IsShown() then
+	if not frame or frame.rollid ~= rollid or not frame:IsShown() or frame.over then
 		return nil
 	end
 
@@ -1209,7 +1216,10 @@ do
 	end
 
 	function RollFramePrototype:Popped()
-		rolls[self.rollid] = nil
+		-- Roll ids are recycled, so a newer live roll may already own this id.
+		if rolls[self.rollid] == self then
+			rolls[self.rollid] = nil
+		end
 		if FakeHistory then
 			FakeHistory.rolls[self.rollid] = nil
 			FakeHistory.links[self.rollid] = nil
@@ -1219,7 +1229,9 @@ do
 			end
 		end
 		if self.drop_key then
-			drop_to_roll[self.drop_key] = nil
+			if drop_to_roll[self.drop_key] == self then
+				drop_to_roll[self.drop_key] = nil
+			end
 			if FakeHistory then FakeHistory.drops[self.drop_key] = nil end
 			self.drop_key = nil
 		end

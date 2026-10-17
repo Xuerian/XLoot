@@ -72,9 +72,13 @@ function XLoot.CanEquipItem(link)
 	if not C_Item.IsEquippableItem(link) then
 		return false
 	end
+	-- Hiding drops the owner and an unowned tooltip fills no lines. Re-own only when lost, since SetOwner hides it and its OnHide closes shared tooltips.
+	if not tooltip:IsOwned(WorldFrame) then
+		tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
+	end
 	tooltip:ClearLines()
 	tooltip:SetHyperlink(link)
-	for i=2, 5 do
+	for i=2, math.min(5, tooltip:NumLines()) do
 		local line = _G["XLootTooltipTextRight"..i]
 		if line and line:GetText() then
 			local r, g, b = line:GetTextColor()
@@ -83,15 +87,12 @@ function XLoot.CanEquipItem(link)
 		end
 	end
 end
-function XLoot.IsItemUpgrade(link)
-	if not XLoot.CanEquipItem(link) then
+function XLoot.IsPawnUpgrade(link)
+	if not PawnIsItemIDAnUpgrade or (issecret and issecret(link)) then
 		return false
 	end
 	local id = string.match(link, "item:(%d+)")
-	if PawnIsItemIDAnUpgrade and id and PawnIsItemIDAnUpgrade(id) then
-		return true
-	end
-	return false
+	return id and PawnIsItemIDAnUpgrade(id) and true or false
 end
 
 -- No single "do I own this appearance" API (no help from blizzard here lol): PlayerHasTransmog* is per-source, so OR the collected state across every source.
@@ -161,8 +162,11 @@ local UPGRADE_SLOTS = {
 	INVTYPE_WEAPONOFFHAND = { INVSLOT_OFFHAND },
 	INVTYPE_HOLDABLE = { INVSLOT_OFFHAND },
 	INVTYPE_SHIELD = { INVSLOT_OFFHAND },
-	INVTYPE_RANGED = { INVSLOT_MAINHAND },
-	INVTYPE_RANGEDRIGHT = { INVSLOT_MAINHAND },
+	-- Ranged items use the ranged slot on Era, TBC and Forever but the main hand from MoP on. The subtype match skips the slot that cannot hold one.
+	INVTYPE_RANGED = { INVSLOT_MAINHAND, INVSLOT_RANGED },
+	INVTYPE_RANGEDRIGHT = { INVSLOT_MAINHAND, INVSLOT_RANGED },
+	INVTYPE_THROWN = { INVSLOT_RANGED },
+	INVTYPE_RELIC = { INVSLOT_RANGED },
 }
 local GetDetailedItemLevelInfo = (C_Item and C_Item.GetDetailedItemLevelInfo) or GetDetailedItemLevelInfo
 local GetInventoryItemLink = GetInventoryItemLink

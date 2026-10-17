@@ -6,6 +6,23 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.18.6] - 2026-10-16
+
+### Bug Fixes
+- The equippable (`*`) and Pawn upgrade (`+`) marks on group roll items now show on WoW Forever. Before, they
+  never appeared there.
+- Bows, guns, crossbows and wands can now be tagged as upgrades on Classic Era, TBC Anniversary and WoW
+  Forever, in the loot window and in the group roll highlight. Before, XLoot compared them against your main
+  hand instead of your ranged slot, so they never were. Thrown weapons and relics are now compared too.
+- When the game reused a roll's number while an older roll's bar was still fading out, the new roll's bar
+  stopped showing roll counts and its winner, and could not be cancelled. Fixed.
+- On Classic, a group roll bar could show the winner of an older roll that had used the same number. Fixed.
+- On Classic, an auto-roll pass rule could make the next group roll bar disappear about 40 seconds early,
+  leaving no way to roll on that item. Fixed.
+
+### Improvements
+- Group roll bars now check whether you can equip an item once instead of twice.
+
 ## [12.18.5] - 2026-10-06
 
 ### Bug Fixes
