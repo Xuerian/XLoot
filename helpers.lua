@@ -358,6 +358,8 @@ local function invert(pattern)
 	else
 		inverted = gsub(inverted, "%%d", "(%%d+)")
 		inverted = gsub(inverted, "%%s", "(.-)")
+		-- Float specifiers like %.1f, whose dot was escaped above
+		inverted = gsub(inverted, "%%%%%.%d*f", "([%%d%%.,]+)")
 		arglist = "m1, m2, m3, m4, m5"
 	end
 	return inverted, arglist

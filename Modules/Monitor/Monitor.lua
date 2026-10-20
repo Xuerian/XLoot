@@ -10,6 +10,7 @@ local me = UnitName("player")
 
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local GetDetailedItemLevelInfo = C_Item and C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or GetSpellTexture
 
 local defaults = {
 	profile = {
@@ -38,7 +39,13 @@ local defaults = {
 		show_coin = false,
 		show_system_coin = false,
 		show_currency = true,
+		currency_cap = false,
 		show_crafted = false,
+		show_reputation = false,
+		show_reputation_loss = true,
+		show_xp = false,
+		show_honor = false,
+		show_skill = false,
 
 		show_totals = false,
 		totals_delay = 0.5,
@@ -79,6 +86,10 @@ end
 function addon:OnEnable()
 	LibStub("LootEvents"):RegisterLootCallback(self.LOOT_EVENT)
 	eframe:RegisterEvent("MODIFIER_STATE_CHANGED")
+	eframe:RegisterEvent("PLAYER_ENTERING_WORLD")
+	eframe:RegisterEvent("PLAYER_XP_UPDATE")
+	eframe:RegisterEvent("PLAYER_LEVEL_UP")
+	eframe:RegisterEvent("PLAYER_LEVEL_CHANGED")
 	XLoot:MakeSkinner(self, {
 		default = { gradient = opt.gradients },
 		anchor = { r = .4, g = .4, b = .4, a = .6, gradient = false },
@@ -191,8 +202,25 @@ function events.systemcoin(player, copper)
 	end
 end
 
+-- MoP Classic's Conquest (390) and Valor (396) caps rise each week and are checked against this season's totalEarned, not the amount held
+local progressive_caps = { [390] = true, [396] = true }
+
+local function cap_tag(id, c)
+	local held, max = c.useTotalEarnedForMaxQty and c.totalEarned or c.quantity, c.maxQuantity
+	local week, week_max = c.quantityEarnedThisWeek, c.maxWeeklyQuantity
+	if progressive_caps[tonumber(id)] then
+		max, week, week_max = 0, c.totalEarned, c.maxQuantity
+	end
+	if (max or 0) > 0 and (held or 0) >= max then
+		return (" |cffff4040(%s)|r"):format(L.capped)
+	elseif (week_max or 0) > 0 and (week or 0) >= week_max then
+		return (" |cffffa000(%s)|r"):format(L.weekly_cap)
+	end
+	return ""
+end
+
 function events.currency(id, num)
-	-- Not sure what event is causing us to capture nothing for (%d+), this isn't ideal
+	-- The id is nil when a currency line has no currency link, which GetCurrencyInfo cannot take
 	if id ~= nil and opt.show_currency then
 		local num = tonumber(num) or 1
 		local c = C_CurrencyInfo.GetCurrencyInfo(id)
@@ -201,7 +229,11 @@ function events.currency(id, num)
 			if not opt.quality_color and opt.color_all_rows then
 				set_row_border(row)
 			end
-			row:SetTexts(nil,  num > 1 and ("%s x%d"):format(c.name, num) or c.name, c.quantity)
+			local text = num > 1 and ("%s x%d"):format(c.name, num) or c.name
+			if opt.currency_cap then
+				text = text..cap_tag(id, c)
+			end
+			row:SetTexts(nil, text, c.quantity)
 		end
 	end
 end
@@ -211,6 +243,125 @@ function events.crafted(link, num)
 		events.item(me, link, num)
 	end
 end
+
+local merge_rows = {}
+
+local function chat_color(chat_type)
+	local info = ChatTypeInfo and ChatTypeInfo[chat_type]
+	if info and info.r then
+		return info.r, info.g, info.b
+	end
+	return 1, 1, 1
+end
+
+local function signed(sign, amount)
+	amount = math.floor(amount * 100 + .5) / 100
+	if amount % 1 ~= 0 then
+		return ("%s%.2f"):format(sign, amount)
+	end
+	return sign..FormatLargeNumber(amount)
+end
+
+local function stat_row(key, icon, amount, r, g, b)
+	local row = merge_rows[key]
+	if row then
+		addon.RefreshRow(row, opt.fade_own)
+	else
+		row = addon:AddRow(icon, opt.fade_own, r, g, b)
+		if not opt.quality_color and opt.color_all_rows then
+			set_row_border(row)
+		end
+		row.merge_key, row.amount = key, nil
+		merge_rows[key] = row
+	end
+	if amount then
+		row.amount = (row.amount or 0) + amount
+	end
+	return row
+end
+
+local faction_icons = {
+	Horde = "Interface\\Icons\\INV_BannerPVP_01",
+	Alliance = "Interface\\Icons\\INV_BannerPVP_02",
+}
+
+function events.reputation(faction, amount, gained)
+	if not opt.show_reputation or not (gained or opt.show_reputation_loss) then
+		return
+	end
+	local r, g, b = 1, .1, .1
+	if gained then
+		r, g, b = chat_color("COMBAT_FACTION_CHANGE")
+	end
+	local icon = faction_icons[UnitFactionGroup("player")] or "Interface\\Icons\\INV_Misc_Ribbon_01"
+	local row = stat_row((gained and "rep+" or "rep-")..faction, icon, amount, r, g, b)
+	local text = row.amount and ("%s %s"):format(signed(gained and "+" or "-", row.amount), faction) or faction
+	row:SetTexts(nil, text, nil, r, g, b)
+end
+
+function events.xp(amount)
+	if opt.show_xp then
+		local r, g, b = chat_color("COMBAT_XP_GAIN")
+		local row = stat_row("xp", "Interface\\Icons\\INV_Misc_Book_11", amount, r, g, b)
+		row:SetTexts(nil, ("%s %s"):format(signed("+", row.amount), XP), nil, r, g, b)
+	end
+end
+
+function events.honor(amount)
+	if opt.show_honor and amount and amount > 0 then
+		local r, g, b = chat_color("COMBAT_HONOR_GAIN")
+		local icon = "Interface\\PVPFrame\\PVPCurrency-Honor-"..(UnitFactionGroup("player") or "Neutral")
+		local row = stat_row("honor", icon, amount, r, g, b)
+		row:SetTexts(nil, ("%s %s"):format(signed("+", row.amount), HONOR), nil, r, g, b)
+	end
+end
+
+function events.skill(name, rank)
+	if opt.show_skill then
+		local r, g, b = chat_color("SKILL")
+		local icon = GetSpellTexture and GetSpellTexture(name) or "Interface\\Icons\\INV_Scroll_03"
+		local row = stat_row("skill:"..name, icon, nil, r, g, b)
+		row:SetTexts(nil, ("%s (%d)"):format(name, rank), nil, r, g, b)
+	end
+end
+
+local xp_level, xp_now, xp_max, xp_pending
+
+function addon.PLAYER_ENTERING_WORLD()
+	if xp_pending then
+		return
+	end
+	xp_level, xp_now, xp_max = UnitLevel("player"), UnitXP("player"), UnitXPMax("player")
+end
+
+local function check_xp()
+	xp_pending = false
+	local level, now = UnitLevel("player"), UnitXP("player")
+	local gained
+	if level == xp_level then
+		-- XP wrapped before UnitLevel caught up, so wait for the level to land
+		if now < xp_now then
+			return
+		end
+		gained = now - xp_now
+	elseif level == xp_level + 1 then
+		gained = xp_max - xp_now + now
+	end
+	xp_level, xp_now, xp_max = level, now, UnitXPMax("player")
+	if gained and gained > 0 then
+		events.xp(gained)
+	end
+end
+
+-- UnitLevel can lag the level-up events, so read level and XP together a frame later
+function addon.PLAYER_XP_UPDATE()
+	if xp_now and not xp_pending then
+		xp_pending = true
+		C_Timer.After(0, check_xp)
+	end
+end
+addon.PLAYER_LEVEL_UP = addon.PLAYER_XP_UPDATE
+addon.PLAYER_LEVEL_CHANGED = addon.PLAYER_XP_UPDATE
 
 function addon.LOOT_EVENT(event, pattern, ...)
 	if events[event] and events[event](...) == false then
@@ -259,16 +410,19 @@ function addon.EframeUpdate(self, elapsed)
 		elseif remaining <= .5 then
 			row:SetAlpha(remaining * 2)
 		else
+			-- Set every frame, since a first frame longer than the fade-in would leave a reused row at alpha 0
 			local since = timer - row.started
-			if since <= .5 then
-				row:SetAlpha(since * 2)
-			end
+			row:SetAlpha(since <= .5 and since * 2 or 1)
 		end
 	end
 end
 
 function addon:RemoveRow(row)
 	row:Hide()
+	if row.merge_key then
+		merge_rows[row.merge_key] = nil
+		row.merge_key = nil
+	end
 	for i,v in ipairs(stack) do
 		if v == row then
 			table_remove(stack, i)
@@ -284,6 +438,12 @@ function addon:RemoveRow(row)
 		active, timer = false, 0
 		eframe:SetScript("OnUpdate", nil)
 	end
+end
+
+function addon.RefreshRow(row, fade_time)
+	row.expires = timer + fade_time
+	row.started = math.min(row.started, timer - .5)
+	row:SetAlpha(1)
 end
 
 function addon:AddRow(icon, fade_time, ir, ig, ib, rr, rg, rb)
@@ -550,6 +710,26 @@ local function test_crafted(event)
 	addon.LOOT_EVENT('crafted', event, random_item_link(), random_item_num())
 end
 
+local function test_reputation(event)
+	addon.LOOT_EVENT('reputation', event, "Silvermoon Court", random(5, 50) * 10, true)
+end
+
+local function test_reputation_loss(event)
+	addon.LOOT_EVENT('reputation', event, "Bloodsail Buccaneers", 25, false)
+end
+
+local function test_xp(event)
+	addon.LOOT_EVENT('xp', event, random(100, 5000))
+end
+
+local function test_honor(event)
+	addon.LOOT_EVENT('honor', event, random(5, 40))
+end
+
+local function test_skill(event)
+	addon.LOOT_EVENT('skill', event, "Skinning", random(1, 300))
+end
+
 local function test_battlepet(event)
 	print("Testing battlepet event")
 	addon.LOOT_EVENT('item', "LOOT_ITEM_PUSHED_SELF", random_player(true), "|cff0070dd|Hbattlepet:868:1:3:158:10:12:0x0000000000000000|h[Pandaren Water Spirit]|h|r", 1)
@@ -570,6 +750,13 @@ local tests = {
 	{ test_currency, "CURRENCY_GAINED_MULTIPLE" },
 	{ test_crafted, "LOOT_ITEM_CREATED_SELF" },
 	{ test_crafted, "CURRENCY_GAINED_MULTIPLE" },
+	{ test_reputation, "FACTION_STANDING_INCREASED" },
+	{ test_reputation, "FACTION_STANDING_INCREASED" },
+	{ test_reputation_loss, "FACTION_STANDING_DECREASED" },
+	{ test_xp, "PLAYER_XP_UPDATE" },
+	{ test_xp, "PLAYER_XP_UPDATE" },
+	{ test_honor, "COMBATLOG_HONORAWARD" },
+	{ test_skill, "SKILL_RANK_UP" },
 	{ test_battlepet }
 
 }

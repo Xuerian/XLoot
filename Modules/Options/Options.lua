@@ -644,7 +644,13 @@ function addon:OnEnable()
 				{ "show_coin", name = MONEY },
 				{ "show_system_coin" },
 				{ "show_currency", name = CURRENCY },
+				{ "currency_cap", requires = "show_currency" },
 				{ "show_crafted" },
+				{ "show_reputation", name = REPUTATION },
+				{ "show_reputation_loss", requires = "show_reputation" },
+				{ "show_xp", name = COMBAT_XP_GAIN },
+				{ "show_honor", name = HONOR },
+				{ "show_skill" },
 			}, name = FILTERS },
 			{ "fading", "group", {
 				{ "fade_own", "range", 1, 10800, 1, 1, 60, 1, name = L.items_own },

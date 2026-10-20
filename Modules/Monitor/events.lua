@@ -1,4 +1,4 @@
-local lib = LibStub:NewLibrary("LootEvents", "2")
+local lib = LibStub:NewLibrary("LootEvents", "3")
 if not lib then return nil end
 local print = print
 
@@ -7,7 +7,7 @@ local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
 
 --[[// Usage
-	Callbacks recieve (event, chat_event, ...)
+	Callbacks receive (event, pattern, ...)
 	LootEvents:RegisterLootCallback(func)
 		event: 'item'
 			player_name, item_link, num_items
@@ -19,9 +19,15 @@ local issecret = issecretvalue -- 12.0 secret values, nil pre-12.0
 			currency, num_currency
 		event: 'crafted'
 			item_link, num_items
+		event: 'reputation'
+			faction, amount (nil on lines without one), gained
+		event: 'honor'
+			amount
+		event: 'skill'
+			skill_name, rank
 
 	LootEvents:RegisterGroupCallback(func)
-		Triggers func when "Group" loot mode events are recieved
+		Triggers func when "Group" loot mode events are received
 		event: 'selected'
 			item_link, player_name, roll_type
 		event: 'rolled'
@@ -260,6 +266,101 @@ do
 	handler('ERR_QUEST_REWARD_MONEY_S', system_coin)
 end
 
+local function match_patterns(patterns, text)
+	for _, v in ipairs(patterns) do
+		local m1, m2, m3 = Deformat(text, v[1])
+		if m1 then
+			current_pattern = v[1]
+			v[2](m1, m2, m3)
+			return true
+		end
+	end
+end
+
+local function FeedHandler(patterns, prepare)
+	return function(text)
+		if issecret and issecret(text) then return end
+		if not need_loot then return end
+		if not match_patterns(patterns, text) and prepare then
+			match_patterns(patterns, prepare(text))
+		end
+	end
+end
+
+local function feed_pattern(list, str, func)
+	if _G[str] then -- absent on some flavors, like the account-wide reputation lines
+		table.insert(list, { _G[str], func, str })
+	end
+end
+
+local bonus_tails = {}
+for _, str in ipairs({ 'FACTION_STANDING_INCREASED_REFER_PART', 'FACTION_STANDING_INCREASED_ACH_PART', 'FACTION_STANDING_INCREASED_REST_PART' }) do
+	if _G[str] then
+		table.insert(bonus_tails, "%s*"..XLoot.InvertFormatString(_G[str]))
+	end
+end
+
+-- The client can append bonus parts to a plain reputation line, which the anchored patterns would then miss
+local function strip_bonus(text)
+	for _, tail in ipairs(bonus_tails) do
+		text = text:gsub(tail, "")
+	end
+	return text
+end
+
+local faction_patterns, honor_patterns, skill_patterns = {}, {}, {}
+do
+	local function gain(faction, amount)
+		trigger_loot('reputation', faction, tonumber(amount), true)
+	end
+
+	local function loss(faction, amount)
+		trigger_loot('reputation', faction, tonumber(amount), false)
+	end
+
+	local function faction(str, func)
+		feed_pattern(faction_patterns, str, func)
+	end
+
+	faction('FACTION_STANDING_INCREASED', gain)
+	faction('FACTION_STANDING_INCREASED_ACCOUNT_WIDE', gain)
+	faction('FACTION_STANDING_INCREASED_ACH_BONUS', gain)
+	faction('FACTION_STANDING_INCREASED_ACH_BONUS_ACCOUNT_WIDE', gain)
+	faction('FACTION_STANDING_INCREASED_BONUS', gain)
+	faction('FACTION_STANDING_INCREASED_DOUBLE_BONUS', gain)
+	faction('FACTION_STANDING_INCREASED_GENERIC', gain)
+	faction('FACTION_STANDING_INCREASED_GENERIC_ACCOUNT_WIDE', gain)
+	faction('FACTION_STANDING_DECREASED', loss)
+	faction('FACTION_STANDING_DECREASED_ACCOUNT_WIDE', loss)
+	faction('FACTION_STANDING_DECREASED_GENERIC', loss)
+	faction('FACTION_STANDING_DECREASED_GENERIC_ACCOUNT_WIDE', loss)
+
+	-- MoP Classic awards fractional honor, and a comma decimal would defeat tonumber
+	local function honor(amount)
+		trigger_loot('honor', tonumber((amount:gsub(",", "."))))
+	end
+
+	feed_pattern(honor_patterns, 'COMBATLOG_HONORAWARD', honor)
+	feed_pattern(honor_patterns, 'COMBATLOG_HONORGAIN', function(_, _, amount) honor(amount) end)
+	feed_pattern(honor_patterns, 'COMBATLOG_HONORGAIN_EXHAUSTION1', function(_, _, amount) honor(amount) end)
+	feed_pattern(honor_patterns, 'COMBATLOG_HONORGAIN_NO_RANK', function(_, amount) honor(amount) end)
+	feed_pattern(honor_patterns, 'COMBATLOG_HONORGAIN_NO_RANK_EXHAUSTION1', function(_, amount) honor(amount) end)
+
+	local function skill(name, rank)
+		trigger_loot('skill', name, tonumber(rank))
+	end
+
+	feed_pattern(skill_patterns, 'SKILL_RANK_UP', skill)
+	feed_pattern(skill_patterns, 'ERR_SKILL_UP_SI', skill)
+end
+
+local FactionHandler = FeedHandler(faction_patterns, strip_bonus)
+local HonorHandler = FeedHandler(honor_patterns)
+local SkillHandler = FeedHandler(skill_patterns)
+event("CHAT_MSG_COMBAT_FACTION_CHANGE", FactionHandler)
+event("CHAT_MSG_COMBAT_HONOR_GAIN", HonorHandler)
+event("CHAT_MSG_SKILL", SkillHandler)
+
 group_patterns = { }
 do
 	local function handler(str, func)
@@ -356,6 +457,29 @@ XLoot:SetSlashCommand("xesyscap", function()
 		syscap:UnregisterEvent("CHAT_MSG_SYSTEM")
 		print("XLoot: system-message capture OFF")
 	end
+end)
+
+XLoot:SetSlashCommand("xefeed", function()
+	local function feed(handler, str, ...)
+		if _G[str] then
+			handler(_G[str]:format(...))
+		end
+	end
+	feed(FactionHandler, 'FACTION_STANDING_INCREASED', "Silvermoon Court", 250)
+	feed(FactionHandler, 'FACTION_STANDING_INCREASED', "Silvermoon Court", 150)
+	feed(FactionHandler, 'FACTION_STANDING_INCREASED_ACCOUNT_WIDE', "Council of Dornogal", 75)
+	feed(FactionHandler, 'FACTION_STANDING_INCREASED_ACH_BONUS', "Cenarion Circle", 100, 10)
+	if FACTION_STANDING_INCREASED and FACTION_STANDING_INCREASED_REST_PART then
+		FactionHandler(FACTION_STANDING_INCREASED:format("Timbermaw Hold", 50).." "..FACTION_STANDING_INCREASED_REST_PART:format(5))
+	end
+	feed(FactionHandler, 'FACTION_STANDING_INCREASED_GENERIC', "Argent Dawn")
+	feed(FactionHandler, 'FACTION_STANDING_DECREASED', "Bloodsail Buccaneers", 25)
+	feed(HonorHandler, 'COMBATLOG_HONORAWARD', 15)
+	feed(HonorHandler, 'COMBATLOG_HONORGAIN', "Enemy", "Private", 12)
+	feed(HonorHandler, 'COMBATLOG_HONORGAIN_EXHAUSTION1', "Enemy", "Private", 6, "100%", "rested")
+	feed(HonorHandler, 'COMBATLOG_HONORGAIN_NO_RANK', "Enemy", 8)
+	feed(SkillHandler, 'SKILL_RANK_UP', "Skinning", 51)
+	feed(SkillHandler, 'SKILL_RANK_UP', "Skinning", 52)
 end)
 
 local locales = {

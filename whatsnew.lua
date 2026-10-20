@@ -6,6 +6,30 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.19.0",
+		date = "2026-10-19",
+		changes = {
+			{
+				label = "Reputation in the loot feed",
+				type = "feature",
+				option = "Loot Monitor > Filters",
+				description = "The loot feed can show the reputation you gain, such as \"+250 Silvermoon Court\", so you can see how fast it climbs. Gains with the same faction add up on one row while it is still on screen. Losses show in red, and have their own switch if you would rather not see them. Off by default. Suggested by Benjiwow.",
+			},
+			{
+				label = "Experience, honor and skill-ups in the loot feed",
+				type = "feature",
+				option = "Loot Monitor > Filters",
+				description = "Three more switches show the experience you gain from any source, the honor you earn, and a skill's new rank when it goes up. Each one adds up on a single row while it is on screen, in the color your chat window gives the same message. Off by default.",
+			},
+			{
+				label = "Currency cap warning",
+				type = "feature",
+				option = "Loot Monitor > Filters",
+				description = "Currency rows can carry a \"(capped)\" or \"(weekly cap)\" tag once you reach that currency's limit, so you know further gains are going to waste. Off by default.",
+			},
+		},
+	},
+	{
 		version = "12.17.0",
 		date = "2026-08-30",
 		changes = {

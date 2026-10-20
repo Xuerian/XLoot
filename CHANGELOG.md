@@ -6,6 +6,27 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.19.0] - 2026-10-19
+
+### Features
+- **Reputation in the loot feed.** The Loot Monitor can show the reputation you gain, such as
+  "+250 Silvermoon Court". Warband and account-wide reputation count too. Losses show in red under their own
+  "Reputation losses" switch, which follows the Reputation switch. Off by default, under Loot Monitor >
+  Filters. Suggested by Benjiwow.
+- **Experience, honor and skill-ups in the loot feed.** Three more switches show the experience you gain
+  from any source (kills, quests, exploration, gathering), the honor you earn, and a skill's new rank when it
+  goes up. Off by default, under Loot Monitor > Filters.
+- More gains of the same kind add up on one row while it is still on screen, so a big pull shows one
+  experience row instead of ten, and a weapon skill climbing on Classic keeps one row that updates. These rows
+  use the colors your chat window gives the same messages.
+- **Currency cap warning.** Currency rows can carry a "(capped)" or "(weekly cap)" tag once you reach that
+  currency's limit, so you know further gains are going to waste. Off by default, under Loot Monitor >
+  Filters.
+
+### Bug Fixes
+- A loot feed row that appeared right before a loading screen could stay invisible until its last half
+  second on screen. Fixed.
+
 ## [12.18.6] - 2026-10-16
 
 ### Bug Fixes

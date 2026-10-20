@@ -2,6 +2,8 @@
 local locales = {
 	enUS = {
 		anchor = "Loot Monitor",
+		capped = "capped",
+		weekly_cap = "weekly cap",
 	},
 	-- Possibly localized
 	ptBR = {
