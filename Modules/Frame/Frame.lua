@@ -739,7 +739,13 @@ do
 
 		else
 			r, g, b = .4, .4, .4
-			text_name = slotData.secret and slotData.name or slotData.name:gsub('\n', ', ')
+			local copper = XLoot.opt.value_coin_icons and slotData.slotType == LOOT_SLOT_MONEY and not slotData.secret
+				and XLoot.ParseCoinString(slotData.name, true)
+			if copper and copper > 0 then
+				text_name = XLoot.MoneyString(copper, true)
+			else
+				text_name = slotData.secret and slotData.name or slotData.name:gsub('\n', ', ')
+			end
 		end
 
 		self.text_name:SetText(text_name)

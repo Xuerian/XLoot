@@ -38,6 +38,28 @@ function XLoot.MoneyString(copper, icons)
 	return XLoot.CopperToString(copper)
 end
 
+local coin_patterns = {}
+for i, v in ipairs(coin_table) do
+	coin_patterns[i] = (v[1]:gsub("%%d", "(%%d+)"))
+end
+
+-- exact returns 0 when a digit is left unmatched, so a grouped "1,234 Gold" falls back instead of reading as 234 gold
+function XLoot.ParseCoinString(str, exact)
+	local g = str:match(coin_patterns[1]) or 0
+	local s = str:match(coin_patterns[2]) or 0
+	local c = str:match(coin_patterns[3]) or 0
+	if exact then
+		local rest = str
+		for _, pattern in ipairs(coin_patterns) do
+			rest = rest:gsub(pattern, "")
+		end
+		if rest:find("%d") then
+			return 0
+		end
+	end
+	return g*10000+s*100+c
+end
+
 -- Scanning tooltip must live outside the UIParent tree, or the tooltip refresh cycle perpetually re-processes dynamic content (weapon imbues, temp buffs, tradeable timers).
 XLootTooltip = CreateFrame('GameTooltip', 'XLootTooltip', nil, 'GameTooltipTemplate')
 local tooltip = XLootTooltip

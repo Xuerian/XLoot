@@ -50,9 +50,21 @@ local locales = {
 --@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Master")@
 --@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Master")@
 --@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Master")@
---@localization(locale="ruRU", format="lua_additive_table", table-name="locales.ruRU", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Master")@
 --@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Master")@
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Master")@
 --@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Master")@
+
+locales.ruRU["ML_RANDOM"] = "Рейдовый бросок"
+locales.ruRU["ML_SELF"] = "Своя добыча"
+locales.ruRU["ML_BANKER"] = "Банкир"
+locales.ruRU["ML_DISENCHANTER"] = "Распылитель"
+locales.ruRU["RECIPIENTS"] = "Особые получатели"
+locales.ruRU["SPECIALROLLS"] = "Особые броски"
+locales.ruRU["BINDING_BANKER"] = "Назначить банкира"
+locales.ruRU["BINDING_DISENCHANTER"] = "Назначить распылителя"
+locales.ruRU["ITEM_AWARDED"] = "%s получает: %s"
+locales.ruRU["CANDIDATE_UNAVAILABLE"] = "Этот игрок больше не может получить добычу."
+locales.ruRU["ITEM_UNAVAILABLE"] = "Этого предмета больше нет в окне добычи."
+locales.ruRU["ROLL_DISCARDED"] = "Рейдовый бросок отменён — победитель не назначен."
 
 XLoot:Localize("Master", locales)

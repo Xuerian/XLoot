@@ -11,9 +11,9 @@ local locales = {
 			tooltip_sell = "Vendor sell price in tooltips",
 			tooltip_sell_desc = "Add a vendor sell-price line to item tooltips, including the full value of a stack (e.g. 20 x 6s). Applies everywhere item tooltips appear.",
 			value_coin_icons = "Coin icons",
-			value_coin_icons_desc = "Show XLoot's item values using gold, silver, and copper coin icons instead of text. Applies to the loot row sell price and the Classic tooltip sell line. Off by default.",
+			value_coin_icons_desc = "Show money as gold, silver, and copper coin icons instead of text. Applies to looted coins in the loot window and the Loot Monitor, the loot row sell price, and the Classic tooltip sell line. Off by default.",
 			minimap_icon = "Minimap icon",
-			minimap_icon_desc = "Show an XLoot coin button on the minimap. Left-click opens these options, right-click shows What's New. Drag it to move it around the minimap. XLoot is also offered to broker displays like Titan Panel, ChocolateBar, and ElvUI datatexts whether or not this is on. Off by default.",
+			minimap_icon_desc = "Show an XLoot coin button on the minimap. Left-click opens these options, right-click shows What's New, and Shift-click toggles Speedy auto-loot. Drag it to move it around the minimap. XLoot is also offered to broker displays like Titan Panel, ChocolateBar, and ElvUI datatexts whether or not this is on. Off by default.",
 			whatsnew_show = "Show What's New now",
 			whatsnew_show_desc = "Reopen the What's New summary for the current version.",
 			whatsnew_mode = "After an update",
@@ -57,7 +57,7 @@ local locales = {
 			autoloot_quality_min_desc = "Only auto loot items of this quality or higher (Poor means everything)",
 			autoloot_all = "Auto loot everything",
 			speedy_autoloot = "Speedy auto-loot",
-			speedy_autoloot_desc = "Vacuum every loot slot the instant loot is available, one item per server tick (paced to avoid the disconnect on big AoE piles) and without showing the loot window. Off by default. Ignores the per-item filters below unless \"Only speedy-loot filtered items\" is on. Hold your auto-loot-toggle modifier to skip Speedy and get the normal window for one loot.",
+			speedy_autoloot_desc = "Vacuum every loot slot the instant loot is available, one item per server tick (paced to avoid the disconnect on big AoE piles) and without showing the loot window. Off by default. Ignores the per-item filters below unless \"Only speedy-loot filtered items\" is on. Hold your auto-loot-toggle modifier to skip Speedy and get the normal window for one loot. To switch it on or off without opening these options, type /xlspeedy, set the XLoot key binding, or Shift-click the minimap icon.",
 			speedy_autoloot_respect_filters = "Only speedy-loot filtered items",
 			speedy_autoloot_respect_filters_desc = "Instead of grabbing everything, Speedy loots only the items your filters below would auto loot -- just paced and without the window flash. Non-matching items still appear in the loot window.",
 			speedy_autoloot_skip_fishing = "Leave fishing catches alone",
@@ -402,7 +402,6 @@ local locales = {
 --@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Options")@
 --@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Options")@
 --@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Options")@
---@localization(locale="ruRU", format="lua_additive_table", table-name="locales.ruRU", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Options")@
 --@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Options")@
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Options")@
 --@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Options")@
@@ -414,7 +413,6 @@ local locales = {
 --@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
---@localization(locale="ruRU", format="lua_additive_table", table-name="locales.ruRU", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
@@ -424,7 +422,6 @@ local locales = {
 --@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Frame")@
 --@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Frame")@
 --@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Frame")@
---@localization(locale="ruRU", format="lua_additive_table", table-name="locales.ruRU", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Frame")@
 --@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Frame")@
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Frame")@
 --@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Frame")@
@@ -434,7 +431,6 @@ local locales = {
 --@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Group")@
 --@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Group")@
 --@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Group")@
---@localization(locale="ruRU", format="lua_additive_table", table-name="locales.ruRU", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Group")@
 --@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Group")@
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Group")@
 --@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Group")@
@@ -444,9 +440,341 @@ local locales = {
 --@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
---@localization(locale="ruRU", format="lua_additive_table", table-name="locales.ruRU", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
+
+locales.ruRU["font"] = "Шрифт"
+locales.ruRU["font_sizes"] = "Размеры"
+locales.ruRU["enter_to_save"] = "Нажмите Enter, чтобы сохранить введённое значение."
+locales.ruRU["font_size_loot"] = "Добыча"
+locales.ruRU["font_size_quantity"] = "Количество"
+locales.ruRU["font_flag"] = "Контур"
+locales.ruRU["desc_channel_auto"] = "Максимально доступный"
+locales.ruRU["growth_direction"] = "Направление роста"
+locales.ruRU["alignment"] = "Выравнивание"
+locales.ruRU["scale"] = "Масштаб"
+locales.ruRU["width"] = "Ширина"
+locales.ruRU["alpha"] = "Прозрачность"
+locales.ruRU["spacing"] = "Интервал"
+locales.ruRU["offset"] = "Смещение"
+locales.ruRU["visible"] = "Видимый"
+locales.ruRU["padding"] = "Отступ"
+locales.ruRU["items_others"] = "Предметы других игроков"
+locales.ruRU["items_own"] = "Ваши предметы"
+locales.ruRU["up"] = "Вверх"
+locales.ruRU["down"] = "Вниз"
+locales.ruRU["left"] = "Слева"
+locales.ruRU["right"] = "Справа"
+locales.ruRU["top"] = "Сверху"
+locales.ruRU["bottom"] = "Снизу"
+locales.ruRU["minimum_quality"] = "Минимальное качество"
+locales.ruRU["when_never"] = "Никогда"
+locales.ruRU["when_solo"] = "В одиночку"
+locales.ruRU["when_always"] = "Всегда"
+locales.ruRU["when_auto"] = "Автоматически"
+locales.ruRU["when_group"] = "В любой группе"
+locales.ruRU["when_party"] = "В группе (не рейд)"
+locales.ruRU["when_raid"] = "В рейде"
+locales.ruRU["whatsnew_mode_popup"] = "Всплывающее окно"
+locales.ruRU["whatsnew_mode_chat"] = "Ссылка в чате"
+locales.ruRU["whatsnew_mode_none"] = "Нет"
+locales.ruRU["confirm_reset_profile"] = "Это сбросит все параметры для этого профиля. Вы уверены?"
+locales.ruRU["profile"] = "Профиль"
+locales.ruRU["message_reloadui_warning"] = "|c2244dd22%s|r: изменение |c2244dd22%s|r требует перезагрузки интерфейса, прежде чем продолжить игру: |c2244dd22/reload ui|r"
+locales.ruRU.Core = {
+	panel_title = "Общие настройки",
+	details = "Скин применяется ко всем модулям XLoot. Для большинства остальных настроек сейчас требуется /reload. Если что-то работает неправильно, пожалуйста, создайте обращение.\nЧтобы отключить отдельный модуль, отключите его как обычный аддон.",
+	skin = "Скин",
+	skin_desc = "Выберите используемый скин. Включает скины Masque",
+	skin_anchors = "Скин для якорей",
+	skin_anchors_desc = "Применять скин к якорям, которые использует XLoot",
+	tooltip_sell = "Цена продажи в подсказках",
+	tooltip_sell_desc = "Добавляет в подсказки предметов строку с ценой продажи торговцу, включая стоимость всей стопки (например, 20 x 6с). Работает везде, где показываются подсказки предметов.",
+	value_coin_icons = "Значки монет",
+	minimap_icon = "Значок у миникарты",
+	whatsnew_show = "Показать «Что нового»",
+	whatsnew_show_desc = "Снова открыть сводку «Что нового» для текущей версии.",
+	whatsnew_mode = "После обновления",
+	whatsnew_mode_desc = "Выберите, как XLoot сообщает о новых возможностях после обновления: автоматически открывать окно «Что нового», выводить в чат ненавязчивую ссылку или ничего не показывать.",
+	reset_defaults = "Сбросить по умолчанию",
+	reset_defaults_desc = "Сбросить все настройки XLoot в текущем профиле к значениям по умолчанию.",
+	discord = "Присоединяйтесь к нашему Discord!",
+	discord_desc = "Открыть ссылку-приглашение в Discord-сообщество XLoot, которую можно скопировать.",
+	module_header = "Настройки модулей",
+}
+locales.ruRU.Frame = {
+	panel_title = "Окно добычи",
+	panel_desc = "Настраиваемое окно добычи",
+	frame_options = "Настройки окна",
+	slot_options = "Ячейки добычи",
+	link_button = "Кнопка «Ссылки на всё»",
+	autolooting = "Автолут",
+	colors = "Цвета",
+	autoloot_currency = "Автолут валюты",
+	autoloot_currency_desc = "Когда автоматически брать валюту",
+	autoloot_quest = "Автолут предметов для заданий",
+	autoloot_quest_desc = "Когда автоматически брать предметы для заданий",
+	autoloot_tradegoods = "Автолут хозяйственных товаров",
+	autoloot_tradegoods_desc = "Когда автоматически брать любые предметы типа «Хозяйственные товары»",
+	autoloot_gear = "Автолут экипировки",
+	autoloot_gear_desc = "Когда автоматически брать любые предметы, которые можно надеть (доспехи и оружие)",
+	autoloot_gear_quality = "Минимальное качество экипировки",
+	autoloot_gear_quality_desc = "Автоматически брать только экипировку такого или более высокого качества (при значении «Низкое» берётся вся экипировка)",
+	autoloot_gear_minlevel = "Минимальный уровень экипировки",
+	autoloot_gear_minlevel_desc = "Автоматически брать только экипировку с таким или более высоким уровнем предмета (0 — не учитывать уровень предмета)",
+	autoloot_value = "Автолут по цене",
+	autoloot_value_desc = "Когда автоматически брать предметы стоимостью не ниже минимальной цены",
+	autoloot_value_minprice = "Минимальная цена (золото)",
+	autoloot_value_minprice_desc = "Автоматически брать, только если общая стоимость продажи торговцу взятой стопки составляет не менее указанного числа золота (0 — любой предмет, который можно продать)",
+	autoloot_quality = "Автолут по качеству",
+	autoloot_quality_desc = "Когда автоматически брать любой предмет не ниже указанного ниже минимального качества, независимо от его типа",
+	autoloot_quality_min = "Минимальное качество",
+	autoloot_quality_min_desc = "Автоматически брать предметы только такого или более высокого качества (при значении «Низкое» берётся всё)",
+	autoloot_all = "Автолут всего",
+	speedy_autoloot = "Быстрый автолут",
+	speedy_autoloot_respect_filters = "Быстро брать только отфильтрованное",
+	speedy_autoloot_respect_filters_desc = "Вместо того чтобы брать всё подряд, быстрый автолут забирает только предметы, которые взяли бы ваши фильтры ниже — просто быстрее и без вспышки окна. Остальные предметы по-прежнему показываются в окне добычи.",
+	speedy_autoloot_skip_fishing = "Не трогать улов с рыбалки",
+	speedy_autoloot_skip_fishing_desc = "Позволяет улову с рыбалки открываться в обычном окне добычи, а не забираться быстрым автолутом. Быстрый автолут может опустошить поплавок раньше, чем аддон для учёта рыбалки успеет прочитать улов, поэтому включите эту настройку, если такой аддон пропускает рыбу. Всё остальное по-прежнему берётся быстро.",
+	autoloot_list = "Автолут предметов из списка",
+	autoloot_list_desc = "Когда автоматически брать предметы из списка",
+	autoloot_item_list = "Предметы для автолута",
+	frame_color_border = "Цвет рамки окна",
+	frame_color_backdrop = "Цвет фона окна",
+	frame_color_gradient = "Цвет градиента окна",
+	frame_width_automatic = "Автоматически расширять окно",
+	frame_width = "Ширина окна",
+	old_close_button = "Использовать старую кнопку закрытия",
+	loot_highlight = "Подсвечивать ячейки при наведении",
+	loot_color_border = "Цвет рамки добычи",
+	loot_color_backdrop = "Цвет фона добычи",
+	loot_color_gradient = "Цвет градиента добычи",
+	loot_color_info = "Цвет текста информации",
+	loot_color_quest = "Цвет предметов для заданий",
+	loot_color_quest_desc = "Цвет, в который окрашиваются предметы для заданий. Используется, только когда включено «Окрашивать предметы для заданий» и выключено «Использовать цвет моего класса».",
+	loot_collapse = "Сворачивать полученные ячейки",
+	loot_icon_size = "Размер значка добычи",
+	loot_row_height = "Высота строки добычи",
+	quality_color_frame = "Окрашивать рамку окна по высшему качеству",
+	quality_color_slot = "Окрашивать рамку добычи по качеству",
+	quest_color_slot = "Окрашивать предметы для заданий",
+	quest_color_slot_desc = "Окрашивает название и рамку предметов для заданий в особый цвет, чтобы они выделялись при открытии окна добычи. Охватывает как предметы типа «Задания», так и обычные предметы, которые нужны для ваших активных заданий. Заменяет окраску по качеству в этих строках.",
+	quest_color_class = "Использовать цвет моего класса",
+	quest_color_class_desc = "Окрашивать предметы для заданий в цвет вашего класса вместо цвета, заданного в «Цвет предметов для заданий».",
+	loot_texts_info = "Показывать подробную информацию",
+	loot_texts_bind = "Показывать тип привязки",
+	loot_texts_lock = "Показывать статус блокировки",
+	loot_texts_sell = "Показывать цену продажи",
+	loot_texts_sell_desc = "Показывать в строке добычи общую стоимость продажи каждого предмета торговцу",
+	loot_texts_newlook = "Показывать метку нового внешнего вида",
+	loot_texts_newlook_desc = "Помечает голубой меткой (новый вид) экипировку, внешний вид которой для трансмогрификации вы ещё не собрали ни из какого источника. Только Retail.",
+	loot_texts_upgrade = "Показывать метку улучшения",
+	loot_texts_upgrade_desc = "Помечает зелёной меткой (улучшение) добытое оружие и доспехи, если их уровень предмета выше, чем у надетого в этой ячейке (того же типа оружия или доспехов).",
+	loot_buttons_auto = "Ярлык автолута",
+	loot_buttons_auto_desc = "Кнопка для добавления любого предмета в ваш список автолута (см. ниже)\nПоказывается, только когда предмет был бы взят автоматически",
+	font_size_info = "Информация о добыче",
+	font_size_bottombuttons = "Ссылка/Закрыть",
+	font_flag_loot = "Контур шрифта",
+	font_flag_loot_desc = "Стиль контура для названия предмета и информационного текста в окне добычи.",
+	font_flag = "Контур деталей",
+	font_flag_desc = "Стиль контура для мелких текстов строки добычи: количества в стопке, метки типа привязки (БоЕ/БоП) и кнопок строки.",
+	frame_snap = "Привязывать окно к курсору мыши",
+	frame_snap_offset_x = "Смещение по горизонтали",
+	frame_snap_offset_y = "Смещение по вертикали",
+	frame_grow_upwards = "Расширять окно вверх",
+	frame_draggable = "Окно добычи можно перетаскивать",
+	linkall_threshold = "Минимальное качество",
+	linkall_threshold_desc = "Отправлять ссылки только на добычу такого или более высокого качества.",
+	linkall_channel = "Канал для ссылок",
+	linkall_channel_desc = "Канал чата, в который отправляются ссылки на добычу.",
+	linkall_channel_secondary = "Дополнительный канал",
+	linkall_channel_secondary_desc = "Необязательный второй канал, в который тоже отправляются ссылки на добычу. Выберите «Нет», чтобы отключить.",
+	linkall_show = "Видимость кнопки ссылки",
+	linkall_first_only = "Ссылка только на верхний предмет",
+	linkall_auto = "Объявлять добычу при открытии",
+	linkall_auto_desc = "Автоматически отправлять ссылки на добычу в канал чата по умолчанию при открытии окна добычи, используя порог качества выше. Каждый источник добычи объявляется только один раз.",
+	autolooting_text = "Всё в этом разделе — собственный автолут XLoot, отдельная система от встроенного автолута Blizzard (настройка самой игры в Esc > Параметры). XLoot может мгновенно забрать всю добычу с цели (Быстрый автолут) или автоматически взять только предметы, подходящие под ваши фильтры ниже. Не используйте его одновременно с автолутом Blizzard: когда две системы забирают добычу с одной и той же цели, появляются безвредные предупреждения о том, что объект занят. Выберите что-то одно.",
+	autolooting_list = "Чтобы автоматически брать определённые предметы, перечислите их ниже.\n  Пример: Льняная ткань,Испепелитель,Медная руда",
+	autolooting_details = "XLoot выбирает наивысшую настройку при решении, брать ли ячейку. Это позволяет, например, брать всё автоматически в одиночку, но только предметы для заданий и деньги в группе.",
+	show_slot_errors = "Ошибки добычи в чате",
+	show_slot_errors_details = "Выводить сообщение в чат, если предмет добычи по какой-то причине не удалось показать. Большинство таких сообщений можно безопасно игнорировать.",
+}
+locales.ruRU.Group = {
+	panel_title = "Добыча группы",
+	testing = "Проверка",
+	anchors = "Якоря",
+	rolls = "Окна бросков",
+	other_frames = "Другие окна",
+	roll_tracking = "Какие броски показывать",
+	alerts = "Оповещения о добыче",
+	extra_info = "Подробности",
+	expiration = "Время показа (в секундах)",
+	test_settings = "Нажмите, чтобы проверить настройки",
+	text_outline = "Контур текста",
+	text_outline_desc = "Рисует тёмный контур вокруг текста в окнах бросков",
+	text_time = "Показывать оставшееся время",
+	text_time_desc = "Показывает оставшиеся секунды поверх значка предмета",
+	text_ilvl = "Показывать уровень предмета",
+	roll_highlight = "Подсвечивать важные броски",
+	roll_highlight_desc = "Меняет цвет рамки окна броска, если предмет — улучшение или внешний вид, которого у вас нет, чтобы сразу было видно, стоит ли бросать.",
+	roll_highlight_upgrade = "Улучшения по уровню предмета",
+	roll_highlight_upgrade_desc = "Зелёная рамка, если уровень предмета выше, чем у надетого.",
+	roll_highlight_newlook = "Несобранные внешние виды",
+	roll_highlight_newlook_desc = "Синяя рамка, если вы ещё не собрали внешний вид предмета (только Retail).",
+	roll_urgency = "Срочный цвет таймера",
+	roll_urgency_desc = "Полоса обратного отсчёта броска становится всё краснее по мере истечения времени.",
+	auto_roll = "Бросать автоматически",
+	auto_roll_desc = "Автоматически выбирать «Нужно», «Не откажусь» или «Пас» для предметов, на которые у вас есть правило. Shift+клик по кнопке броска в окне броска задаёт или удаляет правило для этого предмета.",
+	auto_roll_need = "Разрешить авто-«Нужно»",
+	auto_roll_need_desc = "Также автоматически выбирать «Нужно». По умолчанию выключено, поэтому правило никогда не выберет «Нужно» за вас без вашего ведома.",
+	auto_roll_clear = "Очистить все правила",
+	auto_roll_clear_desc = "Удалить все сохранённые правила автоброска.",
+	autoroll = "Автобросок",
+	role_icon = "Показывать значки ролей",
+	win_icon = "Показывать значок победившего типа броска",
+	show_decided = "Показывать принявших решение",
+	show_undecided = "Список ожидающих игроков",
+	show_undecided_desc = "Показывать список игроков, которые ещё не выбрали, как бросать",
+	hook_alert = "Изменять оповещения о добыче",
+	hook_alert_desc = "(всплывающие окна «Вы выиграли…»)\nПрикрепляет оповещения о добыче к перемещаемому якорю.\n\nОтключение может улучшить совместимость с другими аддонами добычи. \n\n(Требуется перезагрузка интерфейса)",
+	alert_skin = "Скин для окон оповещений о добыче",
+	alert_offset = "Вертикальный интервал",
+	alert_background = "Показывать фон",
+	alert_icon_frame = "Показывать рамку значка",
+	hook_bonus = "Изменять бонусные броски",
+	hook_bonus_desc = "Прикрепляет бонусные броски добычи к перемещаемому якорю.\n\nОтключение может улучшить совместимость с другими аддонами добычи. \n\n(Требуется перезагрузка интерфейса)",
+	bonus_skin = "Скин для окна бонусного броска",
+	roll_width = "Ширина окна броска",
+	roll_button_size = "Размер кнопок броска",
+	roll_anchor_visible = "Якорь бросков виден",
+	alert_anchor_visible = "Якорь оповещений о добыче виден",
+	alert_anchor_visible_desc = "Относится к окнам «Вы выиграли…»",
+	roll_status = "Показывать результаты бросков",
+	roll_status_desc = "Показывать в окне броска, кто бросал и кто выиграл, по данным истории добычи игры. Только Retail.",
+	track_all = "Отслеживать все броски",
+	track_all_desc = "Оставлять каждое окно броска открытым после вашего броска, чтобы наблюдать за результатами и видеть победителя, а не закрывать его сразу.",
+	track_player_roll = "Отслеживать предметы, на которые вы бросали",
+	track_player_roll_desc = "Оставлять окно броска открытым после того, как вы выбрали «Нужно» или «Не откажусь» (но не «Пас»), чтобы увидеть, чем всё закончится.",
+	track_by_threshold = "Отслеживать предметы по минимальному качеству",
+	track_by_threshold_desc = "Оставлять окно броска открытым после вашего броска, только если качество предмета не ниже выбранного ниже.",
+	expire_won = "Выигранные броски",
+	expire_won_desc = "Сколько секунд окно броска остаётся на экране после того, как вы выиграли предмет.",
+	expire_lost = "Проигранные/пропущенные броски",
+	expire_lost_desc = "Сколько секунд окно броска остаётся на экране после того, как вы проиграли или выбрали «Пас».",
+	preview_show = "Показать предпросмотр",
+	equip_prefix = "Показывать префикс экипируемого",
+	equip_prefix_desc = "Добавляет к названиям предметов префикс, показывающий, можно ли предмет надеть и является ли он улучшением. (Для префикса улучшения требуется аддон Pawn)",
+	prefix_equippable = "Префикс экипируемого",
+	prefix_upgrade = "Префикс улучшения",
+	hook_warning_text = "Сообщалось, что перехват окон оповещений о добыче и бонусных бросков в редких случаях вызывает проблемы, например, бонусные броски перестают отображаться.\n\nВключая эти параметры, вы подтверждаете, что понимаете этот риск и принимаете его.\n",
+}
+locales.ruRU.Monitor = {
+	panel_title = "Монитор добычи",
+	testing = "Проверка",
+	anchor = "Якорь",
+	thresholds = "Пороги качества",
+	fading = "Время исчезновения строк (в секундах)",
+	details = "Подробности",
+	test_settings = "Нажмите, чтобы проверить настройки",
+	visible = "Якорь виден",
+	show_crafted = "Созданное",
+	show_system_coin = "Золото из системных сообщений",
+	show_system_coin_desc = "Также показывать золото, о котором сообщается только системным сообщением (а не обычной добычей), например награды за локальные задания, золото за сдачу задания и контейнеры с наградами вроде Sky Racer's Purse. Не зависит от фильтра денег.",
+	show_totals = "Показывать общее число предметов в инвентаре",
+	totals_delay = "Задержка итогов",
+	totals_delay_desc = "Сколько ждать, прежде чем запрашивать у игры, сколько у вас предметов, так как события предметов не всегда точно совпадают со счётчиками инвентаря",
+	use_altoholic = "Учитывать банк (Altoholic)",
+	font_size_ilvl = "Уровень предмета",
+	name_width = "Ширина имени игрока",
+	gradients = "Градиенты",
+	gradients_desc = "Добавляет мягкую градиентную заливку на фон каждой строки монитора. Только внешний вид. Для изменения требуется перезагрузка интерфейса.",
+	quality_color = "Окрашивать строки по качеству предмета",
+	quality_color_desc = "Окрашивать рамки строк добычи в цвет качества предмета. Выключите, чтобы использовать собственный цвет рамки, например цвет класса, чтобы совпадало с окном добычи.",
+	monitor_color_border = "Цвет рамки строки",
+	monitor_color_border_desc = "Цвет рамки строк добычи, когда окраска по качеству выключена.",
+	color_all_rows = "Окрашивать все строки",
+	color_all_rows_desc = "Также применять цвет рамки строк к строкам денег и валюты, а не только предметов, чтобы весь монитор выглядел единообразно.",
+	quest_color = "Окрашивать предметы для заданий",
+	quest_color_desc = "Окрашивает название и рамку предметов для заданий в ленте добычи, чтобы они выделялись, так же, как это делает окно добычи. Охватывает как предметы типа «Задания», так и обычные предметы, которые нужны для ваших активных заданий, и заменяет окраску по качеству в этих строках. Окрашивается только ваша добыча и только предметы, прошедшие через окно добычи — награда за задание, выданная прямо в сумки, не окрашивается. Предметы для заданий показываются, даже если их качество ниже порогов выше, поэтому функция работает и в профиле по умолчанию.",
+	quest_color_class = "Использовать цвет моего класса",
+	quest_color_class_desc = "Окрашивать предметы для заданий в цвет вашего класса вместо цвета, заданного в «Цвет предметов для заданий».",
+	monitor_color_quest = "Цвет предметов для заданий",
+	monitor_color_quest_desc = "Цвет, в который окрашиваются предметы для заданий в ленте добычи. Используется, только когда включено «Окрашивать предметы для заданий» и выключено «Использовать цвет моего класса».",
+	rightclick_dismiss = "ПКМ, чтобы убрать строки",
+	rightclick_dismiss_desc = "Щелчок правой кнопкой по строке монитора убирает её раньше, чем она исчезнет сама. Оставшиеся строки сдвигаются вверх, закрывая промежуток.",
+	blizzard_alerts = "Оповещения о добыче Blizzard",
+	suppress_loot_toasts = "Скрывать всплывающие окна добычи Blizzard",
+	suppress_loot_toasts_desc = "Подавляет стандартные всплывающие уведомления о добыче Blizzard, которые выезжают при получении предмета, денег, улучшения или легендарного предмета (те блоки, что видны при открытии множества сундуков). Монитор добычи XLoot по-прежнему показывает всё, а оповещения не о добыче, такие как достижения, рецепты, питомцы, транспорт и честь PvP, не затрагиваются. По умолчанию выключено. Вступает в силу сразу, перезагрузка не нужна.",
+}
+locales.ruRU.Toast = {
+	panel_title = "Уведомления о добыче",
+	testing = "Проверка",
+	anchor = "Якорь",
+	filtering = "Что показывать",
+	behavior = "Поведение",
+	blizzard = "Оповещения Blizzard",
+	mouse = "Мышь",
+	font = "Шрифт",
+	enabled = "Включить уведомления о добыче",
+	enabled_desc = "Показывать всплывающее уведомление в стиле Blizzard при получении заметной добычи. По умолчанию выключено, поэтому ничего не изменится, пока вы не включите. Уведомления появляются у перемещаемого якоря и исчезают сами.",
+	test_settings = "Нажмите для предпросмотра уведомлений",
+	visible = "Якорь виден",
+	threshold = "Минимальное качество",
+	threshold_desc = "Показывать уведомление только для добычи такого или более высокого качества, чтобы обычные предметы не засоряли экран. Предметы для заданий можно показывать отдельно ниже.",
+	quest = "Предметы для заданий",
+	quest_desc = "Также показывать уведомления о предметах для заданий, даже если их качество ниже минимального.",
+	ilvl = "Показывать уровень предмета",
+	ilvl_desc = "Добавляет уровень предмета перед названием у экипировки.",
+	max_active = "Максимум на экране",
+	max_active_desc = "Сколько уведомлений может быть показано одновременно. Остальная добыча ждёт в очереди и появляется по мере исчезновения старых уведомлений.",
+	fadeout_delay = "Время на экране",
+	fadeout_delay_desc = "Сколько секунд уведомление остаётся на экране до исчезновения. Наведение курсора приостанавливает исчезновение.",
+	vfx = "Анимация появления",
+	vfx_desc = "Проигрывать эффект свечения и блеска при появлении уведомления. Выключите для простого плавного появления.",
+	sfx = "Звук",
+	sfx_desc = "Проигрывать звук при появлении уведомления; для легендарных предметов звук особый.",
+	hide_blizzard = "Скрывать дублирующее уведомление Blizzard",
+	hide_blizzard_desc = "Подавляет стандартные всплывающие уведомления о добыче Blizzard, чтобы рядом с уведомлениями XLoot не было дубликата: они выезжают при получении предмета, денег, улучшения или легендарного предмета. По умолчанию включено, пока включены уведомления о добыче. Оповещения не о добыче, такие как достижения, рецепты, питомцы, транспорт и честь PvP, не затрагиваются. Вступает в силу сразу, перезагрузка не нужна.",
+	mouse_hover = "Подсказка при наведении",
+	mouse_hover_desc = "Показывать подсказку предмета при наведении мыши на уведомление и приостанавливать его исчезновение, пока курсор над ним.",
+	mouse_click_mode = "Клики",
+	mouse_click_mode_desc = "Как уведомления реагируют на клики. «Всегда» — уведомления кликабельны, но могут перехватывать клики, предназначенные для интерфейса под ними. «Только с зажатым Shift» пропускает обычные левые клики к тому, что находится позади, при этом ПКМ по-прежнему закрывает уведомление, а Shift+клик по-прежнему отправляет ссылку. «Никогда» пропускает все клики. Якорь можно перетаскивать во всех режимах.",
+	click_always = "Всегда",
+	click_modifier = "Только с зажатым Shift",
+	click_never = "Никогда (пропускать клики)",
+	color_border = "Окрашивать рамку по качеству",
+	color_border_desc = "Окрашивает рамку уведомления в цвет качества предмета.",
+	color_icon_border = "Окрашивать рамку значка по качеству",
+	color_icon_border_desc = "Окрашивает рамку значка в цвет качества предмета.",
+	color_name = "Окрашивать название по качеству",
+	color_name_desc = "Окрашивает текст названия предмета в цвет качества.",
+	color_threshold = "Окрашивать только от качества",
+	color_threshold_desc = "Применять окраску по качеству только к добыче такого или более высокого качества.",
+	font_flag = "Контур шрифта",
+	font_size = "Размер шрифта",
+}
+locales.ruRU.Master = {
+	panel_title = "Ответственный за добычу",
+	specialrecipients = "Меню особых получателей",
+	raidroll = "Меню особых бросков",
+	awardannounce = "Объявлять распределение предметов",
+	confirm_qualitythreshold = "Минимальное качество для подтверждения",
+	confirm_qualitythreshold_desc = "Для предметов такого или более высокого качества перед передачей запрашивается подтверждение. «Никогда» пропускает запрос для всего, включая эпические и легендарные предметы.",
+	menu_roll = "Показывать рейдовый бросок",
+	menu_disenchant = "Показывать распылителя",
+	menu_disenchanters = "Имена персонажей-распылителей",
+	menu_bank = "Показывать банкира",
+	menu_bankers = "Имена персонажей-банкиров",
+	menu_self = "Показывать себя",
+	award_qualitythreshold = "Минимальное качество",
+	award_qualitythreshold_desc = "Объявлять передачу только для предметов такого или более высокого качества. «Всегда» объявляет каждую передачу, «Никогда» отключает объявления.",
+	award_channel = "Канал объявлений",
+	award_channel_desc = "Канал чата, в который отправляются объявления о передаче. «Максимально доступный» использует самый широкий групповой канал, в который вы можете писать.",
+	award_channel_secondary = "Дополнительный канал",
+	award_channel_secondary_desc = "Необязательный второй канал, в который тоже отправляются объявления о передаче. Выберите «Нет», чтобы отключить.",
+	award_guildannounce = "Дублировать в чат гильдии",
+	award_special = "Объявлять особых получателей",
+}
 
 XLoot:Localize("Options", locales)

@@ -129,19 +129,7 @@ local function SystemHandler(text)
 	end
 end
 
-local function invert(pstr)
-	return pstr:gsub("%%d", "(%1+)")
-end
-local cg = invert(GOLD_AMOUNT)
-local cs = invert(SILVER_AMOUNT)
-local cc = invert(COPPER_AMOUNT)
-
-local function ParseCoinString(tstr)
-	local g = tstr:match(cg) or 0
-	local s = tstr:match(cs) or 0
-	local c = tstr:match(cc) or 0
-	return g*10000+s*100+c
-end
+local ParseCoinString = XLoot.ParseCoinString
 
 if lib.frame then
 	lib.frame:SetScript("OnEvent", function() return nil end)

@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="XLOOT_TOGGLE_SPEEDY" category="XLoot">
+		XLoot:ToggleSpeedyAutoloot()
+	</Binding>
+</Bindings>

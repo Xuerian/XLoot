@@ -4,6 +4,8 @@ _G.XLoot = XLoot
 local L = XLoot.L
 local print, wprint = print, print
 
+_G.BINDING_NAME_XLOOT_TOGGLE_SPEEDY = L.binding_toggle_speedy
+
 local defaults = {
 	profile = {
 		skin = "smooth",
@@ -99,6 +101,36 @@ function XLoot:ShowOptionPanel(module)
 	XLootOptions:OpenPanel(module)
 end
 
+local function SpeedyProfile()
+	local frame = XLoot:GetModule("Frame", true)
+	return frame and frame.db and frame.db.profile
+end
+
+function XLoot.SpeedyAutolootText()
+	local profile = SpeedyProfile()
+	if profile then
+		local state = profile.speedy_autoloot and ("|cff20ff20%s|r"):format(L.state_on) or ("|cffff4040%s|r"):format(L.state_off)
+		return L.speedy_state:format(state)
+	end
+end
+
+function XLoot:ToggleSpeedyAutoloot(on)
+	local profile = SpeedyProfile()
+	if not profile then
+		print("|c2244dd22XLoot|r "..L.speedy_unavailable)
+		return
+	end
+	if on == nil then
+		on = not profile.speedy_autoloot
+	end
+	profile.speedy_autoloot = on
+	local registry = LibStub("AceConfigRegistry-3.0", true)
+	if registry then
+		registry:NotifyChange("XLoot")
+	end
+	print("|c2244dd22XLoot|r "..self:SpeedyAutolootText())
+end
+
 function XLoot:ApplyOptions(in_options)
 	self.opt = self.db.profile
 	XLoot:SetSkin(self.opt.skin)
@@ -177,6 +209,16 @@ function XLoot:OnEnable()
 	C_AddOns.EnableAddOn("XLoot_Options")
 	C_AddOns.LoadAddOn("XLoot_Options")
 	self:SetSlashCommand("xloot", function() self:ShowOptionPanel(self) end)
+	self:SetSlashCommand("xlspeedy", function(msg)
+		msg = (msg or ""):lower():match("^%s*(.-)%s*$")
+		if msg == "" then
+			self:ToggleSpeedyAutoloot()
+		elseif msg == "on" or msg == "off" then
+			self:ToggleSpeedyAutoloot(msg == "on")
+		else
+			print("|c2244dd22XLoot|r "..L.speedy_usage)
+		end
+	end)
 
 	self:SetupMinimapIcon()
 	self:CheckWhatsNew()

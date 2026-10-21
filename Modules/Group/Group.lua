@@ -449,7 +449,7 @@ function addon.ToggleAutoRollRule(link, rtypeid)
 		print(L.auto_roll_removed:format(name))
 	else
 		opt.auto_roll_rules[itemid] = rtypeid
-		print(L.auto_roll_saved:format(rtypes[rtypeid], name))
+		print(L.auto_roll_saved:format(L["roll_type_"..rtypes[rtypeid]] or rtypes[rtypeid], name))
 	end
 	NotifyOptions()
 end
@@ -462,7 +462,8 @@ end
 function addon.AutoRollRulesText()
 	local lines = {}
 	for itemid, rtypeid in pairs(opt.auto_roll_rules) do
-		lines[#lines+1] = ("%s: %s"):format(GetItemInfo(itemid) or ('item:'..itemid), rtypes[rtypeid] or '?')
+		local rtype = rtypes[rtypeid]
+		lines[#lines+1] = ("%s: %s"):format(GetItemInfo(itemid) or ('item:'..itemid), rtype and (L["roll_type_"..rtype] or rtype) or '?')
 	end
 	if #lines == 0 then
 		return L.auto_roll_none

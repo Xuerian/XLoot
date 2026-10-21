@@ -8,18 +8,35 @@ local LDBIcon = LibStub("LibDBIcon-1.0", true)
 local BUTTON = "XLoot"
 local ICON = [[Interface\Icons\INV_Misc_Coin_01]]
 
-local function OnClick(_, button)
-	if button == "RightButton" then
+local drawn_tooltip
+
+local function OnTooltipShow(tooltip)
+	drawn_tooltip = tooltip
+	tooltip:AddLine(BUTTON)
+	tooltip:AddLine(L.minimap_click_left, 1, 1, 1)
+	tooltip:AddLine(L.minimap_click_right, 1, 1, 1)
+	local speedy = XLoot:SpeedyAutolootText()
+	if speedy then
+		tooltip:AddLine(L.minimap_click_shift, 1, 1, 1)
+		tooltip:AddLine(" ")
+		tooltip:AddLine(speedy, 1, 1, 1)
+	end
+end
+
+local function OnClick(frame, button)
+	if button == "LeftButton" and IsShiftKeyDown() then
+		XLoot:ToggleSpeedyAutoloot()
+		local tooltip = drawn_tooltip
+		if tooltip and tooltip:IsOwned(frame) then
+			tooltip:ClearLines()
+			OnTooltipShow(tooltip)
+			tooltip:Show()
+		end
+	elseif button == "RightButton" then
 		XLoot:ShowWhatsNew()
 	else
 		XLoot:ShowOptionPanel(XLoot)
 	end
-end
-
-local function OnTooltipShow(tooltip)
-	tooltip:AddLine(BUTTON)
-	tooltip:AddLine(L.minimap_click_left, 1, 1, 1)
-	tooltip:AddLine(L.minimap_click_right, 1, 1, 1)
 end
 
 -- minimap_icon is the only source of truth: minimap.hide is derived from it, and the lib owns minimapPos.

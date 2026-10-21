@@ -36,6 +36,13 @@ local locales = {
 		anchor_hide = "hide",
 		minimap_click_left = "Left-click: Open options",
 		minimap_click_right = "Right-click: What's New",
+		minimap_click_shift = "Shift-click: Toggle Speedy auto-loot",
+		speedy_state = "Speedy auto-loot: %s",
+		state_on = "ON",
+		state_off = "OFF",
+		speedy_unavailable = "Speedy auto-loot needs the XLoot Frame module enabled.",
+		speedy_usage = "Usage: /xlspeedy toggles Speedy auto-loot. /xlspeedy on or /xlspeedy off sets it directly.",
+		binding_toggle_speedy = "Toggle Speedy auto-loot",
 		anchor_hide_desc = "Lock this module in position\nThis will hide the anchor,\nbut it can be shown again from the options",
 		discord_popup = "Join the XLoot community for help, feedback, and updates.\n\nCopy the invite below (it's pre-selected — just press Ctrl+C):",
 	},
@@ -57,10 +64,17 @@ local locales = {
 --@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
---@localization(locale="ruRU", format="lua_additive_table", table-name="locales.ruRU", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="zhTW", format="lua_additive_table", table-name="locales.zhTW", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 
+locales.ruRU["anchor_hide"] = "скрыть"
+locales.ruRU["anchor_hide_desc"] = "Зафиксировать этот модуль на месте\nЭто скроет якорь,\nно его можно снова показать в настройках"
+locales.ruRU["skin_legacy"] = "XLoot: Наследие"
+locales.ruRU["skin_smooth"] = "XLoot: Плавный"
+locales.ruRU["skin_svelte"] = "XLoot: Стройный"
+locales.ruRU["minimap_click_left"] = "ЛКМ: открыть настройки"
+locales.ruRU["minimap_click_right"] = "ПКМ: Что нового"
+locales.ruRU["discord_popup"] = "Присоединяйтесь к сообществу XLoot, чтобы получить помощь, оставить отзыв и узнавать об обновлениях.\n\nСкопируйте приглашение ниже (оно уже выделено — просто нажмите Ctrl+C):"
 
 XLoot.L = CompileLocales(locales)

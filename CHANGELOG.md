@@ -6,6 +6,22 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.20.0] - 2026-10-20
+
+### Features
+- **Speedy auto-loot quick toggle.** Turn Speedy auto-loot on or off without opening the options: type
+  /xlspeedy (or /xlspeedy on and /xlspeedy off), set the new XLoot key binding, or Shift-click the minimap
+  icon. Every toggle confirms ON or OFF in chat, and the minimap tooltip shows the current state. Suggested by
+  RoadBlock.
+- **Russian translation.** XLoot is now translated into Russian, including the auto-roll messages, which now
+  name the roll type in Russian too. The newest Loot Monitor and Speedy strings show in English for now.
+  Contributed by kolechkin.
+
+### Improvements
+- **Coin icons now cover looted coins.** With Global options > Coin icons turned on, coins in the loot window
+  and the Loot Monitor's Money and System gold rows show as gold, silver, and copper icons, not just item sell
+  prices. Reported by Benjiwow.
+
 ## [12.19.0] - 2026-10-19
 
 ### Features

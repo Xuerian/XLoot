@@ -4,7 +4,7 @@ XLootMonitor = CreateFrame("Frame", "XLootMonitor", UIParent)
 XLootMonitor.addon = addon
 
 local print, opt, eframe, anchor = print
-local CopperToString, FancyPlayerName = XLoot.CopperToString, XLoot.FancyPlayerName
+local MoneyString, FancyPlayerName = XLoot.MoneyString, XLoot.FancyPlayerName
 local table_insert, table_remove = table.insert, table.remove
 local me = UnitName("player")
 
@@ -187,7 +187,7 @@ local function add_coin_row(copper)
 	if not opt.quality_color and opt.color_all_rows then
 		set_row_border(row)
 	end
-	row:SetTexts(nil, CopperToString(copper))
+	row:SetTexts(nil, MoneyString(copper, XLoot.opt.value_coin_icons))
 end
 
 function events.coin(player, copper)

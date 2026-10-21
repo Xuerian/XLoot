@@ -6,6 +6,24 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.20.0",
+		date = "2026-10-20",
+		changes = {
+			{
+				label = "Speedy auto-loot quick toggle",
+				type = "feature",
+				option = "Loot Frame > Auto-looting",
+				description = "Turn Speedy auto-loot on or off without opening the options: type /xlspeedy, set the XLoot key binding, or Shift-click the minimap icon. Every toggle confirms ON or OFF in chat, so you always know where it stands. Suggested by RoadBlock.",
+			},
+			{
+				label = "Coin icons for looted coins",
+				type = "improvement",
+				option = "Global options",
+				description = "The Coin icons option now also shows looted coins in the loot window and the Loot Monitor as gold, silver, and copper icons, not just item sell prices. Off by default. Reported by Benjiwow.",
+			},
+		},
+	},
+	{
 		version = "12.19.0",
 		date = "2026-10-19",
 		changes = {

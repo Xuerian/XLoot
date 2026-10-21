@@ -35,4 +35,8 @@ local locales = {
 	},
 }
 
+locales.ruRU["anchor"] = "Уведомления о добыче"
+locales.ruRU["received"] = "Вы получили"
+locales.ruRU["legendary"] = "Легендарный предмет!"
+
 XLoot:Localize("Toast", locales)
