@@ -6,6 +6,18 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.22.0",
+		date = "2026-11-07",
+		changes = {
+			{
+				label = "Share your settings between game versions",
+				type = "feature",
+				option = "Profile > Share settings",
+				description = "Export turns your XLoot settings into a string you can copy, and Import loads one, so you can carry your setup from retail to WoW Forever or a Classic flavor, or to another account or computer. Import it as a new profile or over the current one. Frame positions are fitted to the new screen. Auto-roll rules carry over only between the same game version, since each game version has its own items. Suggested by Benjiwow.",
+			},
+		},
+	},
+	{
 		version = "12.21.0",
 		date = "2026-10-30",
 		changes = {

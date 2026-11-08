@@ -805,7 +805,6 @@ function addon:Init()
 	if not init then
 		init = true
 		if not Settings then
-			-- Remove bootstrap
 			for i,frame in ipairs(INTERFACEOPTIONS_ADDONCATEGORIES) do
 				if frame.name == "XLoot" then
 					table.remove(INTERFACEOPTIONS_ADDONCATEGORIES, i)
@@ -835,7 +834,7 @@ function addon:Init()
 			end
 		end)
 
-		AceConfigRegistry:RegisterOptionsTable("XLootProfile", LibStub("AceDBOptions-3.0"):GetOptionsTable(XLoot.db))
+		AceConfigRegistry:RegisterOptionsTable("XLootProfile", self.ProfileOptions())
 		XLoot.profile_panel = AceConfigDialog:AddToBlizOptions("XLootProfile", L.profile, "XLoot")
 		XLoot.profile_panel.default = PanelDefault
 		XLoot.profile_panel.OnDefault = PanelDefault

@@ -6,6 +6,16 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.22.0] - 2026-11-07
+
+### Features
+- **Share your settings between game versions.** The Profile page has new Export and Import buttons. Export shows
+  your XLoot settings as a string to copy, covering every module you have enabled, and Import loads one as a new
+  profile or over the current one, so a setup made on retail can be carried to WoW Forever or a Classic flavor, or to
+  another account or computer. Only settings changed from the defaults travel. Frame positions are fitted to the new
+  screen, settings the other game version does not have are left out, and auto-roll rules carry over only between the
+  same game version, since each game version has its own items. Suggested by Benjiwow.
+
 ## [12.21.0] - 2026-10-30
 
 ### Features

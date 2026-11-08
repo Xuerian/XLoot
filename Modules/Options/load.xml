@@ -4,4 +4,5 @@
 	
 	<Script file="localization.lua"/>
 	<Script file="Options.lua"/>
+	<Script file="Transfer.lua"/>
 </Ui>
