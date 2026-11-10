@@ -89,7 +89,28 @@ function XLoot:SetSlashCommand(slash, func)
 	_G.SlashCmdList[key] = func
 end
 
+local options_after_combat
+
 function XLoot:ShowOptionPanel(module)
+	-- Blizzard blocks addons from opening the Settings panel in combat.
+	if InCombatLockdown() then
+		if not options_after_combat then
+			options_after_combat = CreateFrame("Frame")
+			options_after_combat:SetScript("OnEvent", function(frame)
+				frame:UnregisterEvent("PLAYER_REGEN_ENABLED")
+				-- Opening wipes the unapplied changes of a Settings panel the player opened during combat.
+				if not (SettingsPanel and SettingsPanel:IsShown()) then
+					XLoot:ShowOptionPanel(frame.module)
+				end
+			end)
+		end
+		if not options_after_combat:IsEventRegistered("PLAYER_REGEN_ENABLED") then
+			print("|c2244dd22XLoot|r "..L.options_after_combat)
+		end
+		options_after_combat.module = module
+		options_after_combat:RegisterEvent("PLAYER_REGEN_ENABLED")
+		return
+	end
 	if not XLootOptions then
 		C_AddOns.EnableAddOn("XLoot_Options")
 		local loaded, reason = C_AddOns.LoadAddOn("XLoot_Options")

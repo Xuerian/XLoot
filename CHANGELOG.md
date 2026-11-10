@@ -6,6 +6,14 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.22.1] - 2026-11-09
+
+### Bug Fixes
+- Opening XLoot's options during combat, with `/xloot`, the minimap button or the What's New button, raised a
+  "tried to call the protected function" error and did nothing, since the game blocks addons from opening the settings
+  window in combat. XLoot now says the options will open when combat ends, and opens them then. Reported by
+  GrimNotepad.
+
 ## [12.22.0] - 2026-11-07
 
 ### Features

@@ -43,6 +43,7 @@ local locales = {
 		speedy_unavailable = "Speedy auto-loot needs the XLoot Frame module enabled.",
 		speedy_usage = "Usage: /xlspeedy toggles Speedy auto-loot. /xlspeedy on or /xlspeedy off sets it directly.",
 		binding_toggle_speedy = "Toggle Speedy auto-loot",
+		options_after_combat = "Options will open when combat ends.",
 		anchor_hide_desc = "Lock this module in position\nThis will hide the anchor,\nbut it can be shown again from the options",
 		discord_popup = "Join the XLoot community for help, feedback, and updates.\n\nCopy the invite below (it's pre-selected — just press Ctrl+C):",
 	},
