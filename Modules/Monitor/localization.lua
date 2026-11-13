@@ -39,7 +39,6 @@ local locales = {
 --@localization(locale="ptBR", format="lua_additive_table", table-name="locales.ptBR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="frFR", format="lua_additive_table", table-name="locales.frFR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
---@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Monitor")@
@@ -48,5 +47,9 @@ local locales = {
 locales.ruRU["anchor"] = "Монитор добычи"
 locales.ruRU["capped"] = "лимит"
 locales.ruRU["weekly_cap"] = "недельный лимит"
+
+locales.koKR["anchor"] = "전리품 모니터"
+locales.koKR["capped"] = "한도 도달"
+locales.koKR["weekly_cap"] = "주간 한도 도달"
 
 XLoot:Localize("Monitor", locales)

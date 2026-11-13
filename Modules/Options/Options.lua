@@ -98,9 +98,8 @@ end)
 function addon:OnEnable()
 
 	local option_metadata = {}
-	addon.option_metadata = option_metadata -- Until resulting AceOptionsTable can have .values upated, this is the only way to store a new .items table
+	addon.option_metadata = option_metadata
 
-	-- Returns db (may be a subtable), key, meta, full module db
 	local function path(info)
 		local meta = option_metadata[info.option]
 		local db = meta.module_data.addon.db.profile
@@ -159,7 +158,6 @@ function addon:OnEnable()
 		return values
 	end
 
-	-- TODO: Recursive dependencies
 	local function requires(info)
 		local db, k, meta, full_db = path(info)
 		return ((meta.requires and (not full_db[meta.requires]) or false)
@@ -207,7 +205,6 @@ function addon:OnEnable()
 		return t, key
 	end
 
-	-- Many options are short enough that t[n] and t[n+1] can comfortably represent t.subtable and t.subkey
 	function BetterOptions.infer_db_path(t, offset)
 		offset = offset or 0
 		t.subtable = t.subtable or t[1+offset]
@@ -315,7 +312,6 @@ function addon:OnEnable()
 				opts.must_reload_ui = nil
 			end
 
-			-- TODO: Set metatable on option table to update meta.items?
 			if opts.type == "select" and opts.items then
 				opts.values = values_from_items
 				meta.values = {}
@@ -385,7 +381,6 @@ function addon:OnEnable()
 		{ "whatsnew_show", "execute", func = function() XLoot:ShowWhatsNew() end },
 		{ "reset_defaults", "execute", confirm = true, func = function() addon:ResetProfile() end },
 		{ "discord", "execute", func = function() XLoot:ShowDiscord() end },
-		-- { "module_header", "header" },
 	}))
 	self.config.args = options
 
@@ -444,9 +439,9 @@ function addon:OnEnable()
 
 	local font_flag = {
 		{ "", NONE },
-		{ "OUTLINE", "OUTLINE" },
-		{ "THICKOUTLINE", "THICKOUTLINE" },
-		{ "MONOCHROME", "MONOCHROME" }
+		{ "OUTLINE", L.font_flag_outline },
+		{ "THICKOUTLINE", L.font_flag_thickoutline },
+		{ "MONOCHROME", L.font_flag_monochrome }
 	}
 
 	if XLoot:GetModule("Frame", true) then
@@ -458,6 +453,14 @@ function addon:OnEnable()
 			{ "party", L.when_party },
 			{ "raid", L.when_raid }
 		}
+		local autoloot_remove_pick
+		local function listed_pick()
+			for _, name in ipairs(XLootFrame.GetAutolootList()) do
+				if name == autoloot_remove_pick then
+					return name
+				end
+			end
+		end
 
  		addon:RegisterOptions({ name = "Frame", addon =  XLootFrame.addon }, {
 			{ "frame_options", "group", {
@@ -535,7 +538,38 @@ function addon:OnEnable()
 				{ "autoloot_all", when_group, "autoloots", "all" },
 				{ "autolooting_list", "description" },
 				{ "autoloot_list", when_group, "autoloots", "list" },
-				{ "autoloot_item_list", "input", width = "double" },
+				{ "autoloot_item_add", "input", width = "double",
+					get = function() return "" end,
+					set = function(_, v)
+						XLootFrame:AddToAutolootList(v)
+						update_throttle:Show()
+					end },
+				{ "autoloot_item_list", "description", name = function()
+					local names = XLootFrame.GetAutolootList()
+					return ("|cffffd200%s:|r %s"):format(L.Frame.autoloot_item_list, #names > 0 and table.concat(names, ", ") or NONE)
+				end },
+				{ "autoloot_item_remove", "select",
+					values = function()
+						local values = {}
+						for _, name in ipairs(XLootFrame.GetAutolootList()) do
+							values[name] = name
+						end
+						return values
+					end,
+					sorting = function() return XLootFrame.GetAutolootList() end,
+					get = listed_pick,
+					set = function(_, v) autoloot_remove_pick = v end,
+					disabled = function() return #XLootFrame.GetAutolootList() == 0 end },
+				{ "autoloot_item_remove_button", "execute",
+					func = function()
+						local name = listed_pick()
+						autoloot_remove_pick = nil
+						if name then
+							XLootFrame:RemoveFromAutolootList(name)
+							update_throttle:Show()
+						end
+					end,
+					disabled = function() return not listed_pick() end },
 				{ "autolooting_details", "description" },
 			}},
 			{ "font", "group", {

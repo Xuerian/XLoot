@@ -39,4 +39,8 @@ locales.ruRU["anchor"] = "Уведомления о добыче"
 locales.ruRU["received"] = "Вы получили"
 locales.ruRU["legendary"] = "Легендарный предмет!"
 
+locales.koKR["anchor"] = "전리품 알림"
+locales.koKR["received"] = "획득한 아이템"
+locales.koKR["legendary"] = "전설 아이템!"
+
 XLoot:Localize("Toast", locales)

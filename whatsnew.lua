@@ -6,6 +6,34 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.23.0",
+		date = "2026-11-13",
+		changes = {
+			{
+				label = "See and manage your auto-loot list",
+				type = "feature",
+				option = "Loot Frame > Auto-looting",
+				description = "Every item on your auto-loot list now shows under the Add items box, and the Remove an item dropdown and Remove button take one off. To add, type a name or several names separated by commas into Add items, or click in it and shift-click an item, then press Enter. Suggested by Carolina.",
+			},
+			{
+				label = "Auto-loot list ignores capital letters",
+				type = "improvement",
+				option = "Loot Frame > Auto-looting",
+				description = "\"linen cloth\" now matches Linen Cloth. This works for Russian and accented letters too.",
+			},
+			{
+				label = "Roll bar buttons and text sit centered",
+				type = "bugfix",
+				description = "On retail and WoW Forever, the item name and the Transmog and Pass roll counts on group loot roll bars sat too low, and the Transmog and Pass buttons hung below the bar. Reported by Sythalin.",
+			},
+			{
+				label = "Shift-clicked items in the auto-loot list now loot",
+				type = "bugfix",
+				description = "An item shift-clicked into the auto-loot list was saved as a full item link that never matched, so it was never auto-looted. Items already saved that way now work without adding them again.",
+			},
+		},
+	},
+	{
 		version = "12.22.0",
 		date = "2026-11-07",
 		changes = {
@@ -345,8 +373,8 @@ local VERSION_HEADING = "|cffffffff"
 local WHERE = "|cff808080"
 local STOP = "|r"
 
-local POPUP_INTRO = HEADING.."Everything here is OFF by default"..STOP.."\n"
-	.."XLoot looks and works exactly as before until you switch something on in |cffffffff/xloot|r. Nothing below changes unless you want it to."
+local POPUP_INTRO = HEADING.."New settings start OFF"..STOP.."\n"
+	.."Anything below that adds a setting stays off until you switch it on in |cffffffff/xloot|r. Everything else applies right away."
 
 local POPUP_FOOTER = HEADING.."Thanks for using XLoot!"..STOP.."\n"
 	.."Found a bug or have an idea? Use the Discord button below. You can turn this popup off any time in /xloot."

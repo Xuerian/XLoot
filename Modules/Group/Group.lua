@@ -1018,7 +1018,7 @@ do
 			b.texture_special = texture_special
 
 			local text = b:CreateFontString(nil, 'OVERLAY')
-			text:SetPoint("CENTER", -x + 1, tex == 'DE' and -y +2 or -y)
+			text:SetPoint("CENTER", -x + 1, (tex == 'DE' or tex == 'Transmog') and -y + 2 or -y)
 			b.text = text
 
 			b:SetScript('OnEnter', self.OnEnter)
@@ -1212,7 +1212,6 @@ do
 		bar:SetScript('OnUpdate', self.OnBarUpdate)
 		bar.parent = frame
 		frame.bar = bar
-		-- Tracked so SkinUpdate can re-skin every live bar
 		table.insert(addon.bars, bar)
 
 		local spark = bar:CreateTexture(nil, 'OVERLAY')
@@ -1238,7 +1237,7 @@ do
 		local g = RollButtonPrototype:New(frame, 2, GREED, 'Coin', n, 0, -2, {.1, .2, 1})
 		local d, t, third
 		if HAS_TRANSMOG then
-			t = RollButtonPrototype:New(frame, 4, (TRANSMOGRIFY or 'Transmog'), 'Transmog', g, 0, -2, {.9, .5, .9})
+			t = RollButtonPrototype:New(frame, 4, (TRANSMOGRIFY or 'Transmog'), 'Transmog', g, 0, 2, {.9, .5, .9})
 			third = t
 		elseif BUILD_HAS_DISENCHANT then
 			d = RollButtonPrototype:New(frame, 3, ROLL_DISENCHANT, 'DE', g, 0, 2, {.1, .2, 1})

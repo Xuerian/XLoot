@@ -63,7 +63,6 @@ local locales = {
 --@localization(locale="ptBR", format="lua_additive_table", table-name="locales.ptBR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="frFR", format="lua_additive_table", table-name="locales.frFR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="deDE", format="lua_additive_table", table-name="locales.deDE", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
---@localization(locale="koKR", format="lua_additive_table", table-name="locales.koKR", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="esMX", format="lua_additive_table", table-name="locales.esMX", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="zhCN", format="lua_additive_table", table-name="locales.zhCN", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
 --@localization(locale="esES", format="lua_additive_table", table-name="locales.esES", handle-subnamespaces="subtable", handle-unlocalized="ignore", namespace="Core")@
@@ -84,5 +83,19 @@ locales.ruRU["state_off"] = "ВЫКЛ"
 locales.ruRU["speedy_unavailable"] = "Для быстрого автолута нужно включить модуль XLoot Frame."
 locales.ruRU["speedy_usage"] = "Использование: /xlspeedy переключает быстрый автолут. /xlspeedy on или /xlspeedy off включает или выключает его напрямую."
 locales.ruRU["binding_toggle_speedy"] = "Переключить быстрый автолут"
+
+locales.koKR["anchor_hide"] = "숨기기"
+locales.koKR["anchor_hide_desc"] = "이 위치에 모듈을 고정하고\n위치 조절 손잡이를 숨깁니다.\n설정에서 다시 표시할 수 있습니다."
+locales.koKR["minimap_click_left"] = "좌클릭: 설정 열기"
+locales.koKR["minimap_click_right"] = "우클릭: 업데이트 내용 보기"
+locales.koKR["minimap_click_shift"] = "Shift+클릭: 빠른 자동 획득 전환"
+locales.koKR["speedy_state"] = "빠른 자동 획득: %s"
+locales.koKR["state_on"] = "켜짐"
+locales.koKR["state_off"] = "꺼짐"
+locales.koKR["speedy_unavailable"] = "빠른 자동 획득을 사용하려면 XLoot Frame 모듈을 활성화해야 합니다."
+locales.koKR["speedy_usage"] = "사용법: /xlspeedy로 빠른 자동 획득을 전환합니다. /xlspeedy on 또는 /xlspeedy off로 직접 켜거나 끌 수 있습니다."
+locales.koKR["binding_toggle_speedy"] = "빠른 자동 획득 전환"
+locales.koKR["options_after_combat"] = "전투가 끝나면 설정을 엽니다."
+locales.koKR["discord_popup"] = "XLoot 커뮤니티에서 도움을 받고 의견과 업데이트 소식을 나누세요.\n\n아래 초대 링크는 이미 선택되어 있습니다. Ctrl+C로 복사하세요."
 
 XLoot.L = CompileLocales(locales)

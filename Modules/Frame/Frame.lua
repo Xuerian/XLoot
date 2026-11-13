@@ -90,6 +90,21 @@ local function GetItemInfoTable(link)
 	}
 end
 
+-- string.lower only folds ASCII, so map accented Latin and Cyrillic capitals to their UTF-8 lowercase too.
+local fold_utf8 = {}
+for c = 0x80, 0x9E do
+	if c ~= 0x97 then fold_utf8['\195' .. string.char(c)] = '\195' .. string.char(c + 0x20) end
+end
+for c = 0x80, 0x8F do fold_utf8['\208' .. string.char(c)] = '\209' .. string.char(c + 0x10) end
+for c = 0x90, 0x9F do fold_utf8['\208' .. string.char(c)] = '\208' .. string.char(c + 0x20) end
+for c = 0xA0, 0xAF do fold_utf8['\208' .. string.char(c)] = '\209' .. string.char(c - 0x20) end
+fold_utf8['\197\146'] = '\197\147'
+fold_utf8['\197\184'] = '\195\191'
+
+local function ListKey(name)
+	return (name:lower():gsub('[\195\197\208][\128-\191]', fold_utf8))
+end
+
 local defaults = {
 	profile = {
 		frame_scale = 1.0,
@@ -594,12 +609,7 @@ do
 	function RowPrototype:Auto_OnClick(button)
 		self:Hide()
 		if issecret and issecret(self.parent.item_name) then return end
-		if opt.autoloot_item_list ~= '' then
-			opt.autoloot_item_list = opt.autoloot_item_list .. ',' .. self.parent.item_name
-		else
-			opt.autoloot_item_list = self.parent.item_name
-		end
-		self.parent.owner:ParseAutolootList()
+		XLootFrame:AddToAutolootList(self.parent.item_name)
 		self.parent:OnClick(button)
 	end
 
@@ -793,7 +803,7 @@ do
 			self.texture_bang:Hide()
 		end
 
-		if opt.loot_buttons_auto and (self.owner.fake or (opt.autoloots.list ~= 'never' and slotData.slotType == LOOT_SLOT_ITEM and not slotData.secret and not self.owner.auto_items[slotData.name])) then
+		if opt.loot_buttons_auto and (self.owner.fake or (opt.autoloots.list ~= 'never' and slotData.slotType == LOOT_SLOT_ITEM and not slotData.secret and not self.owner.auto_items[ListKey(slotData.name)])) then
 			self.button_auto:Show()
 			name_width = name_width + self.button_auto:GetWidth() - 6
 		else
@@ -1159,15 +1169,55 @@ do
 end
 
 local auto, auto_items = {}, {}
-function XLootFrame:ParseAutolootList()
-	wipe(auto_items)
-	for entry in opt.autoloot_item_list:gmatch('[^,]+') do
-		-- Trim with a lazy capture: a greedy [^,]+ keeps trailing spaces, so "Silk Cloth " never matched a loot name.
-		local item = entry:match('^%s*(.-)%s*$')
-		if item ~= '' then
-			auto_items[item] = true
+
+local function ListEntries(text)
+	local names, seen = {}, {}
+	-- Shift-clicked links arrive back to back with no comma, and reagent links carry a quality icon inside the brackets.
+	text = text:gsub('|A.-|a', ''):gsub('|H.-|h%[(.-)%]|h', ',%1,'):gsub('|c%x%x%x%x%x%x%x%x', ''):gsub('|cn[^:]*:', ''):gsub('|r', '')
+	for entry in text:gmatch('[^,]+') do
+		local name = entry:match('^%s*(.-)%s*$')
+		if name ~= '' and not seen[ListKey(name)] then
+			seen[ListKey(name)] = true
+			names[#names + 1] = name
 		end
 	end
+	return names
+end
+
+local function NotifyOptions()
+	local reg = LibStub("AceConfigRegistry-3.0", true)
+	if reg then reg:NotifyChange("XLoot") end
+end
+
+function XLootFrame:ParseAutolootList()
+	wipe(auto_items)
+	for _, name in ipairs(ListEntries(opt.autoloot_item_list)) do
+		auto_items[ListKey(name)] = true
+	end
+end
+
+function XLootFrame.GetAutolootList()
+	local names = ListEntries(opt.autoloot_item_list)
+	table.sort(names, function(a, b) return ListKey(a) < ListKey(b) end)
+	return names
+end
+
+function XLootFrame:AddToAutolootList(text)
+	opt.autoloot_item_list = table.concat(ListEntries(opt.autoloot_item_list .. ',' .. text), ',')
+	self:ParseAutolootList()
+	NotifyOptions()
+end
+
+function XLootFrame:RemoveFromAutolootList(name)
+	local key, kept = ListKey(name), {}
+	for _, entry in ipairs(ListEntries(opt.autoloot_item_list)) do
+		if ListKey(entry) ~= key then
+			kept[#kept + 1] = entry
+		end
+	end
+	opt.autoloot_item_list = table.concat(kept, ',')
+	self:ParseAutolootList()
+	NotifyOptions()
 end
 
 local auto_states = {
@@ -1351,9 +1401,6 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 					quantity = quantity,
 					quality = quality,
 					locked = locked,
-					-- questItem = isQuestItem,
-					-- questID = questID,
-					-- startsQuest = startsQuest,
 					bindType = 0
 				}
 				if issecret and issecret(name) then slotData.secret, slotData.quality, slotData.quantity, slotData.locked = true, nil, 1, nil end
@@ -1368,7 +1415,7 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 					autoloot = true
 				elseif
 					auto.all
-					or (auto.list and auto_items[name])
+					or (auto.list and slotType == LOOT_SLOT_ITEM and not (issecret and issecret(name)) and auto_items[ListKey(name)])
 					or (auto.tradegoods and slotData.isCraftingReagent)
 					or (auto.quality and slotType == LOOT_SLOT_ITEM and (slotData.quality or 0) >= opt.autoloot_quality_min)
 					or (auto.gear
@@ -1456,7 +1503,6 @@ function XLootFrame:Update(no_snap, is_refresh, game_autoloot)
 	end
 
 	if our_slot == 0 then
-		-- CloseLoot()
 		return nil
 	end
 
