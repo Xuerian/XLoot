@@ -4,6 +4,7 @@ local opt, anchor, mouse_focus, Skinner
 local rolls = {}
 local auto_rolled = {}
 local pending_rolls = {}
+local closed_early = {}
 local drop_to_roll = {}
 local FakeHistory
 local fake_seq = 0
@@ -231,15 +232,24 @@ local function RollBorderColor(link, r, g, b)
 end
 
 function addon:START_LOOT_ROLL(id, length, ongoing)
+	-- Clear any stale marker so a recycled id can't auto-confirm a later manual roll.
+	auto_rolled[id] = nil
+	local closed_at = closed_early[id]
+	closed_early[id] = nil
+	-- GetTime() holds still within a frame, so a cancel from earlier in this frame matches.
+	if closed_at == GetTime() or GetLootRollTimeLeft(id) == 0 then return end
+
 	local icon, name, count, quality, bop, need, greed, de, reason_need, reason_greed, reason_de, de_skill, can_transmog = GetLootRollItemInfo(id)
-	-- LootFrame.lua includes this sanity check (== nil is a blocked op on a secret name, not is allowed)
+	-- Test with not, since == nil is a blocked operation on a secret name.
 	if not name or (issecret and issecret(name)) then
-		-- a secret value (tainted 12.0 roll) can't be built, so bail. A plain nil name just means the item is not cached yet, so wait for it and retry instead of dropping the roll until a reload
+		-- A secret name (tainted 12.0 roll) can never be built, but a nil one is only an uncached item, so retry once it loads.
 		local link = GetLootRollItemLink(id)
 		local itemid = link and not (issecret and issecret(link)) and GetItemInfoInstant(link)
 		if itemid and pending_rolls[id] ~= itemid and Item then
 			pending_rolls[id] = itemid
 			Item:CreateFromItemID(itemid):ContinueOnItemLoad(function()
+				-- A cancel or a newer roll on this id during the load makes this retry stale.
+				if pending_rolls[id] ~= itemid then return end
 				local remaining = GetLootRollTimeLeft(id)
 				if remaining > 0 then addon:START_LOOT_ROLL(id, remaining, true) end
 				pending_rolls[id] = nil
@@ -247,11 +257,10 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 		end
 		return
 	end
+	pending_rolls[id] = nil
 	local link = GetLootRollItemLink(id)
 	local r, g, b = C_Item.GetItemQualityColor(quality)
 
-	-- Clear any stale marker so a recycled id can't auto-confirm a later manual roll.
-	auto_rolled[id] = nil
 	if opt.auto_roll and link and not (issecret and issecret(link)) and not XLoot.GroupUsesMasterLoot() then
 		local itemid = GetItemInfoInstant(link)
 		local rule = itemid and opt.auto_roll_rules[itemid]
@@ -367,6 +376,9 @@ function addon:CANCEL_LOOT_ROLL(id)
 	auto_rolled[id] = nil
 	pending_rolls[id] = nil
 	local frame = rolls[id]
+	local live = frame and not frame.over and not frame.awaiting and not frame.rollended
+	-- Another addon can roll inside its own START_LOOT_ROLL handler, so this cancel can land before our bar exists.
+	if not live and GetLootRollTimeLeft(id) > 0 then closed_early[id] = GetTime() end
 	-- An over frame is owned by the fader, and popping it here would strand a stale expiry on the recycled frame.
 	if frame and not frame.over then
 		-- Retail cancels the roll the moment you choose but names the winner much later.
@@ -381,6 +393,7 @@ end
 function addon:CANCEL_ALL_LOOT_ROLLS()
 	wipe(auto_rolled)
 	wipe(pending_rolls)
+	wipe(closed_early)
 	wipe(drop_to_roll)
 	for _, frame in pairs(rolls) do
 		if not frame.over then

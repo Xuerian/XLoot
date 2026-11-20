@@ -6,6 +6,14 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.23.1] - 2026-11-19
+
+### Bug Fixes
+- With an addon that rolls on group loot for you, such as Auto Roll on WoW Forever, XLoot's roll bar stayed on
+  screen until its timer ran out, with nothing left to roll. On WoW Forever and retail, a roll such an addon has
+  already made no longer leaves a roll bar stuck on screen. With "Show roll results" on, such a roll may no longer
+  show who won, as with XLoot's own "Roll automatically". Reported by gotmilk0112.
+
 ## [12.23.0] - 2026-11-13
 
 ### Features
