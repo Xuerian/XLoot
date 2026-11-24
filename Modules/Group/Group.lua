@@ -72,6 +72,7 @@ local defaults = {
 
 		roll_button_size = 28,
 		roll_width = 325,
+		hide_transmog = false,
 
 		font = STANDARD_TEXT_FONT,
 		font_flag = "OUTLINE",
@@ -231,6 +232,25 @@ local function RollBorderColor(link, r, g, b)
 	return r, g, b
 end
 
+-- Transmog outranks Greed, so with Transmog hidden the Greed button rolls Transmog whenever the item offers it.
+local function UpdateGreedAndTransmog(frame)
+	local greed, transmog = frame.greed, frame.transmog
+	local can_greed, can_transmog = frame.can_greed, frame.can_transmog
+	local merged = transmog and opt.hide_transmog
+	greed.roll_type = merged and can_transmog and 4 or nil
+	greed.reason = not greed.roll_type and frame.reason_greed ~= 0 and frame.reason_greed or nil
+	if merged then
+		greed:Toggle(can_greed or can_transmog)
+	else
+		greed:Toggle(can_greed and not can_transmog)
+	end
+	if transmog then
+		frame.pass:ClearAllPoints()
+		frame.pass:SetPoint('LEFT', merged and greed or transmog, 'RIGHT', 0, merged and 4 or 2)
+		transmog:SetShown(not merged and frame.pass:IsShown())
+	end
+end
+
 function addon:START_LOOT_ROLL(id, length, ongoing)
 	-- Clear any stale marker so a recycled id can't auto-confirm a later manual roll.
 	auto_rolled[id] = nil
@@ -312,9 +332,6 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 	if frame.disenchant then
 		frame.disenchant:Show()
 	end
-	if frame.transmog then
-		frame.transmog:Show()
-	end
 	frame.pass:Show()
 	frame.text_status:Hide()
 	frame.text_status:SetText()
@@ -334,7 +351,8 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 		end
 	end
 	frame.need:Toggle(need)
-	frame.greed:Toggle(greed and not can_transmog)
+	frame.can_greed, frame.can_transmog, frame.reason_greed = greed, can_transmog, reason_greed
+	UpdateGreedAndTransmog(frame)
 	if frame.disenchant then frame.disenchant:Toggle(de) end
 	if frame.transmog then frame.transmog:Toggle(can_transmog) end
 
@@ -345,7 +363,6 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 	if frame.transmog then frame.transmog:SetText() end
 
 	frame.need.reason = reason_need ~= 0 and reason_need or nil
-	frame.greed.reason = reason_greed ~= 0 and reason_greed or nil
 	if frame.disenchant then
 		frame.disenchant.reason = reason_de ~= 0 and reason_de or nil
 		frame.disenchant.skill = de_skill ~= 0 and de_skill or nil
@@ -697,6 +714,24 @@ local function CompleteRetailDrop(frame, drop)
 	if mouse_focus == frame then frame:OnEnter() end
 end
 
+local function ShowRollCounts(frame)
+	local need, greed, transmog, pass = 0, 0, 0, 0
+	local infos = frame.roll_infos
+	if infos and retail_state_type then
+		for i = 1, #infos do
+			local t = retail_state_type[infos[i].state]
+			if t == 'need' then need = need + 1
+			elseif t == 'greed' then greed = greed + 1
+			elseif t == 'transmog' then transmog = transmog + 1
+			elseif t == 'pass' then pass = pass + 1 end
+		end
+	end
+	frame.need:SetText(need)
+	frame.greed:SetText(opt.hide_transmog and greed + transmog or greed)
+	if frame.transmog then frame.transmog:SetText(transmog) end
+	frame.pass:SetText(pass)
+end
+
 -- Split out so the /xlgd harness can drive a preview without toggling the option on.
 local function ProcessRetailDrop(encounterID, lootListID)
 	if not HistoryGetSortedInfoForDrop then return end
@@ -728,21 +763,7 @@ local function ProcessRetailDrop(encounterID, lootListID)
 		return
 	end
 
-	local need, greed, transmog, pass = 0, 0, 0, 0
-	local infos = drop.rollInfos
-	if infos and retail_state_type then
-		for i = 1, #infos do
-			local t = retail_state_type[infos[i].state]
-			if t == 'need' then need = need + 1
-			elseif t == 'greed' then greed = greed + 1
-			elseif t == 'transmog' then transmog = transmog + 1
-			elseif t == 'pass' then pass = pass + 1 end
-		end
-	end
-	frame.need:SetText(need)
-	frame.greed:SetText(greed)
-	if frame.transmog then frame.transmog:SetText(transmog) end
-	frame.pass:SetText(pass)
+	ShowRollCounts(frame)
 	if mouse_focus and (mouse_focus == frame or mouse_focus.parent == frame) then
 		mouse_focus:OnEnter()
 	end
@@ -933,7 +954,7 @@ do
 		if show_all or show == 1 then
 			RetailRollLines(infos, 'need', NEED, .2, 1, .1)
 		end
-		if show_all or show == 4 then
+		if show_all or show == 4 or (show == 2 and opt.hide_transmog) then
 			RetailRollLines(infos, 'transmog', TRANSMOGRIFY or 'Transmog', .9, .5, .9)
 		end
 		if show_all or show == 2 then
@@ -956,13 +977,13 @@ do
 		function RollButtonPrototype:OnClick()
 			local parent = self.parent
 			if IsShiftKeyDown() then
-				-- Transmog (type 4) has no rtypes entry, so only rule-able buttons set a rule.
-				if parent.link and rtypes[self.type] then
+				-- Transmog has no rule type, so neither its button nor a Greed button rolling it sets a rule.
+				if parent.link and rtypes[self.roll_type or self.type] then
 					addon.ToggleAutoRollRule(parent.link, self.type)
 				end
 				return
 			end
-			RollOnLoot(parent.rollid, self.type)
+			RollOnLoot(parent.rollid, self.roll_type or self.type)
 		end
 
 		function RollButtonPrototype:Toggle(status)
@@ -981,7 +1002,8 @@ do
 			GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT')
 			AddRollLines(self.parent, false, self.type)
 			if GameTooltip:NumLines() == 0 then
-				GameTooltip:SetText(self.label, unpack(self.label_colors))
+				local named = self.roll_type == 4 and self.parent.transmog or self
+				GameTooltip:SetText(named.label, unpack(named.label_colors))
 				GameTooltip:Show()
 			end
 			if self.reason then
@@ -1297,6 +1319,10 @@ do
 		if self.disenchant then self.disenchant:ApplyOptions() end
 		if self.transmog then self.transmog:ApplyOptions() end
 		self.pass:ApplyOptions()
+		UpdateGreedAndTransmog(self)
+		if self.roll_infos and not self.over and not self.awaiting then
+			ShowRollCounts(self)
+		end
 
 		SafeSetFont(self.text_ilvl, opt.font, 8, 'OUTLINE')
 		SafeSetFont(self.text_bind, opt.font, 8, 'THICKOUTLINE')

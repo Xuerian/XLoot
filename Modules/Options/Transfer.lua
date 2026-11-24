@@ -19,7 +19,7 @@ local GAME_ONLY = { Group = { auto_roll_rules = true } }
 -- Options.lua hides these on one engine, so the other engine's values for them are stale.
 local ENGINE_ONLY = {
 	Core = { tooltip_sell = true },
-	Group = { roll_status = true, track_all = true, track_player_roll = true, track_by_threshold = true, track_threshold = true },
+	Group = { roll_status = true, hide_transmog = true, track_all = true, track_player_roll = true, track_by_threshold = true, track_threshold = true },
 }
 -- LibDBIcon saves fields the defaults lack, so its table is checked against the fields it uses.
 local SHAPES = { minimap = { hide = true, minimapPos = 0, lock = false } }

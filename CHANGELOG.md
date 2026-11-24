@@ -6,6 +6,23 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.24.0] - 2026-11-23
+
+### Features
+- **Hide the Transmog roll button.** On retail and WoW Forever, the new "Hide Transmog button" option in Group Loot >
+  Roll frames removes the Transmog button from group loot roll bars, and the Pass button and item name move over to
+  fill the space. On items that offer Transmog, the Greed button rolls Transmog instead, so you roll the same as
+  before. With "Show roll results" on, the Greed button's count and hover list include Transmog rolls. Off by
+  default. Suggested by Blurplurp.
+
+### Improvements
+- The Russian translation now covers the Share settings buttons and windows, the auto-loot list's Add items box,
+  Remove an item dropdown and Remove button, the font outline choices, and the message shown when options will open
+  after combat. Hovering "Show roll results" now explains the hover list in Russian too. The Korean translation now
+  covers the auto-loot list's Add items box, Remove an item dropdown and Remove button. Both cover the new option.
+- The "Show roll results" tooltip said the option was for retail only, though it also appears on WoW Forever. It now
+  names both, in English, Russian and Korean.
+
 ## [12.23.1] - 2026-11-19
 
 ### Bug Fixes

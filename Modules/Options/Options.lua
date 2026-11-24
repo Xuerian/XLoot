@@ -616,7 +616,7 @@ function addon:OnEnable()
 				{ "roll_spacing", "range", -25, 25, 1, name = L.spacing, subtable = "roll_anchor", subkey = "spacing" },
 				{ "roll_offset", "range", -25, 25, 1, name = L.offset, subtable = "roll_anchor", subkey = "offset" },
 				{ "roll_button_size", "range", 16, 48, 1 },
-
+				{ "hide_transmog", width = "double", hidden = not XLoot.IS_RETAIL_ENGINE },
 			}},
 			{ "extra_info", "group", {
 				{ "equip_prefix" },

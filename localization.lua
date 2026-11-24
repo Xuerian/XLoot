@@ -83,6 +83,7 @@ locales.ruRU["state_off"] = "ВЫКЛ"
 locales.ruRU["speedy_unavailable"] = "Для быстрого автолута нужно включить модуль XLoot Frame."
 locales.ruRU["speedy_usage"] = "Использование: /xlspeedy переключает быстрый автолут. /xlspeedy on или /xlspeedy off включает или выключает его напрямую."
 locales.ruRU["binding_toggle_speedy"] = "Переключить быстрый автолут"
+locales.ruRU["options_after_combat"] = "Настройки откроются после окончания боя."
 
 locales.koKR["anchor_hide"] = "숨기기"
 locales.koKR["anchor_hide_desc"] = "이 위치에 모듈을 고정하고\n위치 조절 손잡이를 숨깁니다.\n설정에서 다시 표시할 수 있습니다."

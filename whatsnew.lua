@@ -6,6 +6,18 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.24.0",
+		date = "2026-11-23",
+		changes = {
+			{
+				label = "Hide the Transmog roll button",
+				type = "feature",
+				option = "Group Loot > Roll frames",
+				description = "Hide Transmog button removes the Transmog button from group loot roll bars to save space, and the Pass button and item name move over. On items that offer Transmog, the Greed button rolls Transmog instead, so you roll the same as before. With Show roll results on, the Greed button's count and hover list include Transmog rolls. Retail and WoW Forever. Off by default. Try /xlgd to preview. Suggested by Blurplurp.",
+			},
+		},
+	},
+	{
 		version = "12.23.0",
 		date = "2026-11-13",
 		changes = {
