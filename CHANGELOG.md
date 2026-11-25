@@ -6,6 +6,21 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.24.1] - 2026-11-24
+
+### Bug Fixes
+- On retail and WoW Forever, with some addons that rearrange XLoot's roll buttons, such as EUI-Xloot in its default
+  layout, a roll bar reused for a later roll raised an error, drew no roll buttons and still showed the earlier roll's
+  item. Changing XLoot's settings after a roll could raise the same error. This started in 12.24.0.
+
+### Known Issues
+- On WoW Forever with EUI-Xloot 1.4.0 in its default layout ("Roll Buttons on Left" off), turning on XLoot's "Hide
+  Transmog button", or turning off EUI-Xloot's "Show Transmog Roll Button" (the same setting), after any roll bar has
+  shown since you logged in or reloaded can leave a roll bar with no Need or Greed button, then or on a later roll.
+  Until that change is undone or the UI is reloaded, each new roll and each change to XLoot's settings raises an error
+  in EUI-Xloot's Skin.lua ("Cannot anchor to a region dependent on it"). To avoid it, change that setting right after
+  logging in or reloading, before any roll bar shows, even a test roll's.
+
 ## [12.24.0] - 2026-11-23
 
 ### Features

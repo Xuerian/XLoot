@@ -245,9 +245,15 @@ local function UpdateGreedAndTransmog(frame)
 		greed:Toggle(can_greed and not can_transmog)
 	end
 	if transmog then
-		frame.pass:ClearAllPoints()
-		frame.pass:SetPoint('LEFT', merged and greed or transmog, 'RIGHT', 0, merged and 4 or 2)
-		transmog:SetShown(not merged and frame.pass:IsShown())
+		local pass = frame.pass
+		local _, pass_to = pass:GetPoint(1)
+		local _, transmog_to = transmog:GetPoint(1)
+		-- Move Pass only within XLoot's own button chain, since a reskin can hang Greed or Transmog off Pass and the move would loop.
+		if (pass_to == greed or pass_to == transmog) and transmog_to == greed then
+			pass:ClearAllPoints()
+			pass:SetPoint('LEFT', merged and greed or transmog, 'RIGHT', 0, merged and 4 or 2)
+		end
+		transmog:SetShown(not merged and pass:IsShown())
 	end
 end
 
