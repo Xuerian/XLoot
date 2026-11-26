@@ -6,6 +6,41 @@ local XLoot = select(2, ...)
 -- Newest first. Array order is the display order, so we never sort version strings.
 local updates = {
 	{
+		version = "12.25.0",
+		date = "2026-11-26",
+		changes = {
+			{
+				label = "A new skin, XLoot: Modern",
+				type = "feature",
+				option = "Global options > Skin",
+				description = "A flat look for the loot window, group loot roll bars, the Loot Monitor and loot toasts. Each row trades its bordered box for a thin bar in the item's quality color down one edge, and loot window rows, Loot Monitor rows and loot toasts show a thin outline while your mouse is over them. On roll bars the timer fills the full height of the row behind the buttons, and on retail and WoW Forever the roll buttons use the game's current roll button art. The other skins look the same as before. Try /xlgd, /xlmd and /xltd to preview.",
+			},
+			{
+				label = "Accent color and hover outline",
+				type = "feature",
+				option = "Global options",
+				description = "Accent color, or Use my class color, sets the color of the mouseover highlight on loot window rows, Loot Monitor rows and loot toast icons. XLoot: Modern uses it instead for the loot toast title, for the outline when Hover outline is set to Accent color, and for any edge bar that would otherwise be white or gray, such as on white and gray items, money and currency. Hover outline sets the mouseover outline on XLoot: Modern to the item's quality color or the accent color, or turns it off. With Item quality, the outline matches the edge bar, so it uses the accent color wherever that bar does. Until you change the accent color, it follows the skin, so it is gold on XLoot: Modern and the same gray as before on the other skins.",
+			},
+			{
+				label = "Loot row spacing",
+				type = "feature",
+				option = "Loot Frame > Loot slots",
+				description = "Set the gap between rows in the loot window. Until you change it, it follows the skin.",
+			},
+			{
+				label = "Roll background color",
+				type = "feature",
+				option = "Group Loot > Roll frames",
+				description = "Set the background color behind each group loot roll bar. Until you change it, it follows the skin.",
+			},
+			{
+				label = "Right-aligned loot toasts show their text",
+				type = "bugfix",
+				description = "With the Loot Toasts anchor aligned to the right, the title and item name on loot toasts were pinned to the wrong edge of the toast, leaving them no room to show.",
+			},
+		},
+	},
+	{
 		version = "12.24.0",
 		date = "2026-11-23",
 		changes = {

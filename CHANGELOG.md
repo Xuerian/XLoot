@@ -6,6 +6,38 @@ history lives in the original project's git tags.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [12.25.0] - 2026-11-26
+
+### Features
+- **A new skin, XLoot: Modern.** Pick it in Global options > Skin. It gives the loot window, group loot roll bars, the
+  Loot Monitor and loot toasts a flat look. Each row trades its bordered box for a thin bar in the item's quality
+  color down one edge, and icons fill their frame with a thin black edge. Loot window rows, Loot Monitor rows and
+  loot toasts show a thin outline while your mouse is over them, and Loot Monitor rows sit on a background that fades
+  out across the row. On roll bars the timer fills the full height of the row behind the buttons, and on retail and
+  WoW Forever the roll buttons use the game's current roll button art. On loot toasts a soft flash in the item's
+  quality color replaces the glow and shine. The other skins look the same as before.
+- **Accent color.** Global options has a new "Accent color" setting, plus "Use my class color" to use your class color
+  instead. It colors the mouseover highlight on loot window rows, Loot Monitor rows and loot toast icons. XLoot:
+  Modern, which shows an outline on mouseover instead, uses it for the loot toast title, for the hover outline when
+  "Hover outline" is set to Accent color, and for any edge bar that would otherwise be white or gray, such as on white
+  and gray items, money and currency. Until you change it, it follows the skin, so it is the same gray as before on
+  the other skins and gold on XLoot: Modern.
+- **Hover outline.** For XLoot: Modern, the new "Hover outline" setting in Global options sets the outline to the
+  item's quality color or the accent color, or turns it off. With Item quality, the outline matches the edge bar, so
+  it uses the accent color wherever that bar does, such as on white and gray items, money and currency.
+- **Loot row spacing.** Loot Frame > Loot slots has a new "Loot row spacing" setting for the gap between rows in the
+  loot window. Until you change it, it follows the skin.
+- **Roll background color.** Group Loot > Roll frames has a new "Background color" setting for the background behind
+  each roll bar. Until you change it, it follows the skin.
+
+### Bug Fixes
+- With Loot Toasts > Anchor > Alignment set to Right, the title and item name on loot toasts were pinned to the wrong
+  edge of the toast, leaving them no room to show. This started when loot toasts were added in 12.12.0.
+
+### Known Issues
+- On WoW Forever, a profile you pick for a character on XLoot's Profile page can go back to Default after a reload or
+  a restart. This is being looked into next.
+
 ## [12.24.1] - 2026-11-24
 
 ### Bug Fixes

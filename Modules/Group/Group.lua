@@ -18,7 +18,8 @@ local HistoryGetNumItems = C_LootHistory and C_LootHistory.GetNumItems
 local HistoryGetSortedInfoForDrop = C_LootHistory and C_LootHistory.GetSortedInfoForDrop
 local CanEquipItem, IsPawnUpgrade, FancyPlayerName, SafeSetFont = XLoot.CanEquipItem, XLoot.IsPawnUpgrade, XLoot.FancyPlayerName, XLoot.SafeSetFont
 local IsIlvlUpgrade, IsNewAppearance, TimeFractionColor = XLoot.IsIlvlUpgrade, XLoot.IsNewAppearance, XLoot.TimeFractionColor
-local RollFramePrototype
+local Skin = XLoot.Skin
+local RollFramePrototype, FitRoll
 -- Defined in the retail roll-status block, used above it.
 local HoldForResult
 local AWAIT_TIMEOUT = 360 -- seconds, past the longest retail roll window
@@ -27,6 +28,9 @@ local BUILD_NUMBER = select(4, GetBuildInfo())
 local IS_RETAIL = XLoot.IS_RETAIL_ENGINE
 local BUILD_HAS_DISENCHANT = not IS_RETAIL and BUILD_NUMBER >= 30300
 local HAS_TRANSMOG = IS_RETAIL
+local GetAtlasInfo = C_Texture and C_Texture.GetAtlasInfo
+local MODERN_ART = IS_RETAIL and GetAtlasInfo and GetAtlasInfo('lootroll-toast-icon-transmog-up') and true or false
+local BUTTON_GAP = 2
 
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local GetDetailedItemLevelInfo = C_Item and C_Item.GetDetailedItemLevelInfo or GetDetailedItemLevelInfo
@@ -73,6 +77,7 @@ local defaults = {
 		roll_button_size = 28,
 		roll_width = 325,
 		hide_transmog = false,
+		roll_color_backdrop = { 0, 0, 0, .9 },
 
 		font = STANDARD_TEXT_FONT,
 		font_flag = "OUTLINE",
@@ -251,7 +256,11 @@ local function UpdateGreedAndTransmog(frame)
 		-- Move Pass only within XLoot's own button chain, since a reskin can hang Greed or Transmog off Pass and the move would loop.
 		if (pass_to == greed or pass_to == transmog) and transmog_to == greed then
 			pass:ClearAllPoints()
-			pass:SetPoint('LEFT', merged and greed or transmog, 'RIGHT', 0, merged and 4 or 2)
+			if frame.modern_buttons then
+				pass:SetPoint('LEFT', merged and greed or transmog, 'RIGHT', BUTTON_GAP, 0)
+			else
+				pass:SetPoint('LEFT', merged and greed or transmog, 'RIGHT', 0, merged and 4 or 2)
+			end
 		end
 		transmog:SetShown(not merged and pass:IsShown())
 	end
@@ -383,7 +392,7 @@ function addon:START_LOOT_ROLL(id, length, ongoing)
 	local br, bg, bb = RollBorderColor(link, r, g, b)
 	frame.overlay:SetBorderColor(br, bg, bb)
 	frame.icon_frame:SetBorderColor(br, bg, bb)
-	bar:SetStatusBarColor(r, g, b, .7)
+	bar:SetStatusBarColor(r, g, b, bar.fill_alpha)
 	bar.base_r, bar.base_g, bar.base_b = r, g, b
 	bar.base_br, bar.base_bg, bar.base_bb = br, bg, bb
 	frame.icon:SetTexture(icon)
@@ -1032,26 +1041,54 @@ do
 
 		local path = [[Interface\Buttons\UI-GroupLoot-%s-%s]]
 		local transmog_texture = [[Interface\MINIMAP\TRACKING\Transmogrifier]]
+		local atlas_names = { Dice = 'need', Coin = 'greed', Transmog = 'transmog', Pass = 'pass' }
+
+		function RollButtonPrototype:SetArt(modern)
+			local tex = self.tex
+			if modern then
+				local atlas = 'lootroll-toast-icon-'..atlas_names[tex]
+				self:SetNormalAtlas(atlas..'-up')
+				self:SetHighlightAtlas(atlas..'-highlight', 'ADD')
+				self:SetPushedAtlas(atlas..'-down')
+				self:GetNormalTexture():SetVertexColor(1, 1, 1)
+				self:GetHighlightTexture():SetAlpha(1)
+				self.text:SetPoint('CENTER', 0, 0)
+			else
+				if tex == 'Transmog' then
+					self:SetNormalTexture(transmog_texture)
+					self:SetHighlightTexture(transmog_texture)
+					self:SetPushedTexture(transmog_texture)
+					self:GetHighlightTexture():SetAlpha(0.5)
+				else
+					self:SetNormalTexture(path:format(tex, 'Up'))
+					if tex ~= 'Pass' then
+						self:SetHighlightTexture(path:format(tex, 'Highlight'))
+						self:SetPushedTexture(path:format(tex, 'Down'))
+					else
+						self:SetHighlightTexture(path:format(tex, 'Up'))
+						self:GetNormalTexture():SetVertexColor(0.8, 0.7, 0.7)
+						self:GetHighlightTexture():SetAlpha(0.5)
+					end
+				end
+				-- An atlas leaves its texture coordinates behind, and Pass never had a pushed texture.
+				if self.modern_art then
+					if tex == 'Pass' and self.ClearPushedTexture then
+						self:ClearPushedTexture()
+					end
+					for _, t in ipairs({ self:GetNormalTexture(), self:GetHighlightTexture(), self:GetPushedTexture() }) do
+						t:SetTexCoord(0, 1, 0, 1)
+					end
+				end
+				self.text:SetPoint('CENTER', self.text_x, self.text_y)
+			end
+			self.modern_art = modern
+		end
+
 		function RollButtonPrototype:New(parent, roll, label, tex, anchor_to, x, y, label_colors)
 			local b = self:_New(CreateFrame('Button', nil, parent))
 			b:SetPoint('LEFT', anchor_to, 'RIGHT', x, y)
-			if tex == 'Transmog' then
-				b:SetNormalTexture(transmog_texture)
-				b:SetHighlightTexture(transmog_texture)
-				b:SetPushedTexture(transmog_texture)
-				b:GetHighlightTexture():SetAlpha(0.5)
-			else
-				b:SetNormalTexture(path:format(tex, 'Up'))
-				if tex ~= 'Pass' then
-					b:SetHighlightTexture(path:format(tex, 'Highlight'))
-					b:SetPushedTexture(path:format(tex, 'Down'))
-				else
-					b:SetHighlightTexture(path:format(tex, 'Up'))
-					b:GetNormalTexture():SetVertexColor(0.8, 0.7, 0.7)
-					b:GetHighlightTexture():SetAlpha(0.5)
-				end
-			end
 			b.parent = parent
+			b.tex = tex
 
 			local texture_special = b:CreateTexture(nil, 'OVERLAY')
 			texture_special:SetAllPoints(b)
@@ -1059,8 +1096,9 @@ do
 			b.texture_special = texture_special
 
 			local text = b:CreateFontString(nil, 'OVERLAY')
-			text:SetPoint("CENTER", -x + 1, (tex == 'DE' or tex == 'Transmog') and -y + 2 or -y)
 			b.text = text
+			b.text_x, b.text_y = -x + 1, (tex == 'DE' or tex == 'Transmog') and -y + 2 or -y
+			b:SetArt(false)
 
 			b:SetScript('OnEnter', self.OnEnter)
 			b:SetScript('OnLeave', self.OnLeave)
@@ -1081,6 +1119,87 @@ do
 			self:SetWidth(opt.roll_button_size)
 			self:SetHeight(opt.roll_button_size)
 		end
+	end
+
+	-- Buttons move into the Modern layout only from XLoot's own chain, so a reskin's layout is left alone. The classic offsets must match the ones the buttons are created with.
+	local function LayoutRollButtons(frame, modern)
+		if (frame.modern_buttons or false) == modern then
+			return
+		end
+		local need, greed, pass = frame.need, frame.greed, frame.pass
+		local _, need_to = need:GetPoint(1)
+		local _, greed_to = greed:GetPoint(1)
+		if modern and (need_to ~= frame.icon_frame or greed_to ~= need) then
+			return
+		end
+		frame.modern_buttons = modern
+		local third = frame.transmog or frame.disenchant
+		local gap = modern and BUTTON_GAP or 0
+		need:ClearAllPoints()
+		need:SetPoint('LEFT', frame.icon_frame, 'RIGHT', modern and 4 or 3, modern and 0 or -1)
+		greed:ClearAllPoints()
+		greed:SetPoint('LEFT', need, 'RIGHT', gap, modern and 0 or -2)
+		if third then
+			third:ClearAllPoints()
+			third:SetPoint('LEFT', greed, 'RIGHT', gap, modern and 0 or 2)
+		end
+		pass:ClearAllPoints()
+		pass:SetPoint('LEFT', third or greed, 'RIGHT', gap, modern and 0 or 2)
+		need:SetArt(modern)
+		greed:SetArt(modern)
+		if third then
+			third:SetArt(modern)
+		end
+		pass:SetArt(modern)
+	end
+
+	local function RollColor()
+		return Skin.Color(opt, defaults.profile, Skinner:CurrentSkin(), 'roll_color_backdrop')
+	end
+
+	function FitRoll(frame)
+		local skin = Skinner:CurrentSkin()
+		local modern = skin.modern and true or false
+		local overlay, icon_frame, bar = frame.overlay, frame.icon_frame, frame.bar
+		if modern then
+			local height = math.max(24, opt.roll_button_size + 2)
+			local m = Skin.Modern(overlay, frame)
+			frame:SetHeight(height)
+			Skin.ShowBox(overlay, false)
+			Skin.ShowBox(icon_frame, false)
+			m.panel:SetColorTexture(RollColor())
+			m.panel:Show()
+			Skin.PaintFade(m, false, unpack(skin.lift_color))
+			Skin.PlaceEdge(m, false)
+			Skin.PaintEdge(m)
+			icon_frame:SetSize(height - 4, height - 4)
+			icon_frame:SetPoint('LEFT', Skin.EDGE + 4, 0)
+			bar:ClearAllPoints()
+			bar:SetPoint('TOPRIGHT')
+			bar:SetPoint('BOTTOMRIGHT')
+			bar:SetPoint('LEFT', icon_frame, 'RIGHT', 3, 0)
+		else
+			if frame.modern_on then
+				frame:SetHeight(24)
+				Skin.ShowBox(overlay, true)
+				Skin.ShowBox(icon_frame, true)
+				Skin.HideModern(overlay._modern)
+				icon_frame:SetSize(28, 28)
+				icon_frame:SetPoint('LEFT', 0, 0)
+			end
+			-- Only a custom color is painted, plus once more to undo one, so a reskin's own backdrop is left alone as it was before this option existed.
+			local r, g, b, a = RollColor()
+			local d = defaults.profile.roll_color_backdrop
+			local custom = r ~= d[1] or g ~= d[2] or b ~= d[3] or a ~= d[4]
+			if custom or frame.roll_painted then
+				overlay:SetBackdropColor(r, g, b, a)
+				frame.roll_painted = custom
+			end
+		end
+		bar.fill_alpha = modern and .45 or .7
+		Skin.ModernIcon(icon_frame, frame.icon, modern)
+		LayoutRollButtons(frame, modern and MODERN_ART)
+		frame.modern_on = modern
 	end
 
 	RollFramePrototype = XLoot.NewPrototype()
@@ -1143,7 +1262,6 @@ do
 			end
 			return
 		end
-		-- TODO: Remove?
 		local status, result = pcall(GetLootRollTimeLeft, parent.rollid)
 		if not status or result == 0 then
 			-- Rolling closes the local roll, so a Need with no cancel event lands here.
@@ -1160,7 +1278,6 @@ do
 				parent.rollended = time
 			end
 		end
-		-- /TODO
 		local remaining = self.expires - time
 		if remaining < -4 then
 			anchor:Pop(parent)
@@ -1169,7 +1286,7 @@ do
 			local fraction = max(0, min(now / length, 1))
 			if opt.roll_urgency and self.base_r then
 				local ur, ug, ub = TimeFractionColor(fraction, self.base_r, self.base_g, self.base_b)
-				self:SetStatusBarColor(ur, ug, ub, .7)
+				self:SetStatusBarColor(ur, ug, ub, self.fill_alpha)
 				-- The fill shrinks as time runs out, so redden the always-full row border too, ramping from the highlight color it started at.
 				local pr, pg, pb = TimeFractionColor(fraction, self.base_br, self.base_bg, self.base_bb)
 				self.parent.overlay:SetBorderColor(pr, pg, pb)
@@ -1310,12 +1427,11 @@ do
 
 	function RollFramePrototype:ApplyOptions()
 		self:SetWidth(opt.roll_width)
-
-		-- Status bar is reskinned with SkinUpdate
+		FitRoll(self)
 
 		-- Drop any urgency tint so turning the option off mid-roll restores the quality fill and highlight border.
 		if self.bar.base_r then
-			self.bar:SetStatusBarColor(self.bar.base_r, self.bar.base_g, self.bar.base_b, .7)
+			self.bar:SetStatusBarColor(self.bar.base_r, self.bar.base_g, self.bar.base_b, self.bar.fill_alpha)
 			self.overlay:SetBorderColor(self.bar.base_br, self.bar.base_bg, self.bar.base_bb)
 			self.icon_frame:SetBorderColor(self.bar.base_br, self.bar.base_bg, self.bar.base_bb)
 		end
@@ -1346,10 +1462,12 @@ function addon:SkinUpdate()
 	local padding = skin.padding or 2
 	local p, n = padding + 3, -padding - 3
 	for _,bar in pairs(addon.bars) do
-		bar:ClearAllPoints()
-		bar:SetPoint('TOPRIGHT', n, n)
-		bar:SetPoint('BOTTOMRIGHT', n, p)
-		bar:SetPoint('LEFT', bar.parent.icon_frame, 'RIGHT', -padding, 0)
+		if not skin.modern then
+			bar:ClearAllPoints()
+			bar:SetPoint('TOPRIGHT', n, n)
+			bar:SetPoint('BOTTOMRIGHT', n, p)
+			bar:SetPoint('LEFT', bar.parent.icon_frame, 'RIGHT', -padding, 0)
+		end
 		bar:SetStatusBarTexture(skin.bar_texture)
 		local link = bar.parent.link
 		if link and not (issecret and issecret(link)) then
@@ -1371,6 +1489,14 @@ function addon:ApplyOptions()
 
 	anchor:UpdateSVData(opt.roll_anchor)
 
+	-- Leaving Modern runs before SkinUpdate, so a reskin that hooks SkinUpdate builds on the classic layout instead of having its work undone.
+	if not Skinner:CurrentSkin().modern then
+		for _, frame in pairs(anchor.children) do
+			if frame.modern_on then
+				FitRoll(frame)
+			end
+		end
+	end
 	self:SkinUpdate()
 
 	anchor:Restack()

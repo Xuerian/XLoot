@@ -159,10 +159,40 @@ do
 
 	local bd_color = { 0, 0, 0, .9 }
 	local g_color = { .5, .5, .5, .6 }
+	local clear = { 0, 0, 0, 0 }
 
 	local function SetBorderColor(self, r, g, b, a)
 		for i, x in pairs(self._skin_borders) do
 			x:SetVertexColor(r, g, b, a or 1)
+		end
+		if self._modern then
+			lib.PaintEdge(self._modern, r, g, b)
+		end
+	end
+
+	local function shown(list, show)
+		if list then
+			for _, tex in pairs(list) do
+				tex:SetShown(show)
+			end
+		end
+	end
+
+	-- Only a box this hid is ever shown again, so another addon's hidden borders stay hidden.
+	function lib.ShowBox(frame, show, keep_borders)
+		if show and not frame._box_hidden then
+			return
+		end
+		frame._box_hidden = not show or nil
+		shown(frame._skin_borders, show or keep_borders)
+		if frame.gradient then
+			frame.gradient:SetShown(show)
+		end
+		if frame._highlights and frame._higlight_options.layer == 'HIGHLIGHT' then
+			shown(frame._highlights, show)
+		end
+		if frame.GetBackdrop and frame:GetBackdrop() then
+			frame:SetBackdropColor(unpack(show and bd_color or clear))
 		end
 	end
 
@@ -258,6 +288,168 @@ do
 		frame._higlight_options = meta(options)
 		update_borders(frame, options, frame._highlights, r, g, b, a)
 	end
+end
+
+do
+	local FLAT = [[Interface\Buttons\WHITE8X8]]
+	local EDGE, HOVER_ALPHA, OUTLINE_ALPHA = 3, .06, .6
+	local OUTLINE = { { 'TOPLEFT', 'TOPRIGHT' }, { 'BOTTOMLEFT', 'BOTTOMRIGHT' }, { 'TOPLEFT', 'BOTTOMLEFT' }, { 'TOPRIGHT', 'BOTTOMRIGHT' } }
+	local fade_from, fade_to = CreateColor(0, 0, 0, 0), CreateColor(0, 0, 0, 0)
+	lib.FLAT, lib.EDGE = FLAT, EDGE
+
+	function lib.Modern(holder, region)
+		local m = holder._modern
+		if m then
+			return m
+		end
+		region = region or holder
+		m = { region = region }
+		local function piece(layer, sublevel)
+			local tex = holder:CreateTexture(nil, layer, nil, sublevel)
+			tex:Hide()
+			return tex
+		end
+		m.panel = piece('BACKGROUND', -8)
+		m.panel:SetAllPoints(region)
+		m.fade = piece('BACKGROUND', -7)
+		m.fade:SetColorTexture(1, 1, 1, 1)
+		m.fade:SetAllPoints(region)
+		m.edge = piece('ARTWORK')
+		m.hover = piece('BORDER')
+		m.hover:SetColorTexture(1, 1, 1, HOVER_ALPHA)
+		m.hover:SetAllPoints(region)
+		m.outline = {}
+		for i, points in ipairs(OUTLINE) do
+			local line = piece('OVERLAY', 7)
+			line:SetPoint(points[1], region, points[1])
+			line:SetPoint(points[2], region, points[2])
+			m.outline[i] = line
+		end
+		if holder._skin_borders then
+			m.r0, m.g0, m.b0 = holder:GetBorderColor()
+		end
+		holder._modern = m
+		return m
+	end
+
+	function lib.HideModern(m)
+		if m then
+			m.panel:Hide()
+			m.fade:Hide()
+			m.edge:Hide()
+			lib.ShowHover(m, false)
+		end
+	end
+
+	function lib.PaintFade(m, right, r, g, b, a)
+		fade_from:SetRGBA(r, g, b, right and 0 or a)
+		fade_to:SetRGBA(r, g, b, right and a or 0)
+		m.fade:SetGradient('HORIZONTAL', fade_from, fade_to)
+		m.fade:Show()
+	end
+
+	function lib.PlaceEdge(m, right)
+		local side = right and 'RIGHT' or 'LEFT'
+		m.edge:ClearAllPoints()
+		m.edge:SetPoint('TOP'..side, m.region, 'TOP'..side)
+		m.edge:SetPoint('BOTTOM'..side, m.region, 'BOTTOM'..side)
+		m.edge:SetWidth(EDGE)
+		m.edge:Show()
+	end
+
+	-- A white or gray edge reads as no color at all, so any near-neutral color takes the accent color instead.
+	function lib.PaintEdge(m, r, g, b)
+		if r then
+			m.r0, m.g0, m.b0 = r, g, b
+		end
+		r, g, b = m.r0, m.g0, m.b0
+		if not r then
+			return
+		end
+		if math.max(r, g, b) - math.min(r, g, b) <= .1 then
+			r, g, b = XLoot:AccentColor()
+		end
+		m.r, m.g, m.b = r, g, b
+		m.edge:SetColorTexture(r, g, b, 1)
+	end
+
+	function lib.ShowHover(m, show)
+		if not m then
+			return
+		end
+		m.hover:SetShown(show)
+		local mode = XLoot.opt.hover_outline
+		local r, g, b = m.r, m.g, m.b
+		if mode == 'accent' or not r then
+			r, g, b = XLoot:AccentColor()
+		end
+		for i, line in ipairs(m.outline) do
+			if show and mode ~= 'none' then
+				if PixelUtil then
+					if i <= 2 then PixelUtil.SetHeight(line, 1, 1) else PixelUtil.SetWidth(line, 1, 1) end
+				elseif i <= 2 then
+					line:SetHeight(1)
+				else
+					line:SetWidth(1)
+				end
+				line:SetColorTexture(r, g, b, OUTLINE_ALPHA)
+				line:Show()
+			else
+				line:Hide()
+			end
+		end
+	end
+
+	function lib.SavePoints(region)
+		local points = {}
+		for i = 1, region:GetNumPoints() do
+			points[i] = { region:GetPoint(i) }
+		end
+		return points
+	end
+
+	function lib.RestorePoints(region, points)
+		region:ClearAllPoints()
+		for _, point in ipairs(points) do
+			region:SetPoint(unpack(point))
+		end
+	end
+
+	-- Leaving Modern puts the icon back exactly where it was, which may be another addon's layout rather than XLoot's.
+	function lib.ModernIcon(icon_frame, icon, on)
+		on = on and true or false
+		if (icon_frame._modern_icon or false) == on then
+			return
+		end
+		icon_frame._modern_icon = on
+		local edge = icon_frame._modern_edge
+		if on and not edge then
+			edge = icon_frame:CreateTexture(nil, 'BACKGROUND', nil, -8)
+			edge:SetColorTexture(0, 0, 0, 1)
+			edge:SetPoint('TOPLEFT', icon_frame, 'TOPLEFT', -1, 1)
+			edge:SetPoint('BOTTOMRIGHT', icon_frame, 'BOTTOMRIGHT', 1, -1)
+			icon_frame._modern_edge = edge
+		end
+		if edge then
+			edge:SetShown(on)
+		end
+		if on then
+			icon_frame._icon_points = lib.SavePoints(icon)
+			icon:ClearAllPoints()
+			icon:SetAllPoints(icon_frame)
+		else
+			lib.RestorePoints(icon, icon_frame._icon_points)
+		end
+	end
+end
+
+-- AceDB copies defaults into the profile, so a color equal to its default counts as never changed and follows the skin.
+function lib.Color(opt, defaults, skin, key)
+	local raw, default = rawget(opt, key), defaults[key]
+	if raw and (raw[1] ~= default[1] or raw[2] ~= default[2] or raw[3] ~= default[3] or raw[4] ~= default[4]) then
+		return unpack(raw)
+	end
+	return unpack(skin and skin[key] or default)
 end
 
 do
@@ -384,9 +576,29 @@ local smooth = {
 	color_mod = .9,
 }
 
+local modern = {
+	name = ('|c2244dd22%s|r'):format(L.skin_modern),
+	modern = true,
+	texture = lib.FLAT,
+	bar_texture = lib.FLAT,
+	size = 2,
+	padding = 0,
+	row_spacing = 4,
+	color_mod = 1,
+	accent_color = { 1, .82, 0 },
+	panel_color = { .05, .05, .06, .88 },
+	lift_color = { 1, 1, 1, .07 },
+	fade_color = { 0, 0, 0, .6 },
+	frame_color_border = { .25, .25, .28, 1 },
+	frame_color_backdrop = { .05, .05, .06, .88 },
+	loot_color_backdrop = { 1, 1, 1, .07 },
+	roll_color_backdrop = { .05, .05, .06, .88 },
+}
+
 XLoot:RegisterSkin('svelte', svelte)
 XLoot:RegisterSkin('legacy', legacy)
 XLoot:RegisterSkin('smooth', smooth)
+XLoot:RegisterSkin('modern', modern)
 
 -- Index Masque skins later so we definitely catch all of them
 

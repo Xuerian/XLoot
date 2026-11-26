@@ -142,6 +142,35 @@ function addon:OnEnable()
 		end
 	end
 
+	local function get_skin_color(info)
+		local db, k, meta = path(info)
+		return XLoot.Skin.Color(db, meta.module_data.addon.db.defaults.profile, XLoot.Skin.current, k)
+	end
+
+	local function near(x, y)
+		return math.abs(x - y) < .005
+	end
+
+	local function skin_row_spacing()
+		local frame = XLootFrame.skin and XLootFrame or XLootFakeFrame and XLootFakeFrame.skin and XLootFakeFrame
+		return (frame and frame.skin or XLoot.Skin.current).row_spacing
+	end
+
+	-- The picker writes back an unchanged color, as on Cancel, and AceGUI's Classic picker returns alpha as 1 - (1 - a). So a near match of the shown color is ignored, and the skin's own color is stored as the default so it keeps following the skin.
+	local function set_skin_color(info, r, g, b, a)
+		local cr, cg, cb, ca = info.option.get(info)
+		if near(r, cr) and near(g, cg) and near(b, cb) and near(a or 1, ca or 1) then
+			return
+		end
+		local _, k, meta = path(info)
+		local default = meta.module_data.addon.db.defaults.profile[k]
+		local own = XLoot.Skin.current[k] or default
+		if near(r, own[1]) and near(g, own[2]) and near(b, own[3]) and near(a or 1, own[4] or 1) then
+			r, g, b, a = unpack(default)
+		end
+		set(info, r, g, b, a)
+	end
+
 	local function set_anchor(...)
 		set(...)
 		local db, k, meta = path(...)
@@ -363,6 +392,11 @@ function addon:OnEnable()
 		{ "chat", L.whatsnew_mode_chat },
 		{ "none", L.whatsnew_mode_none },
 	}
+	local hover_outlines = {
+		{ "quality", L.hover_outline_quality },
+		{ "accent", L.hover_outline_accent },
+		{ "none", L.hover_outline_none },
+	}
 	local options = Finalize({ name = "Core", addon =  XLoot, OnChanged = OnCoreChanged }, BetterOptions.Compile({
 		{ "details", "description" },
 		-- Narrowed so all four fit one row: AceConfigDialog frames are a fixed 170px each and the panel holds about 3.3 of them.
@@ -377,6 +411,9 @@ function addon:OnEnable()
 		{ "tooltip_sell", "toggle", hidden = XLoot.IS_RETAIL_ENGINE },
 		{ "value_coin_icons", "toggle", width = 0.75 },
 		{ "minimap_icon", "toggle", width = 0.75 },
+		{ "accent_color", "color", false, width = 0.9, requires_inverse = "accent_class", get = function() return XLoot:AccentColor() end, set = set_skin_color },
+		{ "accent_class", "toggle", width = 0.9 },
+		{ "hover_outline", hover_outlines, width = 0.9 },
 		{ "whatsnew_mode", whatsnew_modes },
 		{ "whatsnew_show", "execute", func = function() XLoot:ShowWhatsNew() end },
 		{ "reset_defaults", "execute", confirm = true, func = function() addon:ResetProfile() end },
@@ -489,6 +526,19 @@ function addon:OnEnable()
 				{ "loot_alpha", "alpha" },
 				{ "loot_icon_size", "range", 16, 64, 1 },
 				{ "loot_row_height", "range", 14, 64, 1 },
+				{ "loot_row_spacing", "range", 0, 20, 1,
+					get = function(info)
+						local spacing = get(info)
+						return spacing < 0 and skin_row_spacing() or spacing
+					end,
+					-- The slider writes its value back on any click, so an unchanged value is ignored and the skin's own spacing, rounded to the slider's step, is stored as following the skin.
+					set = function(info, v)
+						local skin, spacing = math.floor(skin_row_spacing() + .5), get(info)
+						if v == (spacing < 0 and skin or spacing) then
+							return
+						end
+						set(info, v == skin and -1 or v)
+					end },
 				{ "loot_padding", "header", name = L.padding },
 				{ "loot_padding_top", "range", 0, 25, 1, name = L.top },
 				{ "loot_padding_left", "range", 0, 25, 1, name = L.left  },
@@ -586,10 +636,10 @@ function addon:OnEnable()
 			{ "colors", "group", {
 				{ "quality_color_frame", width = "full" },
 				{ "quality_color_slot", width = "full" },
-				{ "frame_color_border", "color", width = "double", requires_inverse = "quality_color_frame" },
+				{ "frame_color_border", "color", width = "double", requires_inverse = "quality_color_frame", get = get_skin_color, set = set_skin_color },
 				{ "loot_color_border", "color", requires_inverse = "quality_color_slot" },
-				{ "frame_color_backdrop", "color", width = "double" },
-				{ "loot_color_backdrop", "color" },
+				{ "frame_color_backdrop", "color", width = "double", get = get_skin_color, set = set_skin_color },
+				{ "loot_color_backdrop", "color", get = get_skin_color, set = set_skin_color },
 				{ "frame_color_gradient", "color", width = "double" },
 				{ "loot_color_gradient", "color" },
 				{ "loot_color_info", "color", width = "double", requires = "loot_texts_info" },
@@ -616,6 +666,7 @@ function addon:OnEnable()
 				{ "roll_spacing", "range", -25, 25, 1, name = L.spacing, subtable = "roll_anchor", subkey = "spacing" },
 				{ "roll_offset", "range", -25, 25, 1, name = L.offset, subtable = "roll_anchor", subkey = "offset" },
 				{ "roll_button_size", "range", 16, 48, 1 },
+				{ "roll_color_backdrop", "color", get = get_skin_color, set = set_skin_color },
 				{ "hide_transmog", width = "double", hidden = not XLoot.IS_RETAIL_ENGINE },
 			}},
 			{ "extra_info", "group", {
@@ -855,11 +906,12 @@ function addon:Init()
 
 		local _OnShow = panel:GetScript("OnShow")
 		local _OnHide = panel:GetScript("OnHide")
+		-- Modules prepare before the panel fills, so the loot preview exists when the row spacing slider reads it.
 		panel:SetScript("OnShow", function(...)
-			_OnShow(...)
 			for name, module_data in pairs(self.modules) do
-				trigger(module_data.addon, "OnOptionsShow", panel)
+				xpcall(trigger, geterrorhandler(), module_data.addon, "OnOptionsShow", panel)
 			end
+			_OnShow(...)
 		end)
 		panel:SetScript("OnHide", function(...)
 			_OnHide(...)

@@ -7,6 +7,7 @@ local opt, eframe, anchor
 local me = UnitName("player")
 local issecret = issecretvalue
 local SafeSetFont = XLoot.SafeSetFont
+local Skin = XLoot.Skin
 local table_insert, table_remove = table.insert, table.remove
 local floor, ceil, random = math.floor, math.ceil, math.random
 local GetItemInfo = C_Item.GetItemInfo
@@ -128,6 +129,9 @@ function addon:ApplyOptions()
 	for _, t in ipairs(active) do
 		t:ApplyOptions()
 	end
+	for _, t in ipairs(queued) do
+		t:ApplyOptions()
+	end
 	self:Reflow()
 end
 
@@ -184,6 +188,7 @@ function addon:BuildToast(link, num)
 	local toast = table_remove(pool) or self.CreateToast()
 	toast.item = link
 	toast.itemID = itemID
+	toast.quality = quality
 	toast.count_value = num
 	toast.icon:SetTexture(icon)
 
@@ -321,7 +326,11 @@ do
 		self:SetAlpha(1)
 		update_modifier_click(self)
 		if opt.mouse_hover then
-			self.icon_frame:ShowHighlight()
+			if self.modern_on then
+				Skin.ShowHover(self._modern, true)
+			else
+				self.icon_frame:ShowHighlight()
+			end
 			if self.item then
 				GameTooltip:SetOwner(self, 'ANCHOR_TOPLEFT', 28, 0)
 				GameTooltip:SetHyperlink(self.item)
@@ -331,6 +340,7 @@ do
 
 	local function OnLeave(self)
 		mouse_focus = nil
+		Skin.ShowHover(self._modern, false)
 		self.icon_frame:HideHighlight()
 		GameTooltip:Hide()
 		if opt.mouse_click_mode == "modifier" and self.SetPassThroughButtons then
@@ -343,6 +353,7 @@ do
 	local function OnHide(self)
 		if mouse_focus == self then
 			mouse_focus = nil
+			Skin.ShowHover(self._modern, false)
 			self.icon_frame:HideHighlight()
 			GameTooltip:Hide()
 		end
@@ -356,19 +367,77 @@ do
 		end
 	end
 
+	local function EdgeColor(self)
+		local quality = self.quality
+		if quality and opt.color_border and quality >= opt.color_threshold then
+			return GetItemQualityColor(quality)
+		end
+		return .5, .5, .5
+	end
+
+	local function FitModern(self, right)
+		local skin = addon:CurrentSkin()
+		local modern = skin.modern and true or false
+		if modern then
+			Skin.ShowBox(self, false)
+			Skin.ShowBox(self.icon_frame, false)
+			local m = Skin.Modern(self)
+			m.panel:SetColorTexture(unpack(skin.panel_color))
+			m.panel:Show()
+			Skin.PaintFade(m, right, unpack(skin.lift_color))
+			Skin.PlaceEdge(m, right)
+			Skin.PaintEdge(m, EdgeColor(self))
+			local r, g, b = XLoot:AccentColor()
+			self.title:SetTextColor(r, g, b)
+			if self.quality then
+				r, g, b = GetItemQualityColor(self.quality)
+			end
+			local glow = self.glow
+			if not self.modern_on then
+				local coords = { glow:GetTexCoord() }
+				-- XLoot's own glow is recognized by its crop, so leaving Modern never puts XLoot's texture under another addon's crop and anchors.
+				local own = math.abs(coords[1] - 5/512) < .001 and math.abs(coords[5] - 395/512) < .001
+				self.glow_saved = { points = Skin.SavePoints(glow), coords = coords, shine = self.shine:IsShown(), own = own }
+			end
+			glow:ClearAllPoints()
+			glow:SetAllPoints(self)
+			glow:SetTexCoord(0, 1, 0, 1)
+			glow:SetColorTexture(r, g, b, .25)
+			self.shine:Hide()
+		elseif self.modern_on then
+			Skin.ShowBox(self, true)
+			Skin.ShowBox(self.icon_frame, true)
+			Skin.HideModern(self._modern)
+			self.title:SetTextColor(1, .82, 0)
+			local glow, saved = self.glow, self.glow_saved
+			if saved.own then
+				glow:SetTexture(GLOW)
+			end
+			glow:SetTexCoord(unpack(saved.coords))
+			Skin.RestorePoints(glow, saved.points)
+			self.shine:SetShown(saved.shine)
+		end
+		Skin.ModernIcon(self.icon_frame, self.icon, modern)
+		self.modern_on = modern
+		return modern
+	end
+
 	local function ApplyOptions(self)
 		local a, b, xmod = "LEFT", "RIGHT", 1
 		if opt.anchor.alignment == "right" then a, b, xmod = b, a, -1 end
+		local modern = FitModern(self, a == "RIGHT")
+		local r, g, bl = XLoot:AccentColor()
+		self.icon_frame:SetHighlightColor(r, g, bl, .8)
 		self.icon_frame:ClearAllPoints()
-		self.icon_frame:SetPoint(a, 3 * xmod, 0)
+		self.icon_frame:SetPoint(a, (modern and Skin.EDGE + 4 or 3) * xmod, 0)
 		self.title:ClearAllPoints()
 		self.title:SetPoint("TOP" .. a, self.icon_frame, "TOP" .. b, 6 * xmod, -2)
-		self.title:SetPoint("TOP" .. b, self, "TOPRIGHT", -4 * xmod, -2)
+		self.title:SetPoint("TOP" .. b, self, "TOP" .. b, -4 * xmod, -2)
 		self.title:SetJustifyH(a)
 		SafeSetFont(self.title, opt.font, opt.font_size, opt.font_flag)
 		self.name:ClearAllPoints()
 		self.name:SetPoint("BOTTOM" .. a, self.icon_frame, "BOTTOM" .. b, 6 * xmod, 2)
-		self.name:SetPoint("TOP" .. b, self, "RIGHT", -4 * xmod, 0)
+		self.name:SetPoint("TOP" .. b, self, b, -4 * xmod, 0)
 		self.name:SetJustifyH(a)
 		SafeSetFont(self.name, opt.font, opt.font_size + 1, opt.font_flag)
 		SafeSetFont(self.count, opt.font, opt.font_size, "THICKOUTLINE")
@@ -485,6 +554,7 @@ function XLootToast.TestSettings()
 	for _, s in ipairs(test_samples) do
 		local toast = table_remove(pool) or addon.CreateToast()
 		toast.item, toast.itemID, toast.count_value = nil, -random(1, 100000), random(1, 4)
+		toast.quality = s[3]
 		toast.icon:SetTexture(s[2])
 		local r, g, b = GetItemQualityColor(s[3])
 		toast:SetBorderColor(r, g, b)

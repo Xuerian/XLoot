@@ -10,6 +10,9 @@ local defaults = {
 	profile = {
 		skin = "smooth",
 		skin_anchors = false,
+		accent_color = { .8, .8, .8, 1 },
+		accent_class = false,
+		hover_outline = "quality",
 		tooltip_sell = false,
 		value_coin_icons = false,
 		minimap_icon = false,
@@ -150,6 +153,13 @@ function XLoot:ToggleSpeedyAutoloot(on)
 		registry:NotifyChange("XLoot")
 	end
 	print("|c2244dd22XLoot|r "..self:SpeedyAutolootText())
+end
+
+function XLoot:AccentColor()
+	if self.opt.accent_class then
+		return XLoot.MyClassColor()
+	end
+	return XLoot.Skin.Color(self.opt, defaults.profile, XLoot.Skin.current, "accent_color")
 end
 
 function XLoot:ApplyOptions(in_options)

@@ -5,6 +5,7 @@ XLootMonitor.addon = addon
 
 local print, opt, eframe, anchor = print
 local MoneyString, FancyPlayerName, SafeSetFont = XLoot.MoneyString, XLoot.FancyPlayerName, XLoot.SafeSetFont
+local Skin = XLoot.Skin
 local table_insert, table_remove = table.insert, table.remove
 local me = UnitName("player")
 
@@ -496,7 +497,9 @@ do
 
 	local function OnEnter(self)
 		mouse_focus = self
-		if self._highlights then
+		if self.modern_on then
+			Skin.ShowHover(self._modern, true)
+		elseif self._highlights then
 			self.icon_frame:ShowHighlight()
 		end
 		self:ShowTooltip()
@@ -504,6 +507,7 @@ do
 
 	local function OnLeave(self)
 		mouse_focus = nil
+		Skin.ShowHover(self._modern, false)
 		if self._highlights then
 			self.icon_frame:HideHighlight()
 		end
@@ -515,6 +519,7 @@ do
 	local function OnHide(self)
 		if mouse_focus == self then
 			mouse_focus = nil
+			Skin.ShowHover(self._modern, false)
 			if self._highlights then
 				self.icon_frame:HideHighlight()
 			end
@@ -532,7 +537,7 @@ do
 	end
 
 	local function FitToText(self)
-		self:SetWidth(self.name:GetWidth() + self.text:GetWidth() + 8 + self.icon_frame:GetWidth())
+		self:SetWidth(self.name:GetWidth() + self.text:GetWidth() + 8 + self.icon_frame:GetWidth() + (self.modern_on and Skin.EDGE + 9 or 0))
 	end
 
 	local function SetTexts(self, name, text, total, nr, ng, nb, tr, tg, tb)
@@ -556,16 +561,50 @@ do
 		{ "text", 0 },
 	}
 
+	local function FitModern(self, right)
+		local skin = addon:CurrentSkin()
+		local modern = skin.modern and true or false
+		local icon_frame = self.icon_frame
+		if modern then
+			Skin.ShowBox(self, false)
+			Skin.ShowBox(icon_frame, false)
+			local m = Skin.Modern(self)
+			Skin.PaintFade(m, right, unpack(skin.fade_color))
+			Skin.PlaceEdge(m, right)
+			Skin.PaintEdge(m)
+			self:SetHeight(28)
+			icon_frame:SetSize(24, 24)
+		elseif self.modern_on then
+			Skin.ShowBox(self, true)
+			Skin.ShowBox(icon_frame, true)
+			Skin.HideModern(self._modern)
+			self:SetHeight(24)
+			icon_frame:SetSize(28, 28)
+		end
+		Skin.ModernIcon(icon_frame, self.icon, modern)
+		self.modern_on = modern
+		return modern
+	end
+
 	local function ApplyOptions(self)
 		local a, b, xmod = "LEFT", "RIGHT", 1
 		if opt.anchor.alignment == "right" then
 			a, b, xmod = b, a, -1
 		end
+		local modern = FitModern(self, a == "RIGHT")
 		self.icon_frame:ClearAllPoints()
-		self.icon_frame:SetPoint(a)
+		if modern then
+			self.icon_frame:SetPoint(a, (Skin.EDGE + 4) * xmod, 0)
+		else
+			self.icon_frame:SetPoint(a)
+		end
+
+		local r, g, bl = XLoot:AccentColor()
+		self:SetHighlightColor(r, g, bl)
+		self.icon_frame:SetHighlightColor(r, g, bl, .8)
 
 		self.name:ClearAllPoints()
-		self.name:SetPoint(a, self.icon_frame, b, 2 * xmod, 0)
+		self.name:SetPoint(a, self.icon_frame, b, (modern and 5 or 2) * xmod, 0)
 		self.name:SetJustifyH(a)
 		SafeSetFont(self.name, opt.font, opt.font_size_loot, opt.font_flag)
 
@@ -588,7 +627,6 @@ do
 
 		addon:Skin(frame)
 		addon:Highlight(frame, "row_highlight")
-		frame:SetHighlightColor(.8, .8, .8)
 
 		frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 		frame:SetScript("OnClick", OnClick)

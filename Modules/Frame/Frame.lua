@@ -54,6 +54,7 @@ local GetContainerNumFreeSlots = C_Container and C_Container.GetContainerNumFree
 local REAGENT_BAG = XLoot.IS_RETAIL_ENGINE and Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag or nil
 local GetItemInfo = C_Item and C_Item.GetItemInfo or GetItemInfo
 local SendChatMessage, SafeSetFont = XLoot.SendChatMessage, XLoot.SafeSetFont
+local Skin = XLoot.Skin
 local issecret = issecretvalue
 
 local print, wprint = print, print
@@ -135,6 +136,7 @@ local defaults = {
 
 		loot_icon_size = 34,
 		loot_row_height = 30,
+		loot_row_spacing = -1, -- Below 0 follows the skin
 
 		loot_highlight = true,
 
@@ -567,12 +569,15 @@ do
 	end
 
 	function RowPrototype:HighlightEnter()
-		if self._highlights then
+		if self.modern_on then
+			Skin.ShowHover(self._modern, self.owner.opt.loot_highlight)
+		elseif self._highlights then
 			self.frame_item:ShowHighlight()
 		end
 	end
 
 	function RowPrototype:HighlightLeave()
+		Skin.ShowHover(self._modern, false)
 		if self._highlights then
 			self.frame_item:HideHighlight()
 		end
@@ -633,15 +638,40 @@ do
 		self.parent.text_name:SetPoint('RIGHT', self.parent, 'RIGHT', -6, 0)
 	end
 
+	function RowPrototype:FitModern(modern)
+		local owner, item = self.owner, self.frame_item
+		if modern then
+			Skin.ShowBox(self, false)
+			Skin.ShowBox(item, false)
+			local m = Skin.Modern(self)
+			Skin.PaintFade(m, false, owner:GetColor('loot_color_backdrop'))
+			Skin.PlaceEdge(m, false)
+			Skin.PaintEdge(m)
+			local size = math.min(owner.opt.loot_icon_size, owner.opt.loot_row_height - 4)
+			item:SetSize(size, size)
+			item:SetPoint('LEFT', Skin.EDGE + 4, 0)
+		elseif self.modern_on then
+			Skin.HideModern(self._modern)
+			item:SetPoint('LEFT', 0, 0)
+		end
+		Skin.ModernIcon(item, self.texture_item, modern)
+		self.modern_on = modern
+	end
+
 	local resize_texts = {'text_name', 'text_info'}
 	function RowPrototype:UpdateAppearance()
 		local owner, opt = self.owner, self.owner.opt
+		local modern = owner.skin.modern and true or false
 
 		self:SetPoint('LEFT', opt.loot_padding_left, 0)
 		self:SetPoint('RIGHT', -opt.loot_padding_right, 0)
 
+		if not modern then
+			Skin.ShowBox(self, true)
+			Skin.ShowBox(self.frame_item, true)
+			self:SetBackdropColor(owner:GetColor('loot_color_backdrop', 0.7))
+		end
 		self:SetBorderColor(owner:GetColor('loot_color_border'))
-		self:SetBackdropColor(owner:GetColor('loot_color_backdrop', 0.7))
 		self:SetGradientColor(owner:GetColor('loot_color_gradient'))
 		self.frame_item:SetGradientColor(owner:GetColor('loot_color_gradient'))
 		self.text_info:SetTextColor(owner:GetColor('loot_color_info'))
@@ -673,20 +703,22 @@ do
 		self.frame_item:SetHeight(opt.loot_icon_size)
 		self:SetHeight(opt.loot_row_height)
 
-		owner.row_height = self:GetHeight() + owner.skin.row_spacing
+		owner.row_height = self:GetHeight() + owner.row_spacing
 
 		if opt.loot_highlight then
 			if not self._highlights then
 				owner:Highlight(self, 'row_highlight')
 				owner:Highlight(self.frame_item, 'item_highlight')
 			end
-			self:SetHighlightColor(.8, .8, .8, .8)
-			self.frame_item:SetHighlightColor(.8, .8, .8, .8)
+			local r, g, b = XLoot:AccentColor()
+			self:SetHighlightColor(r, g, b, .8)
+			self.frame_item:SetHighlightColor(r, g, b, .8)
 		elseif self._highlights then
 			self:SetHighlightColor(0, 0, 0, 0)
 			self.frame_item:SetHighlightColor(0, 0, 0, 0)
 		end
 
+		self:FitModern(modern)
 		self.layout = nil
 	end
 
@@ -1051,13 +1083,28 @@ do
 
 	function FramePrototype:UpdateAppearance()
 		self.skin = self:CurrentSkin()
-		self.skin.row_offset = self.skin.row_spacing * -1
+		local spacing = self.opt.loot_row_spacing
+		if spacing < 0 then
+			spacing = self.skin.row_spacing
+		end
+		self.row_spacing = spacing
+		self.skin.row_offset = -spacing
 
+		local overlay = self.overlay
 		self:SetScale(self.opt.frame_scale)
-		self.overlay:SetAlpha(self.opt.frame_alpha)
-		self.overlay:SetBorderColor(self:GetColor('frame_color_border'))
-		self.overlay:SetGradientColor(self:GetColor('frame_color_gradient'))
-		self.overlay:SetBackdropColor(self:GetColor('frame_color_backdrop', 0.7))
+		overlay:SetAlpha(self.opt.frame_alpha)
+		if self.skin.modern then
+			Skin.ShowBox(overlay, false, true)
+			local m = Skin.Modern(overlay, self)
+			m.panel:SetColorTexture(self:GetColor('frame_color_backdrop'))
+			m.panel:Show()
+		else
+			Skin.ShowBox(overlay, true)
+			Skin.HideModern(overlay._modern)
+			overlay:SetGradientColor(self:GetColor('frame_color_gradient'))
+			overlay:SetBackdropColor(self:GetColor('frame_color_backdrop', 0.7))
+		end
+		overlay:SetBorderColor(self:GetColor('frame_color_border'))
 
 		for i, row in ipairs(self.rows) do
 			row:UpdateAppearance()
